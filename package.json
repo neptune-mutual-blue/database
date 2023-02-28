@@ -1,0 +1,16 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/neptune-mutual-blue/database",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "generate": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=base",
+    "explorer": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=explorer"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "standard": "^17.0.0"
+  }
+}
