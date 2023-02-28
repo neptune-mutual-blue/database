@@ -43,7 +43,28 @@ SELECT description, chain_id, cover_key, total
 FROM transactions;
 
 
+CREATE UNIQUE INDEX description_chain_id_cover_key_stablecoin_transactions_view
+ON stablecoin_transactions_view(description, chain_id, cover_key);
+
 CREATE INDEX chain_id_cover_key_stablecoin_transactions_view_inx
 ON stablecoin_transactions_view(chain_id, cover_key);
 
---@TODO: refresh this view automatically
+
+DROP FUNCTION IF EXISTS core.refresh_stablecoin_transactions_view_trigger();
+
+CREATE FUNCTION core.refresh_stablecoin_transactions_view_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  REFRESH MATERIALIZED VIEW CONCURRENTLY stablecoin_transactions_view;
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER refresh_stablecoin_transactions_view_trigger
+BEFORE INSERT OR UPDATE ON core.transactions
+FOR EACH STATEMENT
+EXECUTE FUNCTION core.refresh_stablecoin_transactions_view_trigger();
+

@@ -22,8 +22,27 @@ GROUP BY
   reassurance.pool_capitalized.chain_id,
   reassurance.pool_capitalized.cover_key;
 
+CREATE UNIQUE INDEX description_chain_id_cover_key_reassurance_transaction_view
+ON reassurance_transaction_view(description, chain_id, cover_key);
+
 CREATE INDEX chain_id_cover_key_reassurance_transaction_view_inx
 ON reassurance_transaction_view(chain_id, cover_key);
 
 
---@TODO: refresh this view automatically
+DROP FUNCTION IF EXISTS core.refresh_reassurance_transaction_view_trigger();
+
+CREATE FUNCTION core.refresh_reassurance_transaction_view_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  REFRESH MATERIALIZED VIEW CONCURRENTLY reassurance_transaction_view;
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER refresh_reassurance_transaction_view_trigger
+BEFORE INSERT OR UPDATE ON core.transactions
+FOR EACH STATEMENT
+EXECUTE FUNCTION core.refresh_reassurance_transaction_view_trigger();

@@ -1,5 +1,3 @@
--- @todo: ensure that the dynamic query doesn't result in an injection attack
- 
 DROP FUNCTION IF EXISTS get_explorer_home
 (
   _sort_by                                        text,
@@ -57,12 +55,20 @@ BEGIN
     _sort_direction := 'ASC';
   END IF;
   
+  IF(_sort_direction NOT IN ('ASC', 'DESC')) THEN
+    RAISE EXCEPTION 'Access is denied. Invalid sort_direction: "%"', _sort_direction; --SQL Injection Attack
+  END IF;
+  
   IF(_networks IS NULL) THEN
     _networks := array_agg(DISTINCT core.transactions.chain_id) FROM core.transactions;
   END IF;
 
-  IF NOT(_sort_by IN('chain_id', 'date', 'event_name', 'coupon_code', 'transaction_sender', 'cover_key', 'product_key')) THEN
-    RAISE EXCEPTION 'Invalid sort_by value %', _sort_by;
+  IF(_contracts IS NULL) THEN
+    _contracts := array_agg(DISTINCT core.transactions.address) FROM core.transactions;  
+  END IF;
+
+  IF (_sort_by NOT IN('chain_id', 'date', 'event_name', 'coupon_code', 'transaction_sender', 'cover_key', 'product_key')) THEN
+    RAISE EXCEPTION 'Access is denied. Invalid sort_by: "%"', _sort_by; --SQL Injection Attack
   END IF;
   
   IF(_sort_by = 'date') THEN
@@ -90,16 +96,17 @@ BEGIN
       BETWEEN extract(epoch from COALESCE(%L, ''1-1-1990''::date))
       AND extract(epoch from COALESCE(%L, ''1-1-2990''::date))
     AND core.transactions.chain_id = ANY(%L)
+    AND core.transactions.address = ANY(%L)
     AND 
     (
-        COALESCE(core.transactions.ck, '''') ILIKE ''%%%s%%''
+        COALESCE(core.transactions.ck, '''') ILIKE %s
         OR 
-        COALESCE(core.transactions.pk, '''') ILIKE ''%%%s%%''
+        COALESCE(core.transactions.pk, '''') ILIKE %s
     )
-    AND core.transactions.event_name ILIKE ''%%%s%%''
-    AND COALESCE(core.transactions.coupon_code, '''') ILIKE ''%%%s%%''
+    AND core.transactions.event_name ILIKE %s
+    AND COALESCE(core.transactions.coupon_code, '''') ILIKE %s
   )
-  SELECT COUNT(*) FROM result;', _date_from, _date_to, _networks, _cover_key_like, _cover_key_like, _event_name_like, _coupon_code_like);
+  SELECT COUNT(*) FROM result;', _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like));
   
   -- RAISE NOTICE '%', _query;
 
@@ -107,7 +114,7 @@ BEGIN
   INTO _total_records;
   
   
-  _total_pages = 1; --+ COALESCE(_total_records / _page_size, 0);
+  _total_pages = COALESCE(_total_records / _page_size, 0);
   
    _query := format('
     SELECT
@@ -134,18 +141,19 @@ BEGIN
     BETWEEN extract(epoch from COALESCE(%L, ''1-1-1990''::date))
     AND extract(epoch from COALESCE(%L, ''1-1-2990''::date))
   AND core.transactions.chain_id = ANY(%L)
+  AND core.transactions.address = ANY(%L)
   AND 
   (
-      COALESCE(core.transactions.ck, '''') ILIKE ''%%%s%%''
+      COALESCE(core.transactions.ck, '''') ILIKE %s
       OR 
-      COALESCE(core.transactions.pk, '''') ILIKE ''%%%s%%''
+      COALESCE(core.transactions.pk, '''') ILIKE %s
   )
-  AND core.transactions.event_name ILIKE ''%%%s%%''
-  AND COALESCE(core.transactions.coupon_code, '''') ILIKE ''%%%s%%''
-  ORDER BY %s %s
+  AND core.transactions.event_name ILIKE %s
+  AND COALESCE(core.transactions.coupon_code, '''') ILIKE %s
+  ORDER BY %I %s
   LIMIT %s::integer
   OFFSET %s::integer * %s::integer  
-  ', _page_size, _page_number, _total_records, _total_pages, _date_from, _date_to, _networks, _cover_key_like, _cover_key_like, _event_name_like, _coupon_code_like, _sort_by, _sort_direction, _page_size, _page_number - 1, _page_size);
+  ', _page_size, _page_number, _total_records, _total_pages, _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like), _sort_by, _sort_direction, _page_size, _page_number - 1, _page_size);
 
   --RAISE NOTICE '%', _query;
   RETURN QUERY EXECUTE _query;
@@ -159,12 +167,12 @@ LANGUAGE plpgsql;
 --   'date', --_sort_by                                        text,
 --   'DESC', --_sort_direction                                 text,
 --   1, --_page_number                                    integer,
---   20000, --_page_size                                      integer,
+--   2, --_page_size                                      integer,
 --   NULL, --_date_from                                      TIMESTAMP WITH TIME ZONE,
 --   '1-1-2099'::date, --_date_to                                        TIMESTAMP WITH TIME ZONE,
 --   NULL, --_networks                                       numeric[],
 --   NULL, --_contracts                                      text[],
---   '0x',-- _cover_key_like                                 text,
---   'Deploy', --_event_name_like                                text,
+--   NULL,-- _cover_key_like                                 text,
+--   'Added', --_event_name_like                                text,
 --   '' --_coupon_code_like                               text
 -- );
