@@ -50,7 +50,7 @@ CREATE INDEX chain_id_cover_key_stablecoin_transactions_view_inx
 ON stablecoin_transactions_view(chain_id, cover_key);
 
 
-DROP FUNCTION IF EXISTS core.refresh_stablecoin_transactions_view_trigger();
+DROP FUNCTION IF EXISTS core.refresh_stablecoin_transactions_view_trigger() CASCADE;
 
 CREATE FUNCTION core.refresh_stablecoin_transactions_view_trigger()
 RETURNS trigger

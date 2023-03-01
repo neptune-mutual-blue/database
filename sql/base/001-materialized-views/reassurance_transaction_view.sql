@@ -29,7 +29,7 @@ CREATE INDEX chain_id_cover_key_reassurance_transaction_view_inx
 ON reassurance_transaction_view(chain_id, cover_key);
 
 
-DROP FUNCTION IF EXISTS core.refresh_reassurance_transaction_view_trigger();
+DROP FUNCTION IF EXISTS core.refresh_reassurance_transaction_view_trigger() CASCADE;
 
 CREATE FUNCTION core.refresh_reassurance_transaction_view_trigger()
 RETURNS trigger
