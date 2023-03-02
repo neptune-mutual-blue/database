@@ -1,0 +1,2 @@
+CREATE USER ? LOGIN WITH PASSWORD '#';
+GRANT readonlyuser TO ?;

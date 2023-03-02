@@ -14,7 +14,7 @@ BEGIN
     RAISE NOTICE '%', to_hex(ascii(substring(_string FROM i + 1 FOR 1)));
   END LOOP;
 
-  RETURN rpad(_bytes32, 64, '0');
+  RETURN rpad(_bytes32, 66, '0');
 END
 $$
 LANGUAGE plpgsql;
