@@ -35,7 +35,7 @@ AS
     'Fee Earned' AS description,
     chain_id,
     cover_key,
-    SUM(fee) AS total_fee
+    SUM(fee - platform_fee) AS total_fee
   FROM policy.cover_purchased
   GROUP BY chain_id, cover_key
 )

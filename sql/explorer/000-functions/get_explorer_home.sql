@@ -67,7 +67,7 @@ BEGIN
     _contracts := array_agg(DISTINCT core.transactions.address) FROM core.transactions;  
   END IF;
 
-  IF (_sort_by NOT IN('chain_id', 'date', 'event_name', 'coupon_code', 'transaction_sender', 'cover_key', 'product_key')) THEN
+  IF (_sort_by NOT IN('chain_id', 'date', 'event_name', 'coupon_code', 'transaction_sender', 'ck', 'pk')) THEN
     RAISE EXCEPTION 'Access is denied. Invalid sort_by: "%"', _sort_by; --SQL Injection Attack
   END IF;
   
@@ -99,12 +99,12 @@ BEGIN
     AND core.transactions.address = ANY(%L)
     AND 
     (
-        COALESCE(core.transactions.ck, '''') ILIKE %s
-        OR 
-        COALESCE(core.transactions.pk, '''') ILIKE %s
+      bytes32_to_string(core.transactions.ck) ILIKE %s
+      OR 
+      bytes32_to_string(core.transactions.pk) ILIKE %s
     )
     AND core.transactions.event_name ILIKE %s
-    AND COALESCE(core.transactions.coupon_code, '''') ILIKE %s
+    AND bytes32_to_string(core.transactions.coupon_code) ILIKE %s
   )
   SELECT COUNT(*) FROM result;', _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like));
   
@@ -144,12 +144,12 @@ BEGIN
   AND core.transactions.address = ANY(%L)
   AND 
   (
-      COALESCE(core.transactions.ck, '''') ILIKE %s
-      OR 
-      COALESCE(core.transactions.pk, '''') ILIKE %s
+    bytes32_to_string(core.transactions.ck) ILIKE %s
+    OR 
+    bytes32_to_string(core.transactions.pk) ILIKE %s
   )
   AND core.transactions.event_name ILIKE %s
-  AND COALESCE(core.transactions.coupon_code, '''') ILIKE %s
+  AND bytes32_to_string(core.transactions.coupon_code) ILIKE %s
   ORDER BY %I %s
   LIMIT %s::integer
   OFFSET %s::integer * %s::integer  
