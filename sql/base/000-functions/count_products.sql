@@ -1,13 +1,13 @@
 DROP FUNCTION IF EXISTS count_products
 (
   _chain_id                           numeric,
-  _cover_key                          text
+  _cover_key                          bytes32
 ) CASCADE;
 
 CREATE FUNCTION count_products
 (
   _chain_id                           numeric,
-  _cover_key                          text
+  _cover_key                          bytes32
 )
 RETURNS integer
 STABLE

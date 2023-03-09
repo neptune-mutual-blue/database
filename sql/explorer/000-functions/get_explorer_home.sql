@@ -35,8 +35,8 @@ RETURNS TABLE
   event_name                                      text,
   coupon_code                                     text,
   transaction_sender                              address,
-  cover_key                                       text,
-  product_key                                     text,
+  cover_key                                       bytes32,
+  product_key                                     bytes32,
   transaction_stablecoin_amount                   uint256,
   transaction_npm_amount                          uint256,
   page_size                                       integer,
@@ -58,7 +58,7 @@ BEGIN
   IF(_sort_direction NOT IN ('ASC', 'DESC')) THEN
     RAISE EXCEPTION 'Access is denied. Invalid sort_direction: "%"', _sort_direction; --SQL Injection Attack
   END IF;
-  
+
   IF(_networks IS NULL) THEN
     _networks := array_agg(DISTINCT core.transactions.chain_id) FROM core.transactions;
   END IF;
@@ -74,11 +74,7 @@ BEGIN
   IF(_sort_by = 'date') THEN
     _sort_by := 'block_timestamp';
   END IF;
-    
-  IF NOT(_sort_direction IN('ASC', 'DESC')) THEN
-    RAISE EXCEPTION 'Invalid sort_direction value %', _sort_direction;
-  END IF;
-  
+      
   IF(_page_number < 1) THEN
     RAISE EXCEPTION 'Invalid page_number value %', _page_number;  
   END IF;
@@ -93,8 +89,8 @@ BEGIN
   (
     SELECT * FROM core.transactions
     WHERE core.transactions.block_timestamp
-      BETWEEN extract(epoch from COALESCE(%L, ''1-1-1990''::date))
-      AND extract(epoch from COALESCE(%L, ''1-1-2990''::date))
+      BETWEEN EXTRACT(epoch FROM COALESCE(%L, ''1-1-1990''::date))
+      AND EXTRACT(epoch FROM COALESCE(%L, ''1-1-2990''::date))
     AND core.transactions.chain_id = ANY(%L)
     AND core.transactions.address = ANY(%L)
     AND 
@@ -114,7 +110,7 @@ BEGIN
   INTO _total_records;
   
   
-  _total_pages = COALESCE(_total_records / _page_size, 0);
+  _total_pages = COALESCE(CEILING(_total_records::numeric / _page_size), 0);
   
    _query := format('
     SELECT
@@ -123,13 +119,13 @@ BEGIN
     to_timestamp(core.transactions.block_timestamp)::TIMESTAMP WITH TIME ZONE AS date,
     core.transactions.event_name,
     CASE 
-      WHEN core.transactions.coupon_code = ''0x0000000000000000000000000000000000000000000000000000000000000000''
+      WHEN core.transactions.coupon_code = string_to_bytes32('''')
       THEN NULL 
       ELSE core.transactions.coupon_code 
     END AS coupon_code,
     core.transactions.transaction_sender,
-    core.transactions.ck AS cover_key,
-    core.transactions.pk AS product_key,
+    core.transactions.ck::bytes32 AS cover_key,
+    core.transactions.pk::bytes32 AS product_key,
     core.transactions.transaction_stablecoin_amount,
     core.transactions.transaction_npm_amount,
     %s AS page_size,
@@ -138,8 +134,8 @@ BEGIN
     %s AS toal_pages
   FROM core.transactions
   WHERE core.transactions.block_timestamp
-    BETWEEN extract(epoch from COALESCE(%L, ''1-1-1990''::date))
-    AND extract(epoch from COALESCE(%L, ''1-1-2990''::date))
+    BETWEEN EXTRACT(epoch FROM COALESCE(%L, ''1-1-1990''::date))
+    AND EXTRACT(epoch FROM COALESCE(%L, ''1-1-2990''::date))
   AND core.transactions.chain_id = ANY(%L)
   AND core.transactions.address = ANY(%L)
   AND 

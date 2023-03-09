@@ -37,6 +37,7 @@ AS
 $$
 BEGIN
   REFRESH MATERIALIZED VIEW CONCURRENTLY reassurance_transaction_view;
+  RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;

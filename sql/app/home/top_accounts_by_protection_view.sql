@@ -7,7 +7,7 @@ SELECT
   COUNT(*) AS policies,
   SUM(amount_to_cover) AS protection
 FROM policy.cover_purchased
-WHERE expires_on > extract(epoch FROM NOW() AT TIME ZONE 'utc')
+WHERE expires_on > extract(epoch FROM NOW() AT TIME ZONE 'UTC')
 GROUP BY on_behalf_of
 ORDER BY protection DESC
 LIMIT 10;

@@ -11,7 +11,6 @@ BEGIN
   FOR i IN 0..character_length(_string)
   LOOP
     _bytes32 := _bytes32 || to_hex(ascii(substring(_string FROM i + 1 FOR 1)));
-    RAISE NOTICE '%', to_hex(ascii(substring(_string FROM i + 1 FOR 1)));
   END LOOP;
 
   RETURN rpad(_bytes32, 66, '0');

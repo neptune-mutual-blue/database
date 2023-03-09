@@ -3,7 +3,7 @@ DROP FUNCTION IF EXISTS get_protocol_contracts();
 CREATE FUNCTION get_protocol_contracts()
 RETURNS TABLE
 (
-  chain_id                                          integer,
+  chain_id                                          uint256,
   namespace                                         text,
   contract_name                                     text,
   contract_address                                  text,
@@ -18,7 +18,7 @@ BEGIN
 
   CREATE TEMPORARY TABLE _get_protocol_contracts_result
   (
-    chain_id                                          integer,
+    chain_id                                          uint256,
     namespace                                         text,
     contract_name                                     text,
     contract_address                                  text,

@@ -1,14 +1,12 @@
-DROP FUNCTION IF EXISTS get_product_summary();
-
-CREATE FUNCTION get_product_summary()
+CREATE OR REPLACE FUNCTION get_product_summary()
 RETURNS TABLE
 (
   chain_id                              numeric,
-  cover_key                             text,
+  cover_key                             bytes32,
   cover_key_string                      text,
   cover_info                            text,
-  cover_info_details                    TEXT,
-  product_key                           text,
+  cover_info_details                    text,
+  product_key                           bytes32,
   product_key_string                    text,
   product_info                          text,
   product_info_details                  text,
@@ -27,11 +25,11 @@ BEGIN
   CREATE TEMPORARY TABLE _get_product_summary_result
   (
     chain_id                          numeric,
-    cover_key                         text,
+    cover_key                         bytes32,
     cover_key_string                  text,
     cover_info                        text,
-    cover_info_details                TEXT,
-    product_key                       text,
+    cover_info_details                text,
+    product_key                       bytes32,
     product_key_string                text,
     product_info                      text,
     product_info_details              text,
@@ -74,7 +72,11 @@ BEGIN
     1 AS leverage,
     100 AS capital_efficiency
   FROM cover.cover_created;
-    
+
+  UPDATE _get_product_summary_result
+  SET product_key = string_to_bytes32('')
+  WHERE _get_product_summary_result.product_key IS NULL;
+
   UPDATE _get_product_summary_result
   SET
     floor = config_cover_view.policy_floor,
@@ -85,18 +87,11 @@ BEGIN
   
   
   UPDATE _get_product_summary_result
-  SET capacity = cover_capacity_view.capacity
-  FROM cover_capacity_view
-  WHERE cover_capacity_view.chain_id = _get_product_summary_result.chain_id
-  AND cover_capacity_view.cover_key = _get_product_summary_result.cover_key
-  AND _get_product_summary_result.product_key IS NULL;
-  
-  UPDATE _get_product_summary_result
-  SET capacity = product_capacity_view.capacity
-  FROM product_capacity_view
-  WHERE product_capacity_view.chain_id = _get_product_summary_result.chain_id
-  AND product_capacity_view.cover_key = _get_product_summary_result.cover_key
-  AND product_capacity_view.product_key = _get_product_summary_result.product_key;
+  SET capacity = capacity_view.capacity
+  FROM capacity_view
+  WHERE capacity_view.chain_id = _get_product_summary_result.chain_id
+  AND capacity_view.cover_key = _get_product_summary_result.cover_key
+  AND capacity_view.product_key = _get_product_summary_result.product_key;
 
   UPDATE _get_product_summary_result
   SET commitment = product_commitment_view.commitment
@@ -106,12 +101,11 @@ BEGIN
   AND product_commitment_view.product_key = _get_product_summary_result.product_key;
 
   UPDATE _get_product_summary_result
-  SET commitment = product_commitment_view.commitment
-  FROM product_commitment_view
-  WHERE product_commitment_view.chain_id = _get_product_summary_result.chain_id
-  AND product_commitment_view.cover_key = _get_product_summary_result.cover_key
-  AND product_commitment_view.product_key = '0x0000000000000000000000000000000000000000000000000000000000000000'
-  AND _get_product_summary_result.product_key IS NULL;
+  SET commitment = cover_commitment_view.commitment
+  FROM cover_commitment_view
+  WHERE cover_commitment_view.chain_id = _get_product_summary_result.chain_id
+  AND cover_commitment_view.cover_key = _get_product_summary_result.cover_key
+  AND _get_product_summary_result.product_key = string_to_bytes32('');
 
   UPDATE _get_product_summary_result
   SET commitment = cover_commitment_view.commitment
@@ -151,6 +145,10 @@ BEGIN
   SET cover_info_details = config_known_ipfs_hashes_view.ipfs_details
   FROM config_known_ipfs_hashes_view
   WHERE config_known_ipfs_hashes_view.ipfs_hash = _get_product_summary_result.cover_info;
+
+  UPDATE _get_product_summary_result
+  SET product_key = NULL
+  WHERE _get_product_summary_result.product_key = string_to_bytes32('');
 
   RETURN QUERY
   SELECT * FROM _get_product_summary_result;

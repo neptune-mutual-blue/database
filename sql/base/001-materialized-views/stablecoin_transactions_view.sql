@@ -58,6 +58,7 @@ AS
 $$
 BEGIN
   REFRESH MATERIALIZED VIEW CONCURRENTLY stablecoin_transactions_view;
+  RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;

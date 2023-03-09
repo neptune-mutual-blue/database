@@ -40,10 +40,13 @@ CREATE SCHEMA vault;
 CREATE SCHEMA consensus;
 CREATE SCHEMA strategy;
 
+DROP TYPE IF EXISTS product_status_type CASCADE;
+CREATE TYPE product_status_type AS ENUM ('Normal','Stopped','IncidentHappened','FalseReporting','Claimable');
+
 CREATE TABLE core.locks
 (
   namespace                                         text NOT NULL PRIMARY KEY,
-  started_on                                        integer NOT NULL DEFAULT(extract(epoch FROM NOW() AT TIME ZONE 'utc'))
+  started_on                                        integer NOT NULL DEFAULT(extract(epoch FROM NOW() AT TIME ZONE 'UTC'))
 );
 
 CREATE TABLE core.transactions
@@ -1306,8 +1309,23 @@ CREATE TABLE factory.vault_deployed
 CREATE INDEX vault_deployed_cover_key_inx
 ON factory.vault_deployed(cover_key);
 
+CREATE OR REPLACE FUNCTION get_cover_key_by_vault_address(_chain_id uint256, _vault address)
+RETURNS bytes32
+STABLE
+AS
+$$
+BEGIN
+  RETURN factory.vault_deployed.cover_key
+  FROM factory.vault_deployed
+  WHERE factory.vault_deployed.chain_id = _chain_id
+  AND factory.vault_deployed.vault = _vault;
+END
+$$
+LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS staking.bond_pool_setup_amounts_trigger();
+/********************************************/
+
+DROP FUNCTION IF EXISTS staking.bond_pool_setup_amounts_trigger() CASCADE;
 
 CREATE FUNCTION staking.bond_pool_setup_amounts_trigger()
 RETURNS trigger
@@ -1327,7 +1345,7 @@ FOR EACH ROW EXECUTE FUNCTION staking.bond_pool_setup_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS staking.bond_created_amounts_trigger();
+DROP FUNCTION IF EXISTS staking.bond_created_amounts_trigger() CASCADE;
 
 CREATE FUNCTION staking.bond_created_amounts_trigger()
 RETURNS trigger
@@ -1347,7 +1365,7 @@ FOR EACH ROW EXECUTE FUNCTION staking.bond_created_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS staking.bond_claimed_amounts_trigger();
+DROP FUNCTION IF EXISTS staking.bond_claimed_amounts_trigger() CASCADE;
 
 CREATE FUNCTION staking.bond_claimed_amounts_trigger()
 RETURNS trigger
@@ -1367,27 +1385,7 @@ FOR EACH ROW EXECUTE FUNCTION staking.bond_claimed_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS cxtoken.claimed_amounts_trigger();
-
-CREATE FUNCTION cxtoken.claimed_amounts_trigger()
-RETURNS trigger
-AS
-$$
-BEGIN
-  NEW.transaction_stablecoin_amount = NEW.amount;
-  RETURN NEW;
-END
-$$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER claimed_amounts_trigger
-BEFORE INSERT OR UPDATE ON cxtoken.claimed
-FOR EACH ROW EXECUTE FUNCTION cxtoken.claimed_amounts_trigger();
-
-
-/********************************************/
-
-DROP FUNCTION IF EXISTS reassurance.reassurance_added_amounts_trigger();
+DROP FUNCTION IF EXISTS reassurance.reassurance_added_amounts_trigger() CASCADE;
 
 CREATE FUNCTION reassurance.reassurance_added_amounts_trigger()
 RETURNS trigger
@@ -1408,7 +1406,7 @@ FOR EACH ROW EXECUTE FUNCTION reassurance.reassurance_added_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS reassurance.pool_capitalized_amounts_trigger();
+DROP FUNCTION IF EXISTS reassurance.pool_capitalized_amounts_trigger() CASCADE;
 
 CREATE FUNCTION reassurance.pool_capitalized_amounts_trigger()
 RETURNS trigger
@@ -1426,11 +1424,9 @@ CREATE TRIGGER pool_capitalized_amounts_trigger
 BEFORE INSERT OR UPDATE ON reassurance.pool_capitalized
 FOR EACH ROW EXECUTE FUNCTION reassurance.pool_capitalized_amounts_trigger();
 
-
-
 /********************************************/
 
-DROP FUNCTION IF EXISTS cover.stake_added_amounts_trigger();
+DROP FUNCTION IF EXISTS cover.stake_added_amounts_trigger() CASCADE;
 
 CREATE FUNCTION cover.stake_added_amounts_trigger()
 RETURNS trigger
@@ -1450,7 +1446,7 @@ FOR EACH ROW EXECUTE FUNCTION cover.stake_added_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS cover.stake_removed_amounts_trigger();
+DROP FUNCTION IF EXISTS cover.stake_removed_amounts_trigger() CASCADE;
 
 CREATE FUNCTION cover.stake_removed_amounts_trigger()
 RETURNS trigger
@@ -1470,7 +1466,7 @@ FOR EACH ROW EXECUTE FUNCTION cover.stake_removed_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_amounts_trigger();
+DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_amounts_trigger() CASCADE;
 
 CREATE FUNCTION cxtoken.coverage_start_set_amounts_trigger()
 RETURNS trigger
@@ -1490,7 +1486,7 @@ FOR EACH ROW EXECUTE FUNCTION cxtoken.coverage_start_set_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.reported_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.reported_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.reported_amounts_trigger()
 RETURNS trigger
@@ -1510,7 +1506,7 @@ FOR EACH ROW EXECUTE FUNCTION consensus.reported_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.disputed_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.disputed_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.disputed_amounts_trigger()
 RETURNS trigger
@@ -1531,7 +1527,7 @@ FOR EACH ROW EXECUTE FUNCTION consensus.disputed_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS cover.fee_burned_amounts_trigger();
+DROP FUNCTION IF EXISTS cover.fee_burned_amounts_trigger() CASCADE;
 
 CREATE FUNCTION cover.fee_burned_amounts_trigger()
 RETURNS trigger
@@ -1552,7 +1548,7 @@ FOR EACH ROW EXECUTE FUNCTION cover.fee_burned_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.attested_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.attested_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.attested_amounts_trigger()
 RETURNS trigger
@@ -1572,7 +1568,7 @@ FOR EACH ROW EXECUTE FUNCTION consensus.attested_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.refuted_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.refuted_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.refuted_amounts_trigger()
 RETURNS trigger
@@ -1592,7 +1588,7 @@ FOR EACH ROW EXECUTE FUNCTION consensus.refuted_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.unstaken_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.unstaken_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.unstaken_amounts_trigger()
 RETURNS trigger
@@ -1612,7 +1608,7 @@ FOR EACH ROW EXECUTE FUNCTION consensus.unstaken_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.reporter_reward_distributed_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.reporter_reward_distributed_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.reporter_reward_distributed_amounts_trigger()
 RETURNS trigger
@@ -1633,7 +1629,7 @@ FOR EACH ROW EXECUTE FUNCTION consensus.reporter_reward_distributed_amounts_trig
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS consensus.governance_burned_amounts_trigger();
+DROP FUNCTION IF EXISTS consensus.governance_burned_amounts_trigger() CASCADE;
 
 CREATE FUNCTION consensus.governance_burned_amounts_trigger()
 RETURNS trigger
@@ -1651,9 +1647,9 @@ CREATE TRIGGER governance_burned_amounts_trigger
 BEFORE INSERT OR UPDATE ON consensus.governance_burned
 FOR EACH ROW EXECUTE FUNCTION consensus.governance_burned_amounts_trigger();
 
+/********************************************/
 
-
-DROP FUNCTION IF EXISTS strategy.log_deposit_amounts_trigger();
+DROP FUNCTION IF EXISTS strategy.log_deposit_amounts_trigger() CASCADE;
 
 CREATE FUNCTION strategy.log_deposit_amounts_trigger()
 RETURNS trigger
@@ -1673,7 +1669,7 @@ FOR EACH ROW EXECUTE FUNCTION strategy.log_deposit_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS strategy.deposited_amounts_trigger();
+DROP FUNCTION IF EXISTS strategy.deposited_amounts_trigger() CASCADE;
 
 CREATE FUNCTION strategy.deposited_amounts_trigger()
 RETURNS trigger
@@ -1691,12 +1687,9 @@ CREATE TRIGGER deposited_amounts_trigger
 BEFORE INSERT OR UPDATE ON strategy.deposited
 FOR EACH ROW EXECUTE FUNCTION strategy.deposited_amounts_trigger();
 
-
-
-
 /********************************************/
 
-DROP FUNCTION IF EXISTS strategy.log_withdrawal_amounts_trigger();
+DROP FUNCTION IF EXISTS strategy.log_withdrawal_amounts_trigger() CASCADE;
 
 CREATE FUNCTION strategy.log_withdrawal_amounts_trigger()
 RETURNS trigger
@@ -1716,7 +1709,7 @@ FOR EACH ROW EXECUTE FUNCTION strategy.log_withdrawal_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS strategy.withdrawn_amounts_trigger();
+DROP FUNCTION IF EXISTS strategy.withdrawn_amounts_trigger() CASCADE;
 
 CREATE FUNCTION strategy.withdrawn_amounts_trigger()
 RETURNS trigger
@@ -1736,7 +1729,7 @@ FOR EACH ROW EXECUTE FUNCTION strategy.withdrawn_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS strategy.drained_amounts_trigger();
+DROP FUNCTION IF EXISTS strategy.drained_amounts_trigger() CASCADE;
 
 CREATE FUNCTION strategy.drained_amounts_trigger()
 RETURNS trigger
@@ -1756,14 +1749,14 @@ FOR EACH ROW EXECUTE FUNCTION strategy.drained_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS policy.cover_purchased_amounts_trigger();
+DROP FUNCTION IF EXISTS policy.cover_purchased_amounts_trigger() CASCADE;
 
 CREATE FUNCTION policy.cover_purchased_amounts_trigger()
 RETURNS trigger
 AS
 $$
 BEGIN
-  NEW.transaction_stablecoin_amount = NEW.fee;
+  NEW.transaction_stablecoin_amount = NEW.fee - NEW.platform_fee;
   RETURN NEW;
 END
 $$
@@ -1776,7 +1769,7 @@ FOR EACH ROW EXECUTE FUNCTION policy.cover_purchased_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.governance_transfer_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.governance_transfer_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.governance_transfer_amounts_trigger()
 RETURNS trigger
@@ -1796,7 +1789,7 @@ FOR EACH ROW EXECUTE FUNCTION vault.governance_transfer_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.strategy_transfer_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.strategy_transfer_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.strategy_transfer_amounts_trigger()
 RETURNS trigger
@@ -1816,7 +1809,7 @@ FOR EACH ROW EXECUTE FUNCTION vault.strategy_transfer_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.strategy_receipt_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.strategy_receipt_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.strategy_receipt_amounts_trigger()
 RETURNS trigger
@@ -1834,11 +1827,9 @@ CREATE TRIGGER strategy_receipt_amounts_trigger
 BEFORE INSERT OR UPDATE ON vault.strategy_receipt
 FOR EACH ROW EXECUTE FUNCTION vault.strategy_receipt_amounts_trigger();
 
-
-
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.pods_issued_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.pods_issued_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.pods_issued_amounts_trigger()
 RETURNS trigger
@@ -1858,14 +1849,14 @@ FOR EACH ROW EXECUTE FUNCTION vault.pods_issued_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.pods_redeemed_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.pods_redeemed_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.pods_redeemed_amounts_trigger()
 RETURNS trigger
 AS
 $$
 BEGIN
-  NEW.transaction_stablecoin_amount = NEW.liquidity_released;
+  NEW.transaction_stablecoin_amount = NEW.liquidity_released * -1;
   RETURN NEW;
 END
 $$
@@ -1878,7 +1869,7 @@ FOR EACH ROW EXECUTE FUNCTION vault.pods_redeemed_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.flash_loan_borrowed_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.flash_loan_borrowed_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.flash_loan_borrowed_amounts_trigger()
 RETURNS trigger
@@ -1899,7 +1890,7 @@ FOR EACH ROW EXECUTE FUNCTION vault.flash_loan_borrowed_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.npm_staken_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.npm_staken_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.npm_staken_amounts_trigger()
 RETURNS trigger
@@ -1919,7 +1910,7 @@ FOR EACH ROW EXECUTE FUNCTION vault.npm_staken_amounts_trigger();
 
 /********************************************/
 
-DROP FUNCTION IF EXISTS vault.npm_unstaken_amounts_trigger();
+DROP FUNCTION IF EXISTS vault.npm_unstaken_amounts_trigger() CASCADE;
 
 CREATE FUNCTION vault.npm_unstaken_amounts_trigger()
 RETURNS trigger
@@ -1936,8 +1927,9 @@ CREATE TRIGGER npm_unstaken_amounts_trigger
 BEFORE INSERT OR UPDATE ON vault.npm_unstaken
 FOR EACH ROW EXECUTE FUNCTION vault.npm_unstaken_amounts_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS vault.pods_issued_referral_code_trigger();
+DROP FUNCTION IF EXISTS vault.pods_issued_referral_code_trigger() CASCADE;
 
 CREATE FUNCTION vault.pods_issued_referral_code_trigger()
 RETURNS trigger
@@ -1954,8 +1946,9 @@ CREATE TRIGGER pods_issued_referral_code_trigger
 BEFORE INSERT OR UPDATE ON vault.pods_issued
 FOR EACH ROW EXECUTE FUNCTION vault.pods_issued_referral_code_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS policy.cover_purchased_referral_code_trigger();
+DROP FUNCTION IF EXISTS policy.cover_purchased_referral_code_trigger() CASCADE;
 
 CREATE FUNCTION policy.cover_purchased_referral_code_trigger()
 RETURNS trigger
@@ -1972,7 +1965,9 @@ CREATE TRIGGER cover_purchased_referral_code_trigger
 BEFORE INSERT OR UPDATE ON policy.cover_purchased
 FOR EACH ROW EXECUTE FUNCTION policy.cover_purchased_referral_code_trigger();
 
-DROP FUNCTION IF EXISTS cxtoken.claimed_cover_key_trigger();
+/********************************************/
+
+DROP FUNCTION IF EXISTS cxtoken.claimed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cxtoken.claimed_cover_key_trigger()
 RETURNS trigger
@@ -1990,8 +1985,47 @@ CREATE TRIGGER claimed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cxtoken.claimed
 FOR EACH ROW EXECUTE FUNCTION cxtoken.claimed_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS claim.claim_period_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS vault.pods_issued_cover_key_trigger() CASCADE;
+
+CREATE FUNCTION vault.pods_issued_cover_key_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  NEW.ck = get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER pods_issued_cover_key_trigger
+BEFORE INSERT OR UPDATE ON vault.pods_issued
+FOR EACH ROW EXECUTE FUNCTION vault.pods_issued_cover_key_trigger();
+
+/********************************************/
+
+DROP FUNCTION IF EXISTS vault.pods_redeemed_cover_key_trigger() CASCADE;
+
+CREATE FUNCTION vault.pods_redeemed_cover_key_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  NEW.ck = get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER pods_redeemed_cover_key_trigger
+BEFORE INSERT OR UPDATE ON vault.pods_redeemed
+FOR EACH ROW EXECUTE FUNCTION vault.pods_redeemed_cover_key_trigger();
+
+/********************************************/
+
+DROP FUNCTION IF EXISTS claim.claim_period_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION claim.claim_period_set_cover_key_trigger()
 RETURNS trigger
@@ -2004,13 +2038,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER claim_period_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON claim.claim_period_set
 FOR EACH ROW EXECUTE FUNCTION claim.claim_period_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS claim.blacklist_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS claim.blacklist_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION claim.blacklist_set_cover_key_trigger()
 RETURNS trigger
@@ -2023,13 +2057,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER blacklist_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON claim.blacklist_set
 FOR EACH ROW EXECUTE FUNCTION claim.blacklist_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.cover_created_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.cover_created_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.cover_created_cover_key_trigger()
 RETURNS trigger
@@ -2042,13 +2076,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_created_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.cover_created
 FOR EACH ROW EXECUTE FUNCTION cover.cover_created_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.product_created_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.product_created_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.product_created_cover_key_trigger()
 RETURNS trigger
@@ -2061,13 +2095,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER product_created_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.product_created
 FOR EACH ROW EXECUTE FUNCTION cover.product_created_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.cover_updated_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.cover_updated_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.cover_updated_cover_key_trigger()
 RETURNS trigger
@@ -2080,13 +2114,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_updated_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.cover_updated
 FOR EACH ROW EXECUTE FUNCTION cover.cover_updated_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.product_updated_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.product_updated_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.product_updated_cover_key_trigger()
 RETURNS trigger
@@ -2099,13 +2133,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER product_updated_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.product_updated
 FOR EACH ROW EXECUTE FUNCTION cover.product_updated_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.product_state_updated_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.product_state_updated_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.product_state_updated_cover_key_trigger()
 RETURNS trigger
@@ -2118,13 +2152,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER product_state_updated_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.product_state_updated
 FOR EACH ROW EXECUTE FUNCTION cover.product_state_updated_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.cover_user_whitelist_updated_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.cover_user_whitelist_updated_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.cover_user_whitelist_updated_cover_key_trigger()
 RETURNS trigger
@@ -2137,13 +2171,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_user_whitelist_updated_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.cover_user_whitelist_updated
 FOR EACH ROW EXECUTE FUNCTION cover.cover_user_whitelist_updated_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS reassurance.reassurance_added_cover_key_trigger();
+DROP FUNCTION IF EXISTS reassurance.reassurance_added_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION reassurance.reassurance_added_cover_key_trigger()
 RETURNS trigger
@@ -2156,13 +2190,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER reassurance_added_cover_key_trigger
 BEFORE INSERT OR UPDATE ON reassurance.reassurance_added
 FOR EACH ROW EXECUTE FUNCTION reassurance.reassurance_added_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS reassurance.weight_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS reassurance.weight_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION reassurance.weight_set_cover_key_trigger()
 RETURNS trigger
@@ -2180,8 +2214,9 @@ CREATE TRIGGER weight_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON reassurance.weight_set
 FOR EACH ROW EXECUTE FUNCTION reassurance.weight_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS reassurance.pool_capitalized_cover_key_trigger();
+DROP FUNCTION IF EXISTS reassurance.pool_capitalized_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION reassurance.pool_capitalized_cover_key_trigger()
 RETURNS trigger
@@ -2194,13 +2229,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER pool_capitalized_cover_key_trigger
 BEFORE INSERT OR UPDATE ON reassurance.pool_capitalized
 FOR EACH ROW EXECUTE FUNCTION reassurance.pool_capitalized_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.stake_added_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.stake_added_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.stake_added_cover_key_trigger()
 RETURNS trigger
@@ -2213,13 +2248,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER stake_added_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.stake_added
 FOR EACH ROW EXECUTE FUNCTION cover.stake_added_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.stake_removed_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.stake_removed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.stake_removed_cover_key_trigger()
 RETURNS trigger
@@ -2232,13 +2267,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER stake_removed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.stake_removed
 FOR EACH ROW EXECUTE FUNCTION cover.stake_removed_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.fee_burned_cover_key_trigger();
+DROP FUNCTION IF EXISTS cover.fee_burned_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.fee_burned_cover_key_trigger()
 RETURNS trigger
@@ -2251,13 +2286,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER fee_burned_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cover.fee_burned
 FOR EACH ROW EXECUTE FUNCTION cover.fee_burned_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION cxtoken.coverage_start_set_cover_key_trigger()
 RETURNS trigger
@@ -2270,13 +2305,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER coverage_start_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON cxtoken.coverage_start_set
 FOR EACH ROW EXECUTE FUNCTION cxtoken.coverage_start_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS factory.cx_token_deployed_cover_key_trigger();
+DROP FUNCTION IF EXISTS factory.cx_token_deployed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION factory.cx_token_deployed_cover_key_trigger()
 RETURNS trigger
@@ -2289,13 +2324,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cx_token_deployed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON factory.cx_token_deployed
 FOR EACH ROW EXECUTE FUNCTION factory.cx_token_deployed_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.finalized_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.finalized_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.finalized_cover_key_trigger()
 RETURNS trigger
@@ -2308,13 +2343,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER finalized_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.finalized
 FOR EACH ROW EXECUTE FUNCTION consensus.finalized_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.reported_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.reported_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.reported_cover_key_trigger()
 RETURNS trigger
@@ -2327,13 +2362,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER reported_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.reported
 FOR EACH ROW EXECUTE FUNCTION consensus.reported_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.disputed_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.disputed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.disputed_cover_key_trigger()
 RETURNS trigger
@@ -2346,13 +2381,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER disputed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.disputed
 FOR EACH ROW EXECUTE FUNCTION consensus.disputed_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.first_reporting_stake_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.first_reporting_stake_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.first_reporting_stake_set_cover_key_trigger()
 RETURNS trigger
@@ -2365,13 +2400,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER first_reporting_stake_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.first_reporting_stake_set
 FOR EACH ROW EXECUTE FUNCTION consensus.first_reporting_stake_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.attested_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.attested_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.attested_cover_key_trigger()
 RETURNS trigger
@@ -2384,13 +2419,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER attested_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.attested
 FOR EACH ROW EXECUTE FUNCTION consensus.attested_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.refuted_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.refuted_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.refuted_cover_key_trigger()
 RETURNS trigger
@@ -2403,13 +2438,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER refuted_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.refuted
 FOR EACH ROW EXECUTE FUNCTION consensus.refuted_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.unstaken_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.unstaken_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.unstaken_cover_key_trigger()
 RETURNS trigger
@@ -2422,13 +2457,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER unstaken_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.unstaken
 FOR EACH ROW EXECUTE FUNCTION consensus.unstaken_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.reporter_reward_distributed_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.reporter_reward_distributed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.reporter_reward_distributed_cover_key_trigger()
 RETURNS trigger
@@ -2446,8 +2481,9 @@ CREATE TRIGGER reporter_reward_distributed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.reporter_reward_distributed
 FOR EACH ROW EXECUTE FUNCTION consensus.reporter_reward_distributed_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.governance_burned_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.governance_burned_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.governance_burned_cover_key_trigger()
 RETURNS trigger
@@ -2460,13 +2496,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER governance_burned_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.governance_burned
 FOR EACH ROW EXECUTE FUNCTION consensus.governance_burned_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.resolved_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.resolved_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.resolved_cover_key_trigger()
 RETURNS trigger
@@ -2479,13 +2515,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER resolved_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.resolved
 FOR EACH ROW EXECUTE FUNCTION consensus.resolved_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.cooldown_period_configured_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.cooldown_period_configured_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.cooldown_period_configured_cover_key_trigger()
 RETURNS trigger
@@ -2498,13 +2534,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cooldown_period_configured_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.cooldown_period_configured
 FOR EACH ROW EXECUTE FUNCTION consensus.cooldown_period_configured_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.report_closed_cover_key_trigger();
+DROP FUNCTION IF EXISTS consensus.report_closed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.report_closed_cover_key_trigger()
 RETURNS trigger
@@ -2517,13 +2553,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER report_closed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.report_closed
 FOR EACH ROW EXECUTE FUNCTION consensus.report_closed_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS policy.cover_purchased_cover_key_trigger();
+DROP FUNCTION IF EXISTS policy.cover_purchased_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION policy.cover_purchased_cover_key_trigger()
 RETURNS trigger
@@ -2536,13 +2572,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_purchased_cover_key_trigger
 BEFORE INSERT OR UPDATE ON policy.cover_purchased
 FOR EACH ROW EXECUTE FUNCTION policy.cover_purchased_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS policy.cover_policy_rate_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS policy.cover_policy_rate_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION policy.cover_policy_rate_set_cover_key_trigger()
 RETURNS trigger
@@ -2555,13 +2591,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_policy_rate_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON policy.cover_policy_rate_set
 FOR EACH ROW EXECUTE FUNCTION policy.cover_policy_rate_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS policy.coverage_lag_set_cover_key_trigger();
+DROP FUNCTION IF EXISTS policy.coverage_lag_set_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION policy.coverage_lag_set_cover_key_trigger()
 RETURNS trigger
@@ -2574,13 +2610,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER coverage_lag_set_cover_key_trigger
 BEFORE INSERT OR UPDATE ON policy.coverage_lag_set
 FOR EACH ROW EXECUTE FUNCTION policy.coverage_lag_set_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS vault.interest_accrued_cover_key_trigger();
+DROP FUNCTION IF EXISTS vault.interest_accrued_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION vault.interest_accrued_cover_key_trigger()
 RETURNS trigger
@@ -2593,13 +2629,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER interest_accrued_cover_key_trigger
 BEFORE INSERT OR UPDATE ON vault.interest_accrued
 FOR EACH ROW EXECUTE FUNCTION vault.interest_accrued_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS vault.entered_cover_key_trigger();
+DROP FUNCTION IF EXISTS vault.entered_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION vault.entered_cover_key_trigger()
 RETURNS trigger
@@ -2612,13 +2648,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER entered_cover_key_trigger
 BEFORE INSERT OR UPDATE ON vault.entered
 FOR EACH ROW EXECUTE FUNCTION vault.entered_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS vault.exited_cover_key_trigger();
+DROP FUNCTION IF EXISTS vault.exited_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION vault.exited_cover_key_trigger()
 RETURNS trigger
@@ -2631,13 +2667,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER exited_cover_key_trigger
 BEFORE INSERT OR UPDATE ON vault.exited
 FOR EACH ROW EXECUTE FUNCTION vault.exited_cover_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS factory.vault_deployed_cover_key_trigger();
+DROP FUNCTION IF EXISTS factory.vault_deployed_cover_key_trigger() CASCADE;
 
 CREATE FUNCTION factory.vault_deployed_cover_key_trigger()
 RETURNS trigger
@@ -2650,12 +2686,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER vault_deployed_cover_key_trigger
 BEFORE INSERT OR UPDATE ON factory.vault_deployed
 FOR EACH ROW EXECUTE FUNCTION factory.vault_deployed_cover_key_trigger();
 
-DROP FUNCTION IF EXISTS cxtoken.claimed_product_key_trigger();
+/********************************************/
+
+DROP FUNCTION IF EXISTS cxtoken.claimed_product_key_trigger() CASCADE;
 
 CREATE FUNCTION cxtoken.claimed_product_key_trigger()
 RETURNS trigger
@@ -2668,13 +2705,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER claimed_product_key_trigger
 BEFORE INSERT OR UPDATE ON cxtoken.claimed
 FOR EACH ROW EXECUTE FUNCTION cxtoken.claimed_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS claim.blacklist_set_product_key_trigger();
+DROP FUNCTION IF EXISTS claim.blacklist_set_product_key_trigger() CASCADE;
 
 CREATE FUNCTION claim.blacklist_set_product_key_trigger()
 RETURNS trigger
@@ -2687,13 +2724,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER blacklist_set_product_key_trigger
 BEFORE INSERT OR UPDATE ON claim.blacklist_set
 FOR EACH ROW EXECUTE FUNCTION claim.blacklist_set_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.product_created_product_key_trigger();
+DROP FUNCTION IF EXISTS cover.product_created_product_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.product_created_product_key_trigger()
 RETURNS trigger
@@ -2706,13 +2743,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER product_created_product_key_trigger
 BEFORE INSERT OR UPDATE ON cover.product_created
 FOR EACH ROW EXECUTE FUNCTION cover.product_created_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.product_updated_product_key_trigger();
+DROP FUNCTION IF EXISTS cover.product_updated_product_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.product_updated_product_key_trigger()
 RETURNS trigger
@@ -2725,13 +2762,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER product_updated_product_key_trigger
 BEFORE INSERT OR UPDATE ON cover.product_updated
 FOR EACH ROW EXECUTE FUNCTION cover.product_updated_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.product_state_updated_product_key_trigger();
+DROP FUNCTION IF EXISTS cover.product_state_updated_product_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.product_state_updated_product_key_trigger()
 RETURNS trigger
@@ -2744,13 +2781,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER product_state_updated_product_key_trigger
 BEFORE INSERT OR UPDATE ON cover.product_state_updated
 FOR EACH ROW EXECUTE FUNCTION cover.product_state_updated_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cover.cover_user_whitelist_updated_product_key_trigger();
+DROP FUNCTION IF EXISTS cover.cover_user_whitelist_updated_product_key_trigger() CASCADE;
 
 CREATE FUNCTION cover.cover_user_whitelist_updated_product_key_trigger()
 RETURNS trigger
@@ -2763,13 +2800,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_user_whitelist_updated_product_key_trigger
 BEFORE INSERT OR UPDATE ON cover.cover_user_whitelist_updated
 FOR EACH ROW EXECUTE FUNCTION cover.cover_user_whitelist_updated_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS reassurance.pool_capitalized_product_key_trigger();
+DROP FUNCTION IF EXISTS reassurance.pool_capitalized_product_key_trigger() CASCADE;
 
 CREATE FUNCTION reassurance.pool_capitalized_product_key_trigger()
 RETURNS trigger
@@ -2782,13 +2819,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER pool_capitalized_product_key_trigger
 BEFORE INSERT OR UPDATE ON reassurance.pool_capitalized
 FOR EACH ROW EXECUTE FUNCTION reassurance.pool_capitalized_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_product_key_trigger();
+DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_product_key_trigger() CASCADE;
 
 CREATE FUNCTION cxtoken.coverage_start_set_product_key_trigger()
 RETURNS trigger
@@ -2801,13 +2838,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER coverage_start_set_product_key_trigger
 BEFORE INSERT OR UPDATE ON cxtoken.coverage_start_set
 FOR EACH ROW EXECUTE FUNCTION cxtoken.coverage_start_set_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS factory.cx_token_deployed_product_key_trigger();
+DROP FUNCTION IF EXISTS factory.cx_token_deployed_product_key_trigger() CASCADE;
 
 CREATE FUNCTION factory.cx_token_deployed_product_key_trigger()
 RETURNS trigger
@@ -2820,13 +2857,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cx_token_deployed_product_key_trigger
 BEFORE INSERT OR UPDATE ON factory.cx_token_deployed
 FOR EACH ROW EXECUTE FUNCTION factory.cx_token_deployed_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.finalized_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.finalized_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.finalized_product_key_trigger()
 RETURNS trigger
@@ -2839,13 +2876,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER finalized_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.finalized
 FOR EACH ROW EXECUTE FUNCTION consensus.finalized_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.reported_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.reported_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.reported_product_key_trigger()
 RETURNS trigger
@@ -2858,13 +2895,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER reported_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.reported
 FOR EACH ROW EXECUTE FUNCTION consensus.reported_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.disputed_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.disputed_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.disputed_product_key_trigger()
 RETURNS trigger
@@ -2877,13 +2914,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER disputed_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.disputed
 FOR EACH ROW EXECUTE FUNCTION consensus.disputed_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.attested_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.attested_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.attested_product_key_trigger()
 RETURNS trigger
@@ -2896,13 +2933,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER attested_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.attested
 FOR EACH ROW EXECUTE FUNCTION consensus.attested_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.refuted_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.refuted_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.refuted_product_key_trigger()
 RETURNS trigger
@@ -2915,13 +2952,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER refuted_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.refuted
 FOR EACH ROW EXECUTE FUNCTION consensus.refuted_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.unstaken_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.unstaken_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.unstaken_product_key_trigger()
 RETURNS trigger
@@ -2934,13 +2971,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER unstaken_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.unstaken
 FOR EACH ROW EXECUTE FUNCTION consensus.unstaken_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.reporter_reward_distributed_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.reporter_reward_distributed_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.reporter_reward_distributed_product_key_trigger()
 RETURNS trigger
@@ -2953,13 +2990,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER reporter_reward_distributed_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.reporter_reward_distributed
 FOR EACH ROW EXECUTE FUNCTION consensus.reporter_reward_distributed_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.governance_burned_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.governance_burned_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.governance_burned_product_key_trigger()
 RETURNS trigger
@@ -2972,13 +3009,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER governance_burned_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.governance_burned
 FOR EACH ROW EXECUTE FUNCTION consensus.governance_burned_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.resolved_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.resolved_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.resolved_product_key_trigger()
 RETURNS trigger
@@ -2991,13 +3028,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER resolved_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.resolved
 FOR EACH ROW EXECUTE FUNCTION consensus.resolved_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS consensus.report_closed_product_key_trigger();
+DROP FUNCTION IF EXISTS consensus.report_closed_product_key_trigger() CASCADE;
 
 CREATE FUNCTION consensus.report_closed_product_key_trigger()
 RETURNS trigger
@@ -3010,13 +3047,13 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER report_closed_product_key_trigger
 BEFORE INSERT OR UPDATE ON consensus.report_closed
 FOR EACH ROW EXECUTE FUNCTION consensus.report_closed_product_key_trigger();
 
+/********************************************/
 
-DROP FUNCTION IF EXISTS policy.cover_purchased_product_key_trigger();
+DROP FUNCTION IF EXISTS policy.cover_purchased_product_key_trigger() CASCADE;
 
 CREATE FUNCTION policy.cover_purchased_product_key_trigger()
 RETURNS trigger
@@ -3029,18 +3066,14 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE TRIGGER cover_purchased_product_key_trigger
 BEFORE INSERT OR UPDATE ON policy.cover_purchased
 FOR EACH ROW EXECUTE FUNCTION policy.cover_purchased_product_key_trigger();
 
-DROP FUNCTION IF EXISTS format_stablecoin
-(
-  _amount         numeric
-);
+/********************************************/
 
 
-CREATE FUNCTION format_stablecoin
+CREATE OR REPLACE FUNCTION format_stablecoin
 (
   _amount         numeric
 )
@@ -3055,13 +3088,7 @@ $$
 LANGUAGE plpgsql;
 
 
-DROP FUNCTION IF EXISTS format_npm
-(
-  _amount         numeric
-);
-
-
-CREATE FUNCTION format_npm
+CREATE OR REPLACE FUNCTION format_npm
 (
   _amount         numeric
 )
@@ -3075,3 +3102,14 @@ END
 $$
 LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION ether(amount uint256)
+RETURNS uint256
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN COALESCE(amount, 0) * POWER(10, 16);
+END
+$$
+LANGUAGE plpgsql;
