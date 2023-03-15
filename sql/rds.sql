@@ -3109,7 +3109,32 @@ IMMUTABLE
 AS
 $$
 BEGIN
-  RETURN COALESCE(amount, 0) * POWER(10, 16);
+  RETURN COALESCE(amount, 0) * POWER(10, 18);
 END
 $$
 LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION wei_to_ether(amount uint256)
+RETURNS uint256
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN COALESCE(amount, 0) / POWER(10, 18);
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE FUNCTION average(numeric, variadic numeric[])
+RETURNS numeric
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN (SELECT AVG(vals) FROM unnest($2 || ARRAY[$1]) t(vals));
+END;
+$$
+LANGUAGE plpgsql;
+

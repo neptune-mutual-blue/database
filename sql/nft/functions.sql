@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS add_nft(_metadata jsonb) CASCADE;
-
-CREATE FUNCTION add_nft(_metadata jsonb)
+CREATE OR REPLACE FUNCTION add_nft(_metadata jsonb)
 RETURNS uuid
 AS
 $$
@@ -45,73 +43,20 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT add_nft('{
-  "name": "Delphinus #100001",
-  "description": "The stellar dolphin guardian empowered by the heavens",
-  "image": "https://nft.neptunemutual.net/images/100001.png",
-  "external_url": "https://neptunemutual.com/nft/100001/",
-  "url": "https://nft.neptunemutual.net/metadata/100001.json",
-  "edition": 100001,
-  "date": 1677960792143,
-  "attributes": [
-    {
-      "trait_type": "Background",
-      "value": "The Atlantic Tides"
-    },
-    {
-      "trait_type": "Guardian",
-      "value": "Deep Purple Delphinus"
-    },
-    {
-      "trait_type": "Tail",
-      "value": "Tidal Wave Tail"
-    },
-    {
-      "trait_type": "Flippers",
-      "value": "Reef Guardian Flippers"
-    },
-    {
-      "trait_type": "Armor",
-      "value": "Medieval Armor"
-    },
-    {
-      "trait_type": "Helm",
-      "value": "Crystal Sunburst Helm"
-    },
-    {
-      "trait_type": "Type",
-      "value": "Selection"
-    },
-    {
-      "trait_type": "Nickname",
-      "value": "Sumptuous Radiation"
-    },
-    {
-      "trait_type": "Family",
-      "value": "Delphinus"
-    },
-    {
-      "trait_type": "Siblings",
-      "value": 1000
-    },
-    {
-      "trait_type": "Rarity",
-      "value": 5,
-      "max_value": 10
-    },
-    {
-      "trait_type": "Level",
-      "value": 1,
-      "max_value": 7
-    }
-  ],
-  "properties": {
-    "info": {
-      "value": 100001,
-      "class": "emphasis",
-      "url": "https://neptunemutual.com/nft/100001/",
-      "soulbound": false
-    }
-  },
-  "uid": "delphinus-806"
-}'::jsonb);
+
+
+CREATE OR REPLACE FUNCTION get_owner(_token_id uint256)
+RETURNS address
+STABLE
+AS
+$$
+BEGIN
+  RETURN "to"
+  FROM transfer_single
+  WHERE transfer_single.id = _token_id
+  ORDER BY transfer_single.block_timestamp DESC
+  LIMIT 1;
+END
+$$
+LANGUAGE plpgsql;
+
