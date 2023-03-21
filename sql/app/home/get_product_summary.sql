@@ -115,10 +115,7 @@ BEGIN
   AND _get_product_summary_result.product_key IS NULL;
   
   UPDATE _get_product_summary_result
-  SET reassurance = cover_reassurance_view.reassurance
-  FROM cover_reassurance_view
-  WHERE cover_reassurance_view.chain_id = _get_product_summary_result.chain_id
-  AND cover_reassurance_view.cover_key = _get_product_summary_result.cover_key;
+  SET reassurance = get_reassurance_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity');
   
   UPDATE _get_product_summary_result
   SET utilization_ratio = _get_product_summary_result.commitment / _get_product_summary_result.capacity;
