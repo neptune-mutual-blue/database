@@ -130,8 +130,8 @@ BEGIN
     core.transactions.transaction_npm_amount,
     %s AS page_size,
     %s AS page_number,
-    %s AS toal_records,
-    %s AS toal_pages
+    %s AS total_records,
+    %s AS total_pages
   FROM core.transactions
   WHERE core.transactions.block_timestamp
     BETWEEN EXTRACT(epoch FROM COALESCE(%L, ''1-1-1990''::date))

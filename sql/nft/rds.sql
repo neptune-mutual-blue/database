@@ -62,12 +62,29 @@ LANGUAGE plpgsql;
 ----------------------------------------------------------------------------------------
 ***************************************************************************************/
 
+CREATE TABLE IF NOT EXISTS characters
+(
+  id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
+  level                                             integer,
+  role                                              text,
+  name                                              text,
+  description                                       text,
+  start_index                                       integer,
+  siblings                                          integer,
+  rarity                                            smallint,
+  stage                                             text,
+  views                                             uint256 NOT NULL DEFAULT(0),
+  want_to_mint                                      uint256 NOT NULL DEFAULT(0)
+);
+
+
 CREATE TABLE IF NOT EXISTS nfts
 (
   id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
   token_id                                          uint256 NOT NULL UNIQUE,
   name                                              national character varying(128) NOT NULL,
   nickname                                          text,
+  family                                            text,
   description                                       text NOT NULL,
   url                                               text NOT NULL,
   image                                             text NOT NULL,
@@ -75,7 +92,9 @@ CREATE TABLE IF NOT EXISTS nfts
   date_published                                    uint256 NOT NULL,
   soulbound                                         boolean NOT NULL,
   attributes                                        jsonb NOT NULL,
-  properties                                        jsonb NOT NULL
+  properties                                        jsonb NOT NULL,
+  views                                             uint256 NOT NULL DEFAULT(0),
+  want_to_mint                                      uint256 NOT NULL DEFAULT(0)
 );
 
 CREATE TABLE IF NOT EXISTS transactions
@@ -345,7 +364,7 @@ CREATE INDEX IF NOT EXISTS unpaused_account_inx
 ON unpaused(account);
 
 
-CREATE TABLE persona_set
+CREATE TABLE IF NOT EXISTS persona_set
 (
   account                                           address NOT NULL,
   persona                                           uint8 NOT NULL
@@ -360,5 +379,46 @@ ON persona_set(persona);
 /***************************************************************************************
 ----------------------------------------------------------------------------------------
 ***************************************************************************************/
+INSERT INTO characters(level, role, name, description, start_index, siblings, rarity, stage)
+SELECT 1 AS level, 'Guardian' AS role, 'Delphinus' AS name, 'The stellar dolphin guardian empowered by the heavens' AS description, 100000 AS start_index, 1000 AS siblings, 5 AS rarity, 'Selection' AS stage
+UNION ALL
+SELECT 1 AS level, 'Beast' AS role, 'Sabersquatch' AS name, 'A bloodthirsty predator and hunter of the weak' AS description, 110000 AS start_index, 1000 AS siblings, 5 AS rarity, 'Selection' AS stage
+UNION ALL
+SELECT 2 AS level, 'Guardian' AS role, 'Epic Delphinus' AS name, 'The stellar dolphin guardian empowered by the heavens' AS description, 120000 AS start_index, 500 AS siblings, 6 AS rarity, 'Evolution' AS stage
+UNION ALL
+SELECT 2 AS level, 'Beast' AS role, 'Diabolic Sabersquatch' AS name, 'A bloodthirsty predator and hunter of the weak' AS description, 121000 AS start_index, 500 AS siblings, 6 AS rarity, 'Evolution' AS stage
+UNION ALL
+SELECT 3 AS level, 'Guardian' AS role, 'Aquavallo' AS name, 'The steadfast seahorse guardian in voyage and battles' AS description, 130000 AS start_index, 250 AS siblings, 7 AS rarity, 'Selection' AS stage
+UNION ALL
+SELECT 3 AS level, 'Beast' AS role, 'Gargantuworm' AS name, 'A gigantic worm wreaking havoc and destruction' AS description, 131000 AS start_index, 250 AS siblings, 7 AS rarity, 'Selection' AS stage
+UNION ALL
+SELECT 4 AS level, 'Guardian' AS role, 'Epic Aquavallo' AS name, 'The steadfast seahorse guardian in voyage and battles' AS description, 140000 AS start_index, 200 AS siblings, 8 AS rarity, 'Evolution' AS stage
+UNION ALL
+SELECT 4 AS level, 'Beast' AS role, 'Diabolic Gargantuworm' AS name, 'A gigantic worm wreaking havoc and destruction' AS description, 141000 AS start_index, 200 AS siblings, 8 AS rarity, 'Evolution' AS stage
+UNION ALL
+SELECT 5 AS level, 'Guardian' AS role, 'Salacia' AS name, 'The majestic goddess and shielding light of the seas' AS description, 150000 AS start_index, 100 AS siblings, 9 AS rarity, 'Selection' AS stage
+UNION ALL
+SELECT 5 AS level, 'Beast' AS role, 'Merman Serpent' AS name, 'A vicious reptilian monster corrupting the seas' AS description, 151000 AS start_index, 100 AS siblings, 9 AS rarity, 'Selection' AS stage
+UNION ALL
+SELECT 6 AS level, 'Guardian' AS role, 'Epic Salacia' AS name, 'The majestic goddess and shielding light of the seas' AS description, 160000 AS start_index, 50 AS siblings, 10 AS rarity, 'Evolution' AS stage
+UNION ALL
+SELECT 6 AS level, 'Beast' AS role, 'Diabolic Merman Serpent' AS name, 'A vicious reptilian monster corrupting the seas' AS description, 161000 AS start_index, 50 AS siblings, 10 AS rarity, 'Evolution' AS stage
+UNION ALL
+SELECT 1 AS level, 'Guardian' AS role, 'Legendary Neptune' AS name, 'The all-powerful god of the sea and protector of the chain' AS description, 170000 AS start_index, 25 AS siblings, 10 AS rarity, 'Finale' AS stage
+UNION ALL
+SELECT NULL AS level, 'Beast' AS role, 'Grim Wyvern' AS name, 'A monstrous flying dragon vengefully targeting the chain' AS description, 180000 AS start_index, -1 AS siblings, 3 AS rarity, 'Soulbound' AS stage
+UNION ALL
+SELECT NULL AS level, 'Beast' AS role, 'Diabolic Grim Wyvern' AS name, 'A monstrous flying dragon vengefully targeting the chain' AS description, 190000 AS start_index, 100 AS siblings, 10 AS rarity, NULL AS stage
+UNION ALL
+SELECT NULL AS level, 'Guardian' AS role, 'Neptune' AS name, 'The all-powerful god of the sea and protector of the chain' AS description, 199000 AS start_index, 25 AS siblings, 10 AS rarity, NULL AS stage;
 
-
+CREATE OR REPLACE FUNCTION quote_literal_ilike(_ilike text)
+RETURNS text
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN quote_literal(CONCAT('%', TRIM(_ilike), '%'));
+END
+$$
+LANGUAGE plpgsql;
