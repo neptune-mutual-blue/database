@@ -74,16 +74,7 @@ BEGIN
     cover_key_string,
     product_key,
     product_key_string,
-    capital_efficiency,
-    tvl,
-    coverage_lag,
-    floor,
-    ceiling,
-    reporter_commission,
-    claim_platform_fee,
-    product_status_enum,
-    min_reporting_stake,
-    active_incident_date
+    capital_efficiency
   )
   SELECT
     config_product_view.chain_id,
@@ -91,16 +82,7 @@ BEGIN
     bytes32_to_string(config_product_view.cover_key),
     config_product_view.product_key,
     bytes32_to_string(config_product_view.product_key),
-    config_product_view.capital_efficiency,
-    get_tvl_till_date(config_product_view.chain_id, config_product_view.cover_key, 'infinity'),
-    get_coverage_lag(config_product_view.chain_id, config_product_view.cover_key),
-    get_policy_floor(config_product_view.chain_id, config_product_view.cover_key),
-    get_policy_ceiling(config_product_view.chain_id, config_product_view.cover_key),
-    get_reporter_commission(config_product_view.chain_id),
-    get_claim_platform_fee(config_product_view.chain_id),
-    get_active_product_status(config_product_view.chain_id, config_product_view.cover_key, config_product_view.product_key),
-    get_min_first_reporting_stake(config_product_view.chain_id, config_product_view.cover_key),
-    get_active_incident_date(config_product_view.chain_id, config_product_view.cover_key, config_product_view.product_key)
+    config_product_view.capital_efficiency
   FROM config_product_view
   WHERE config_product_view.chain_id IN
   (
@@ -132,7 +114,7 @@ BEGIN
   FROM config_cover_view
   WHERE config_cover_view.chain_id = _get_product_summary_result.chain_id
   AND config_cover_view.cover_key = _get_product_summary_result.cover_key;
-
+  
   INSERT INTO _get_product_summary_result(chain_id, cover_key, cover_key_string, leverage, capital_efficiency)
   SELECT
     cover.cover_created.chain_id,
@@ -145,6 +127,32 @@ BEGIN
   UPDATE _get_product_summary_result
   SET product_key = string_to_bytes32('')
   WHERE _get_product_summary_result.product_key IS NULL;
+
+  UPDATE _get_product_summary_result
+  SET
+    floor = config_cover_view.policy_floor,
+    ceiling = config_cover_view.policy_ceiling
+  FROM config_cover_view
+  WHERE config_cover_view.chain_id = _get_product_summary_result.chain_id
+  AND config_cover_view.cover_key = _get_product_summary_result.cover_key;
+
+  UPDATE _get_product_summary_result
+  SET product_status_enum = get_active_product_status(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key,  _get_product_summary_result.product_key);
+
+  UPDATE _get_product_summary_result
+  SET active_incident_date = get_active_incident_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key,  _get_product_summary_result.product_key);
+
+  UPDATE _get_product_summary_result
+  SET min_reporting_stake = get_min_first_reporting_stake(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key);
+
+  UPDATE _get_product_summary_result
+  SET coverage_lag = get_coverage_lag(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key);
+
+  UPDATE _get_product_summary_result
+  SET reporter_commission = get_reporter_commission(_get_product_summary_result.chain_id);
+
+  UPDATE _get_product_summary_result
+  SET claim_platform_fee = get_claim_platform_fee(_get_product_summary_result.chain_id);
 
   UPDATE _get_product_summary_result
   SET capacity = capacity_view.capacity
