@@ -6,7 +6,7 @@ SELECT
   config_blockchain_network_view.chain_id,
   config_blockchain_network_view.network_name,
   config_blockchain_network_view.nick_name,
-  AVG(gas_price) AS average_gas_price,
+  FLOOR(AVG(gas_price)) AS average_gas_price,
   MIN(gas_price) AS min_gas_price,
   MAX(gas_price) AS max_gas_price
 FROM core.transactions

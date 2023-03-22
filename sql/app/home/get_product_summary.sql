@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION get_product_summary()
+DROP FUNCTION IF EXISTS get_product_summary(_account address);
+
+CREATE FUNCTION get_product_summary(_account address DEFAULT '')
 RETURNS TABLE
 (
   chain_id                              numeric,
@@ -29,42 +31,44 @@ RETURNS TABLE
   active_incident_date                  integer,
   reporter_commission                   integer,
   reporting_period                      integer,
-  claim_platform_fee                    integer
+  claim_platform_fee                    integer,
+  is_user_whitelisted                   boolean
 )
 AS
 $$
 BEGIN
   CREATE TEMPORARY TABLE _get_product_summary_result
   (
-    chain_id                          numeric,
-    cover_key                         bytes32,
-    cover_key_string                  text,
-    cover_info                        text,
-    cover_info_details                text,
-    product_key                       bytes32,
-    product_key_string                text,
-    product_info                      text,
-    product_info_details              text,
-    product_status_enum               product_status_type,
-    product_status                    integer,
-    floor                             numeric DEFAULT(0),
-    ceiling                           numeric DEFAULT(0),
-    leverage                          numeric DEFAULT(0),
-    capital_efficiency                numeric DEFAULT(0),
-    capacity                          numeric DEFAULT(0),
-    commitment                        numeric DEFAULT(0),
-    available_for_underwriting        numeric DEFAULT(0),
-    utilization_ratio                 numeric,
-    reassurance                       numeric DEFAULT(0),
-    tvl                               numeric DEFAULT(0),
-    coverage_lag                      numeric DEFAULT(0),
-    supports_products                 boolean DEFAULT(false),
-    requires_whitelist                boolean DEFAULT(false),
-    min_reporting_stake               numeric,
-    active_incident_date              integer,
-    reporter_commission               integer,
-    reporting_period                  integer,
-    claim_platform_fee                integer
+    chain_id                            numeric,
+    cover_key                           bytes32,
+    cover_key_string                    text,
+    cover_info                          text,
+    cover_info_details                  text,
+    product_key                         bytes32,
+    product_key_string                  text,
+    product_info                        text,
+    product_info_details                text,
+    product_status_enum                 product_status_type,
+    product_status                      integer,
+    floor                               numeric DEFAULT(0),
+    ceiling                             numeric DEFAULT(0),
+    leverage                            numeric DEFAULT(0),
+    capital_efficiency                  numeric DEFAULT(0),
+    capacity                            numeric DEFAULT(0),
+    commitment                          numeric DEFAULT(0),
+    available_for_underwriting          numeric DEFAULT(0),
+    utilization_ratio                   numeric,
+    reassurance                         numeric DEFAULT(0),
+    tvl                                 numeric DEFAULT(0),
+    coverage_lag                        numeric DEFAULT(0),
+    supports_products                   boolean DEFAULT(false),
+    requires_whitelist                  boolean DEFAULT(false),
+    min_reporting_stake                 numeric,
+    active_incident_date                integer,
+    reporter_commission                 integer,
+    reporting_period                    integer,
+    claim_platform_fee                  integer,
+    is_user_whitelisted                 boolean
   ) ON COMMIT DROP;
   
   INSERT INTO _get_product_summary_result
@@ -176,17 +180,12 @@ BEGIN
 
   UPDATE _get_product_summary_result
   SET 
-    available_for_underwriting = _get_product_summary_result.capacity - _get_product_summary_result.commitment,
-    product_status = array_length(enum_range(NULL, _get_product_summary_result.product_status_enum), 1) - 1;
-  
-  UPDATE _get_product_summary_result
-  SET reassurance = get_reassurance_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity');
-  
-  UPDATE _get_product_summary_result
-  SET tvl = get_tvl_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity');
-  
-  UPDATE _get_product_summary_result
-  SET utilization_ratio = _get_product_summary_result.commitment / _get_product_summary_result.capacity;
+    available_for_underwriting  = _get_product_summary_result.capacity - _get_product_summary_result.commitment,
+    product_status              = array_length(enum_range(NULL, _get_product_summary_result.product_status_enum), 1) - 1,
+    reassurance                 = get_reassurance_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity'),
+    is_user_whitelisted         = check_if_user_whitelisted(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, _get_product_summary_result.product_key, _account),
+    tvl                         = get_tvl_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity'),
+    utilization_ratio = _get_product_summary_result.commitment / _get_product_summary_result.capacity;
 
   UPDATE _get_product_summary_result
   SET cover_info = cover.cover_created.info
@@ -225,4 +224,4 @@ END
 $$
 LANGUAGE plpgsql;
 
---SELECT * FROM get_product_summary()
+SELECT * FROM get_product_summary()
