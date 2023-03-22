@@ -10,3 +10,4 @@ SELECT
 FROM policy.cover_purchased
 GROUP BY chain_id, cover_key, product_key;
 
+ 
