@@ -92,7 +92,7 @@ BEGIN
     cover.cover_created.cover_key,
     bytes32_to_string(cover.cover_created.cover_key),
     1 AS leverage,
-    100 AS capital_efficiency
+    10000 AS capital_efficiency
   FROM cover.cover_created;
 
   UPDATE _get_product_summary_result
