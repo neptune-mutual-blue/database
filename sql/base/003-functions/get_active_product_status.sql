@@ -54,7 +54,7 @@ BEGIN
   
   IF(_resolution_decision = true) THEN
     _status := 'Claimable';
-  ELSE
+  ELSIF(_resolution_decision = false) THEN
     _status := 'FalseReporting';
   END IF;
   
