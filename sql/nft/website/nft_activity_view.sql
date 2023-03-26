@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS nft_activity_view;
+DROP VIEW IF EXISTS nft_activity_view CASCADE;
 
 CREATE VIEW nft_activity_view
 AS

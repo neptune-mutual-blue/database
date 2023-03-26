@@ -1,18 +1,17 @@
-DROP VIEW IF EXISTS regular_nft_view;
+DROP VIEW IF EXISTS minting_level_view;
 
-CREATE VIEW regular_nft_view
+CREATE VIEW minting_level_view
 AS
 SELECT
-  level,
-  role,
-  name,
-  description,
-  start_index,
+  characters.name,
+  characters.role,
+  characters.description,
+  characters.level,
   CONCAT('https://nft.neptunemutual.net/images/', start_index + 1, '.png') AS image,
   CONCAT('https://nft.neptunemutual.net/thumbnails/', start_index + 1, '.webp') AS thumbnail,
   CONCAT('https://nft.neptunemutual.net/covers/', start_index + 1, '.webp') AS cover,
-  siblings,
-  rarity,
-  stage
+  characters.stage,
+  characters.siblings
 FROM characters
-WHERE (siblings > 100 OR siblings = - 1);
+WHERE level IS NOT NULL;
+

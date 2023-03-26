@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS nfts
   id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
   token_id                                          uint256 NOT NULL UNIQUE,
   name                                              national character varying(128) NOT NULL,
+  category                                          text GENERATED ALWAYS AS(split_part(name, '#', 1)) STORED,
   nickname                                          text,
   family                                            text,
   description                                       text NOT NULL,
@@ -370,15 +371,17 @@ CREATE TABLE IF NOT EXISTS persona_set
   persona                                           uint8 NOT NULL
 ) INHERITS(transactions);
 
-CREATE UNIQUE INDEX persona_set_account_uix
-ON persona(LOWER(account));
+CREATE UNIQUE INDEX IF NOT EXISTS persona_set_account_uix
+ON persona_set(LOWER(account));
 
-CREATE INDEX persona_set_persona_inx
+CREATE INDEX IF NOT EXISTS persona_set_persona_inx
 ON persona_set(persona);
 
 /***************************************************************************************
 ----------------------------------------------------------------------------------------
 ***************************************************************************************/
+DELETE FROM characters;
+
 INSERT INTO characters(level, role, name, description, start_index, siblings, rarity, stage)
 SELECT 1 AS level, 'Guardian' AS role, 'Delphinus' AS name, 'The stellar dolphin guardian empowered by the heavens' AS description, 100000 AS start_index, 1000 AS siblings, 5 AS rarity, 'Selection' AS stage
 UNION ALL
@@ -404,7 +407,7 @@ SELECT 6 AS level, 'Guardian' AS role, 'Epic Salacia' AS name, 'The majestic god
 UNION ALL
 SELECT 6 AS level, 'Beast' AS role, 'Diabolic Merman Serpent' AS name, 'A vicious reptilian monster corrupting the seas' AS description, 161000 AS start_index, 50 AS siblings, 10 AS rarity, 'Evolution' AS stage
 UNION ALL
-SELECT 1 AS level, 'Guardian' AS role, 'Legendary Neptune' AS name, 'The all-powerful god of the sea and protector of the chain' AS description, 170000 AS start_index, 25 AS siblings, 10 AS rarity, 'Finale' AS stage
+SELECT 7 AS level, 'Guardian' AS role, 'Legendary Neptune' AS name, 'The all-powerful god of the sea and protector of the chain' AS description, 170000 AS start_index, 25 AS siblings, 10 AS rarity, 'Finale' AS stage
 UNION ALL
 SELECT NULL AS level, 'Beast' AS role, 'Grim Wyvern' AS name, 'A monstrous flying dragon vengefully targeting the chain' AS description, 180000 AS start_index, -1 AS siblings, 3 AS rarity, 'Soulbound' AS stage
 UNION ALL

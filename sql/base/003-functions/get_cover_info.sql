@@ -23,6 +23,6 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM get_cover_info(1, string_to_bytes32('popular-defi-apps'));
+--SELECT * FROM get_cover_info(1, string_to_bytes32('popular-defi-apps'));
 
 

@@ -37,7 +37,7 @@ LANGUAGE plpgsql;
 -- $$
 --   DECLARE i INTEGER;
 -- BEGIN
---   FOR i IN 1..100000 LOOP
+--   FOR i IN 1..10000 LOOP
 --   PERFORM * FROM log_view((SELECT token_id FROM nfts ORDER BY random() LIMIT 1));
 --   END LOOP;
 -- END;

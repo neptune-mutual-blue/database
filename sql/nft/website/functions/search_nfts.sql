@@ -9,6 +9,7 @@ RETURNS TABLE
 (
   nickname                                        text,
   family                                          text,
+  category                                        text,
   token_id                                        uint256,
   views                                           uint256,
   want_to_mint                                    uint256,
@@ -38,6 +39,7 @@ BEGIN
   (
     nickname                                        text,
     family                                          text,
+    category                                        text,
     token_id                                        uint256,
     views                                           uint256,
     want_to_mint                                    uint256,
@@ -52,7 +54,7 @@ BEGIN
   WITH result
   AS
   (
-    SELECT nfts.nickname, nfts.family, nfts.token_id, nfts.views, nfts.want_to_mint, get_sibling_count(nfts.family)
+    SELECT nfts.nickname, nfts.family, nfts.category, nfts.token_id, nfts.views, nfts.want_to_mint, get_sibling_count(nfts.category)
     FROM nfts
     WHERE 1 = 1
     AND (%1$L IS NULL OR attributes @> %1$L)
@@ -63,8 +65,8 @@ BEGIN
   EXECUTE _query
   INTO _total_records;
 
-  INSERT INTO _search_nfts_result(nickname, family, token_id, views, want_to_mint, siblings)
-  SELECT nfts.nickname, nfts.family, nfts.token_id, nfts.views, nfts.want_to_mint, get_sibling_count(nfts.family)
+  INSERT INTO _search_nfts_result(nickname, family, category, token_id, views, want_to_mint, siblings)
+  SELECT nfts.nickname, nfts.family, nfts.category, nfts.token_id, nfts.views, nfts.want_to_mint, get_sibling_count(nfts.category)
   FROM nfts
   WHERE 1 = 1
   AND (_props IS NULL OR attributes @> _props)
@@ -86,13 +88,14 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM search_nfts
-(
-  '',
-  '[{
-    "value": "Evolution",
-    "trait_type": "Type"
-  }]'::jsonb,
-  2,
-  10
-);
+-- SELECT * FROM search_nfts
+-- (
+--   '',
+--   '[{
+--     "value": "Evolution",
+--     "trait_type": "Type"
+--   }]'::jsonb,
+--   2,
+--   10
+-- );
+
