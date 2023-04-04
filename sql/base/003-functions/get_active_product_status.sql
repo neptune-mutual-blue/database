@@ -25,7 +25,7 @@ BEGIN
     _product_key := string_to_bytes32('');  
   END IF;
 
-  IF(_incident_date = 0) THEN
+  IF(COALESCE(_incident_date, 0) = 0) THEN
     RETURN _status;
   END IF;
 
