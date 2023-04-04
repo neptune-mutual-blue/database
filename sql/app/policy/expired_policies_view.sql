@@ -38,7 +38,9 @@ SELECT
       product_key,
       incident_date
   )                                     AS product_status,
-  SUM(amount_to_cover)                  AS amount  
+  SUM(amount_to_cover)                  AS amount,
+  (get_cover_info(chain_id, cover_key)).*,
+  (get_product_info(chain_id, cover_key, product_key)).*
 FROM summary
 GROUP BY
   chain_id,
