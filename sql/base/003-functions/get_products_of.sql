@@ -14,4 +14,4 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM get_products_of(43113, string_to_bytes32('prime'))
+-- SELECT * FROM get_products_of(43113, string_to_bytes32('prime'))
