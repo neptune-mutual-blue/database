@@ -135,7 +135,7 @@ BEGIN
   UPDATE _get_product_summary_result
   SET
     available_for_underwriting    = _get_product_summary_result.capacity - _get_product_summary_result.commitment,
-    utilization_ratio             = _get_product_summary_result.commitment / _get_product_summary_result.capacity,
+    utilization_ratio             = CASE WHEN _get_product_summary_result.capacity = 0 THEN 0 ELSE _get_product_summary_result.commitment / _get_product_summary_result.capacity END,
     product_status                = array_length(enum_range(NULL, _get_product_summary_result.product_status_enum), 1) - 1;
 
   RETURN QUERY

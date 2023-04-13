@@ -83,6 +83,14 @@ BEGIN
   SET network = config_blockchain_network_view.network_name
   FROM config_blockchain_network_view
   WHERE config_blockchain_network_view.chain_id = _get_protocol_contracts_metadata_result.chain_id;
+  
+  UPDATE _get_protocol_contracts_metadata_result
+  SET cx_tokens = '[]'::jsonb
+  WHERE _get_protocol_contracts_metadata_result.cx_tokens IS NULL;
+  
+  UPDATE _get_protocol_contracts_metadata_result
+  SET cover_keys = '{}'
+  WHERE _get_protocol_contracts_metadata_result.cover_keys IS NULL;
 
   RETURN QUERY
   SELECT * FROM _get_protocol_contracts_metadata_result;
@@ -91,4 +99,7 @@ $$
 LANGUAGE plpgsql;
 
 --SELECT * FROM get_protocol_contracts_metadata(1);
+
+
+select * from get_protocol_contracts_metadata(84531)
 

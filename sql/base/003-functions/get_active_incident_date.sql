@@ -46,6 +46,6 @@ END
 $$
 LANGUAGE plpgsql;
 
---SELECT * FROM get_active_incident_date(43113, string_to_bytes32('coinbase'), string_to_bytes32(''));
---SELECT * FROM get_active_incident_date(43113, string_to_bytes32('defi'), string_to_bytes32('lido-v1'));
+--SELECT * FROM get_active_incident_date(84531, string_to_bytes32('coinbase'), string_to_bytes32(''));
+--SELECT * FROM get_active_incident_date(84531, string_to_bytes32('defi'), string_to_bytes32('lido-v1'));
 

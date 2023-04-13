@@ -25,7 +25,7 @@ BEGIN
     _product_key := string_to_bytes32('');  
   END IF;
 
-  IF(_incident_date = 0) THEN
+  IF(COALESCE(_incident_date, 0) = 0) THEN
     RETURN _status;
   END IF;
 
@@ -89,4 +89,4 @@ END
 $$
 LANGUAGE plpgsql;
 
---SELECT * FROM get_active_product_status(43113, string_to_bytes32('huobi'), NULL);
+--SELECT * FROM get_active_product_status(84531, string_to_bytes32('huobi'), NULL);
