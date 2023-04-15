@@ -1,6 +1,5 @@
 CREATE OR REPLACE FUNCTION get_user_milestones
 (
-  _chain_id                       uint256,
   _account                        address
 )
 RETURNS TABLE
@@ -15,16 +14,16 @@ $$
   DECLARE total_liquidity_added   uint256;
 BEGIN
   SELECT
-    SUM(amount_to_cover)          INTO total_policy_purchased
+    SUM(get_stablecoin_value(chain_id, amount_to_cover))          INTO total_policy_purchased
   FROM policy.cover_purchased
   WHERE on_behalf_of              = _account
-  AND chain_id                    = _chain_id;
+  GROUP BY on_behalf_of;
 
   SELECT
-    SUM(liquidity_added)          INTO total_liquidity_added
+    SUM(get_stablecoin_value(chain_id, liquidity_added))          INTO total_liquidity_added
   FROM vault.pods_issued
   WHERE account                   = _account
-  AND chain_id                    = _chain_id;
+  GROUP BY account;
   
   RETURN QUERY
   SELECT
@@ -35,4 +34,4 @@ END
 $$
 LANGUAGE plpgsql;
 
--- SELECT * FROM get_user_milestones(84531, '0x201bcc0d375f10543e585fbb883b36c715c959b3')
+-- SELECT * FROM get_user_milestones('0x201bcc0d375f10543e585fbb883b36c715c959b3')
