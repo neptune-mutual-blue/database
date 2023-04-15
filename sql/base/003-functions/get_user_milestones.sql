@@ -16,14 +16,12 @@ BEGIN
   SELECT
     SUM(get_stablecoin_value(chain_id, amount_to_cover))          INTO total_policy_purchased
   FROM policy.cover_purchased
-  WHERE on_behalf_of              = _account
-  GROUP BY on_behalf_of;
+  WHERE on_behalf_of              = _account;
 
   SELECT
     SUM(get_stablecoin_value(chain_id, liquidity_added))          INTO total_liquidity_added
   FROM vault.pods_issued
-  WHERE account                   = _account
-  GROUP BY account;
+  WHERE account                   = _account;
   
   RETURN QUERY
   SELECT
