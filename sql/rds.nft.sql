@@ -95,8 +95,21 @@ CREATE TABLE IF NOT EXISTS nfts
   attributes                                        jsonb NOT NULL,
   properties                                        jsonb NOT NULL,
   views                                             uint256 NOT NULL DEFAULT(0),
-  want_to_mint                                      uint256 NOT NULL DEFAULT(0)
+  want_to_mint                                      uint256 NOT NULL DEFAULT(0),
+  likes                                             uint256 NOT NULL DEFAULT(0)
 );
+
+CREATE TABLE IF NOT EXISTS likes
+(
+  id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
+  token_id                                          uint256 NOT NULL,
+  liked_by                                          address NOT NULL,
+  liked                                             boolean NOT NULL DEFAULT(true),
+  liked_at                                          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT(NOW()),
+  last_liked_at                                     TIMESTAMP WITH TIME ZONE,
+  last_unliked_at                                   TIMESTAMP WITH TIME ZONE
+);
+
 
 CREATE TABLE IF NOT EXISTS transactions
 (

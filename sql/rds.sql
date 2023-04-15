@@ -3087,6 +3087,17 @@ END
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_stablecoin_value(_chain_id uint256, _amount uint256)
+RETURNS NUMERIC
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN _amount / POWER(10, 6);
+END
+$$
+LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION format_npm
 (
