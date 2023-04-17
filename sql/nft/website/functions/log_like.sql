@@ -14,6 +14,7 @@ BEGIN
   END IF;
 
   SELECT likes.liked                      INTO _previous
+  FROM likes
   WHERE likes.liked_by                    = _account
   AND likes.token_id                      = _token_id
   LIMIT 1;
