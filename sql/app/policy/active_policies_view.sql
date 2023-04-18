@@ -24,6 +24,7 @@ SELECT
   ) - 1                                         AS product_status,
   (get_cover_info(chain_id, cover_key)).*,
   (get_product_info(chain_id, cover_key, product_key)).*,
+  get_active_incident_date(chain_id, cover_key, product_key) as incident_date,
   (get_report_insight(
     chain_id,
     cover_key,
