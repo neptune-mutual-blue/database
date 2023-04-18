@@ -23,7 +23,7 @@ BEGIN
   SET
     last_unliked_at                       = CASE WHEN liked = true  THEN NOW() ELSE last_unliked_at END,
     last_liked_at                         = CASE WHEN liked = false THEN NOW() ELSE last_liked_at   END,
-    liked                                 = !liked
+    liked                                 = NOT(COALESCE(liked, FALSE)) 
   WHERE likes.liked_by                    = _account
   AND likes.token_id                      = _token_id;
 
@@ -36,3 +36,5 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+-- SELECT * FROM log_like('0xB452AC021a1151AAF342c1B75aA914E03e6503b5', 100500)
