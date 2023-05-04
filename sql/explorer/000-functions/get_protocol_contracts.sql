@@ -38,9 +38,9 @@ BEGIN
   INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address, added_on, transaction_hash)
   SELECT 
     cover.cover_initialized.chain_id,
-    cover.cover_initialized.stablecoin,
-    'Stablecoin',
     'cns:cover:sc',
+    'Stablecoin',
+    cover.cover_initialized.stablecoin,
     cover.cover_initialized.block_timestamp,
     cover.cover_initialized.transaction_hash
   FROM cover.cover_initialized
