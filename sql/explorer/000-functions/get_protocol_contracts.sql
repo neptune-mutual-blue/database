@@ -35,6 +35,40 @@ BEGIN
     protocol.contract_added.transaction_hash
   FROM protocol.contract_added;
   
+  INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address, added_on, transaction_hash)
+  SELECT 
+    cover.cover_initialized.chain_id,
+    cover.cover_initialized.stablecoin,
+    'Stablecoin',
+    'cns:cover:sc',
+    cover.cover_initialized.block_timestamp,
+    cover.cover_initialized.transaction_hash
+  FROM cover.cover_initialized
+  WHERE cover.cover_initialized.chain_id = chain_id;
+  
+  FOR _r IN
+  (
+    SELECT * FROM config_blockchain_network_view
+    WHERE config_blockchain_network_view.chain_id = chain_id;
+  )
+  LOOP
+    INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address)
+    SELECT
+      _r.chain_id,
+      'cns:core',
+      'Protocol',
+      _r.protocol_address UNION ALL
+    SELECT
+      _r.chain_id,
+      null,
+      'Store',
+      _r.store_address UNION ALL
+    SELECT
+      _r.chain_id,
+      'cns:core:npm:instance',
+      'NPM',
+      _r.npm_address;
+  END LOOP;
   
   FOR _r IN
   (
@@ -64,3 +98,4 @@ END
 $$
 LANGUAGE plpgsql;
 
+-- SELECT * FROM get_protocol_contracts();
