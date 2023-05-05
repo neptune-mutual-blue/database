@@ -34,45 +34,44 @@ BEGIN
     protocol.contract_added.block_timestamp,
     protocol.contract_added.transaction_hash
   FROM protocol.contract_added;
-  
+
   INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address, added_on, transaction_hash)
-  SELECT 
+  SELECT
     cover.cover_initialized.chain_id,
     'cns:cover:sc',
     'Stablecoin',
     cover.cover_initialized.stablecoin,
     cover.cover_initialized.block_timestamp,
     cover.cover_initialized.transaction_hash
-  FROM cover.cover_initialized
-  WHERE cover.cover_initialized.chain_id = chain_id;
-  
+  FROM cover.cover_initialized;
+
+  INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address)
+  SELECT
+    config_blockchain_network_view.chain_id,
+    null,
+    'Store',
+    config_blockchain_network_view.store_address
+  FROM config_blockchain_network_view;
+
+  INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address)
+  SELECT
+    config_blockchain_network_view.chain_id,
+    'cns:core',
+    'Protocol',
+    config_blockchain_network_view.protocol_address
+  FROM config_blockchain_network_view;
+
+  INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address)
+  SELECT
+    config_blockchain_network_view.chain_id,
+    'cns:core:npm:instance',
+    'NPM',
+    config_blockchain_network_view.npm_address
+  FROM config_blockchain_network_view;
+
   FOR _r IN
   (
-    SELECT * FROM config_blockchain_network_view
-    WHERE config_blockchain_network_view.chain_id = chain_id;
-  )
-  LOOP
-    INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_name, contract_address)
-    SELECT
-      _r.chain_id,
-      'cns:core',
-      'Protocol',
-      _r.protocol_address UNION ALL
-    SELECT
-      _r.chain_id,
-      null,
-      'Store',
-      _r.store_address UNION ALL
-    SELECT
-      _r.chain_id,
-      'cns:core:npm:instance',
-      'NPM',
-      _r.npm_address;
-  END LOOP;
-  
-  FOR _r IN
-  (
-    SELECT * FROM protocol.contract_upgraded 
+    SELECT * FROM protocol.contract_upgraded
     ORDER BY protocol.contract_upgraded.block_timestamp ASC
   )
   LOOP
@@ -85,7 +84,7 @@ BEGIN
     WHERE _r.chain_id = _get_protocol_contracts_result.chain_id
     AND _r.namespace = _get_protocol_contracts_result.namespace;
   END LOOP;
-  
+
 
   UPDATE _get_protocol_contracts_result
   SET contract_name = config_contract_namespace_view.contract_name
