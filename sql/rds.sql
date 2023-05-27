@@ -1,6 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DROP SCHEMA IF EXISTS core;
+DROP SCHEMA IF EXISTS nft;
 DROP SCHEMA IF EXISTS store;
 DROP SCHEMA IF EXISTS protocol;
 DROP SCHEMA IF EXISTS staking;
@@ -13,18 +14,21 @@ DROP SCHEMA IF EXISTS cxtoken;
 DROP SCHEMA IF EXISTS vault;
 DROP SCHEMA IF EXISTS consensus;
 DROP SCHEMA IF EXISTS strategy;
+DROP SCHEMA IF EXISTS ve;
 
 DROP DOMAIN IF EXISTS tx;
 DROP DOMAIN IF EXISTS bytes32;
 DROP DOMAIN IF EXISTS address;
 DROP DOMAIN IF EXISTS ipfs_url;
 DROP DOMAIN IF EXISTS uint256;
+DROP DOMAIN IF EXISTS uint8;
 DROP DOMAIN IF EXISTS transaction_type;
 
 CREATE DOMAIN bytes32 AS text;
 CREATE DOMAIN address AS text;
 CREATE DOMAIN ipfs_url AS text;
 CREATE DOMAIN uint256 AS numeric(180,0);
+CREATE DOMAIN uint8 AS integer;
 
 CREATE SCHEMA core;
 CREATE SCHEMA store;
@@ -39,6 +43,9 @@ CREATE SCHEMA cxtoken;
 CREATE SCHEMA vault;
 CREATE SCHEMA consensus;
 CREATE SCHEMA strategy;
+CREATE SCHEMA ve;
+CREATE SCHEMA nft;
+
 
 DROP TYPE IF EXISTS product_status_type CASCADE;
 CREATE TYPE product_status_type AS ENUM ('Normal','Stopped','IncidentHappened','FalseReporting','Claimable');
@@ -1309,6 +1316,24 @@ CREATE TABLE factory.vault_deployed
 CREATE INDEX vault_deployed_cover_key_inx
 ON factory.vault_deployed(cover_key);
 
+
+/*************************************************************************
+event VoteEscrowLock(address indexed accocunt, uint256 amount, uint256 durationInWeeks, uint256 previousUnlockAt, uint256 unlockAt, uint256 previousBalance, uint256 balance);
+*************************************************************************/
+CREATE TABLE ve.vote_escrow_lock
+(
+  account                                           address NOT NULL,
+  amount                                            uint256 NOT NULL,
+  duration_in_weeks                                 uint256 NOT NULL,
+  previous_unlock_at                                uint256 NOT NULL,
+  unlock_at                                         uint256 NOT NULL,
+  previous_balance                                  uint256 NOT NULL,
+  balance                                           uint256 NOT NULL  
+) INHERITS(core.transactions);
+
+CREATE INDEX vote_escrow_lock_account_inx
+ON ve.vote_escrow_lock(account);
+
 CREATE OR REPLACE FUNCTION get_cover_key_by_vault_address(_chain_id uint256, _vault address)
 RETURNS bytes32
 STABLE
@@ -1463,26 +1488,6 @@ LANGUAGE plpgsql;
 CREATE TRIGGER stake_removed_amounts_trigger
 BEFORE INSERT OR UPDATE ON cover.stake_removed
 FOR EACH ROW EXECUTE FUNCTION cover.stake_removed_amounts_trigger();
-
-/********************************************/
-
-DROP FUNCTION IF EXISTS cxtoken.coverage_start_set_amounts_trigger() CASCADE;
-
-CREATE FUNCTION cxtoken.coverage_start_set_amounts_trigger()
-RETURNS trigger
-AS
-$$
-BEGIN
-  NEW.transaction_stablecoin_amount = NEW.amount;
-  RETURN NEW;
-END
-$$
-LANGUAGE plpgsql;
-
-
-CREATE TRIGGER coverage_start_set_amounts_trigger
-BEFORE INSERT OR UPDATE ON cxtoken.coverage_start_set
-FOR EACH ROW EXECUTE FUNCTION cxtoken.coverage_start_set_amounts_trigger();
 
 /********************************************/
 
@@ -1926,6 +1931,24 @@ LANGUAGE plpgsql;
 CREATE TRIGGER npm_unstaken_amounts_trigger
 BEFORE INSERT OR UPDATE ON vault.npm_unstaken
 FOR EACH ROW EXECUTE FUNCTION vault.npm_unstaken_amounts_trigger();
+
+DROP FUNCTION IF EXISTS ve.vote_escrow_lock_amounts_trigger() CASCADE;
+
+CREATE FUNCTION ve.vote_escrow_lock_amounts_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  NEW.transaction_npm_amount = NEW.amount;
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE TRIGGER vote_escrow_lock_amounts_trigger
+BEFORE INSERT OR UPDATE ON ve.vote_escrow_lock
+FOR EACH ROW EXECUTE FUNCTION ve.vote_escrow_lock_amounts_trigger();
 
 /********************************************/
 

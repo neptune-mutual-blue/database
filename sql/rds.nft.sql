@@ -111,284 +111,59 @@ CREATE TABLE IF NOT EXISTS likes
 );
 
 
-CREATE TABLE IF NOT EXISTS transactions
+CREATE TABLE IF NOT EXISTS nft.merkle_root_updates
 (
-  transaction_id                                    uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
-  transaction_hash                                  text NOT NULL,
-  address                                           address /* NOT NULL */,
-  block_timestamp                                   integer NOT NULL,
-  block_number                                      text NOT NULL,
-  transaction_sender                                address,
-  chain_id                                          uint256 NOT NULL,
-  gas_price                                         uint256,
-  event_name                                        text
+  id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
+  updated_on                                        integer NOT NULL,
+  info                                              national character varying(200) NOT NULL,
+  transaction_hash                                  text NOT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS transaction_hash_chain_id_uix
-ON transactions(LOWER(transaction_hash), chain_id, LOWER(event_name));
 
-CREATE INDEX IF NOT EXISTS transactions_block_timestamp_inx
-ON transactions(block_timestamp);
-
-CREATE INDEX IF NOT EXISTS transactions_block_number_inx
-ON transactions(block_number);
-
-CREATE INDEX IF NOT EXISTS transactions_chain_id_inx
-ON transactions(chain_id);
-
-/***************************************************************************************
-event BaseUriSet(string previous, string current);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS base_uri_set
+CREATE TABLE IF NOT EXISTS nft.merkle_root_update_details
 (
-  previous                                          text,
-  current                                           text
-) INHERITS(transactions);
-
-/***************************************************************************************
-event SoulBound(uint256 id);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS soulbound
-(
-  id                                                uint256 UNIQUE
-) INHERITS(transactions);
-
-
-/***************************************************************************************
-event DefaultRoyaltySet(address indexed sender, address indexed receiver, uint96 feeNumerator);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS default_royalty_set
-(
-  sender                                            address,
-  receiver                                          address,
-  fee_numerator                                     uint96
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS default_royalty_set_sender_inx
-ON default_royalty_set(sender);
-
-CREATE INDEX IF NOT EXISTS default_royalty_set_receiver_inx
-ON default_royalty_set(receiver);
-
-/***************************************************************************************
-event DefaultRoyaltyDeleted(address indexed sender);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS default_royalty_deleted
-(
-  sender                                            address
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS default_royalty_deleted_sender_inx
-ON default_royalty_deleted(sender);
-
-
-/***************************************************************************************
-event TokenRoyaltySet(address indexed sender, uint256 tokenId, address indexed receiver, uint96 feeNumerator);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS token_royalty_set
-(
-  sender                                            address,
-  token_id                                          uint256,
-  receiver                                          address,
-  fee_numerator                                     uint96
-) INHERITS(transactions);
-
-
-CREATE INDEX IF NOT EXISTS token_royalty_set_sender_inx
-ON token_royalty_set(sender);
-
-CREATE INDEX IF NOT EXISTS token_royalty_set_token_id_inx
-ON token_royalty_set(token_id);
-
-CREATE INDEX IF NOT EXISTS token_royalty_set_receiver_inx
-ON token_royalty_set(receiver);
-
-/***************************************************************************************
-event TokenRoyaltyReset(address indexed sender, uint256 tokenId);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS token_royalty_reset
-(
-  sender                                            address,
-  token_id                                          uint256
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS token_royalty_reset_sender_inx
-ON token_royalty_reset(sender);
-
-/***************************************************************************************
-event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS transfer_single
-(
-  operator                                          address,
-  "from"                                            address,
-  "to"                                              address,
-  id                                                uint256,
-  value                                             uint256
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS transfer_single_operator_inx
-ON transfer_single(operator);
-
-CREATE INDEX IF NOT EXISTS transfer_single_from_inx
-ON transfer_single("from");
-
-CREATE INDEX IF NOT EXISTS transfer_single_to_inx
-ON transfer_single("to");
-
-CREATE INDEX IF NOT EXISTS transfer_single_id_inx
-ON transfer_single(id);
-
-/***************************************************************************************
-event TransferBatch(
-    address indexed operator,
-    address indexed from,
-    address indexed to,
-    uint256[] ids,
-    uint256[] values
+  id                                                                  uuid REFERENCES nft.merkle_root_updates,
+  account                                                             address,
+  policy                                                              uint256,
+  liquidity                                                           uint256,
+  points                                                              uint256,
+  eligible_level                                                      uint8,
+  level                                                               uint8,    
+  family                                                              text,
+  persona                                                             uint8,
+  active                                                              boolean DEFAULT(true)
 );
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS transfer_batch
-(
-  operator                                          address,
-  "from"                                            address,
-  "to"                                              address,
-  ids                                               uint256[],
-  values                                            uint256[]
-) INHERITS(transactions);
 
-CREATE INDEX IF NOT EXISTS transfer_batch_operator_inx
-ON transfer_batch(operator);
-
-CREATE INDEX IF NOT EXISTS transfer_batch_from_inx
-ON transfer_batch("from");
-
-CREATE INDEX IF NOT EXISTS transfer_batch_to_inx
-ON transfer_batch("to");
-
-/***************************************************************************************
-event ApprovalForAll(address indexed account, address indexed operator, bool approved);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS approval_for_all
-(
-  account                                           address,
-  operator                                          address,
-  approved                                          boolean
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS approval_for_all_account_inx
-ON approval_for_all(account);
-
-CREATE INDEX IF NOT EXISTS approval_for_all_operator_inx
-ON approval_for_all(operator);
-
-/***************************************************************************************
-event URI(string value, uint256 indexed id);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS uri
-(
-  value                                             text,
-  id                                                uint256
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS uri_id_inx
-ON uri(id);
-
-/***************************************************************************************
-event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS role_admin_changed
-(
-  role                                              bytes32,
-  previous_admin_role                               bytes32,
-  new_admin_role                                    bytes32
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS role_admin_changed_role_inx
-ON role_admin_changed(role);
-
-CREATE INDEX IF NOT EXISTS role_admin_changed_previous_admin_role_inx
-ON role_admin_changed(previous_admin_role);
-
-CREATE INDEX IF NOT EXISTS role_admin_changed_new_admin_role_inx
-ON role_admin_changed(new_admin_role);
-
-/***************************************************************************************
-event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS role_granted
-(
-  role                                              bytes32,
-  account                                           address,
-  sender                                            address
-) INHERITS(transactions);
+CREATE INDEX IF NOT EXISTS merkle_root_update_details_active_inx
+ON nft.merkle_root_update_details(active);
 
 
-CREATE INDEX IF NOT EXISTS role_granted_role_inx
-ON role_granted(role);
-
-CREATE INDEX IF NOT EXISTS role_granted_account_inx
-ON role_granted(account);
-
-CREATE INDEX IF NOT EXISTS role_granted_sender_inx
-ON role_granted(sender);
-
-/***************************************************************************************
-event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS role_revoked
-(
-  role                                              bytes32,
-  account                                           address,
-  sender                                            address
-) INHERITS(transactions);
-
-
-CREATE INDEX IF NOT EXISTS role_revoked_role_inx
-ON role_revoked(role);
-
-CREATE INDEX IF NOT EXISTS role_revoked_account_inx
-ON role_revoked(account);
-
-CREATE INDEX IF NOT EXISTS role_revoked_sender_inx
-ON role_revoked(sender);
-
-
-/***************************************************************************************
-event Paused(address account);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS paused
-(
-  account                                           address
-) INHERITS(transactions);
-
-
-CREATE INDEX IF NOT EXISTS paused_account_inx
-ON paused(account);
-
-/***************************************************************************************
-event Unpaused(address account);
-***************************************************************************************/
-CREATE TABLE IF NOT EXISTS unpaused
-(
-  account                                           address
-) INHERITS(transactions);
-
-CREATE INDEX IF NOT EXISTS unpaused_account_inx
-ON unpaused(account);
-
-
-CREATE TABLE IF NOT EXISTS persona_set
+/*************************************************************************
+event PersonaSet(address indexed account, uint8 level, uint8 persona);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.persona_set
 (
   account                                           address NOT NULL,
+  level                                             uint8 NOT NULL,
   persona                                           uint8 NOT NULL
-) INHERITS(transactions);
+) INHERITS(core.transactions);
 
-CREATE UNIQUE INDEX IF NOT EXISTS persona_set_account_uix
-ON persona_set(LOWER(account));
+CREATE INDEX IF NOT EXISTS persona_set_account_inx
+ON nft.persona_set(account);
 
-CREATE INDEX IF NOT EXISTS persona_set_persona_inx
-ON persona_set(persona);
+/*************************************************************************
+event BoundariesSet(address indexed account, uint256[] levels, Boundary[] boundaries);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.boundaries_set
+(
+  account                                           address NOT NULL,
+  levels                                            uint256[] NOT NULL,
+  boundaries                                        jsonb[] NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS boundaries_set_account_inx
+ON nft.boundaries_set(account);
+
 
 /***************************************************************************************
 ----------------------------------------------------------------------------------------
