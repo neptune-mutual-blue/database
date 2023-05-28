@@ -101,5 +101,5 @@ LANGUAGE plpgsql;
 --SELECT * FROM get_protocol_contracts_metadata(1);
 
 
-select * from get_protocol_contracts_metadata(84531)
+
 

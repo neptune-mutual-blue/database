@@ -250,17 +250,17 @@ $$
 LANGUAGE plpgsql;
 
 
-WITH resolved
-AS
-(
-  SELECT chain_id, cover_key, product_key, incident_date FROM consensus.resolved WHERE emergency ORDER BY chain_id, cover_key, product_key, incident_date DESC LIMIT 1
-)
+-- WITH resolved
+-- AS
+-- (
+--   SELECT chain_id, cover_key, product_key, incident_date FROM consensus.resolved WHERE emergency ORDER BY chain_id, cover_key, product_key, incident_date DESC LIMIT 1
+-- )
 
-SELECT * FROM get_report_insight
-(
-  (SELECT chain_id FROM resolved),
-  (SELECT cover_key FROM resolved),
-  (SELECT product_key FROM resolved),
-  (SELECT incident_date FROM resolved)
-);
+-- SELECT * FROM get_report_insight
+-- (
+--   (SELECT chain_id FROM resolved),
+--   (SELECT cover_key FROM resolved),
+--   (SELECT product_key FROM resolved),
+--   (SELECT incident_date FROM resolved)
+-- );
 
