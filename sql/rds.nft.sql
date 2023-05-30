@@ -165,6 +165,130 @@ CREATE INDEX IF NOT EXISTS boundaries_set_account_inx
 ON nft.boundaries_set(account);
 
 
+/*************************************************************************
+event MerkleRootSet(address indexed account, bytes32 previous, bytes32 current);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.merkle_root_set
+(
+  account                                           address NOT NULL,
+  previous                                          bytes32 NOT NULL,
+  current                                           bytes32 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS merkle_root_set_account_inx
+ON nft.merkle_root_set(account);
+
+/*************************************************************************
+event MintedWithProof(bytes32[] proof, uint256 level, uint256 tokenId);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.minted_with_proof
+(
+  proof                                             bytes32[] NOT NULL,
+  level                                             uint256 NOT NULL,
+  token_id                                          uint256 NOT NULL
+) INHERITS(core.transactions);
+
+-- /*************************************************************************
+-- event PersonaSet(address indexed account, uint8 level, uint8 persona);
+-- *************************************************************************/
+-- CREATE TABLE IF NOT EXISTS nft.persona_set
+-- (
+--   account                                           address NOT NULL,
+--   level                                             uint256 NOT NULL,
+--   persona                                           uint8 NOT NULL
+-- ) INHERITS(core.transactions);
+
+-- CREATE INDEX IF NOT EXISTS persona_set_account_inx
+-- ON nft.persona_set(account);
+
+/*************************************************************************
+event SoulboundMinted(address indexed account, uint256 tokenId);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.soulbound_minted
+(
+  account                                           address NOT NULL,
+  token_id                                          uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS soulbound_minted_account_inx
+ON nft.soulbound_minted(account);
+
+/*************************************************************************
+event DefaultRoyaltySet(address indexed sender, address indexed receiver, uint96 feeNumerator);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.default_royalty_set
+(
+  sender                                            address NOT NULL,
+  receiver                                          address NOT NULL,
+  fee_numerator                                     uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS default_royalty_set_sender_inx
+ON nft.default_royalty_set(sender);
+
+CREATE INDEX IF NOT EXISTS default_royalty_set_receiver_inx
+ON nft.default_royalty_set(receiver);
+
+/*************************************************************************
+event DefaultRoyaltyDeleted(address indexed sender);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.default_royalty_deleted
+(
+  sender                                            address NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS default_royalty_deleted_sender_inx
+ON nft.default_royalty_deleted(sender);
+
+/*************************************************************************
+event TokenRoyaltySet(address indexed sender, uint256 tokenId, address indexed receiver, uint96 feeNumerator);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.token_royalty_set
+(
+  sender                                            address NOT NULL,
+  token_id                                          uint256 NOT NULL,
+  receiver                                          address NOT NULL,
+  fee_numerator                                     uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS token_royalty_set_sender_inx
+ON nft.token_royalty_set(sender);
+
+CREATE INDEX IF NOT EXISTS token_royalty_set_receiver_inx
+ON nft.token_royalty_set(receiver);
+
+/*************************************************************************
+event TokenRoyaltyReset(address indexed sender, uint256 tokenId);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.token_royalty_reset
+(
+  sender                                            address NOT NULL,
+  token_id                                          uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS token_royalty_reset_sender_inx
+ON nft.token_royalty_reset(sender);
+
+
+/*************************************************************************
+event BaseUriSet(string previous, string current);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.base_uri_set
+(
+  previous                                          text NOT NULL,
+  current                                           text NOT NULL
+) INHERITS(core.transactions);
+
+/*************************************************************************
+event SoulBound(uint256 id);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.soulbound
+(
+  token_id                                          uint256 NOT NULL
+) INHERITS(core.transactions);
+
+
+
 /***************************************************************************************
 ----------------------------------------------------------------------------------------
 ***************************************************************************************/
