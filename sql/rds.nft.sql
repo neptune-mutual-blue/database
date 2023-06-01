@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS nfts
   id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
   token_id                                          uint256 NOT NULL UNIQUE,
   name                                              national character varying(128) NOT NULL,
-  category                                          text GENERATED ALWAYS AS(split_part(name, '#', 1)) STORED,
+  category                                          text GENERATED ALWAYS AS(trim(split_part(name, '#', 1))) STORED,
   nickname                                          text,
   family                                            text,
   description                                       text NOT NULL,
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS nft.base_uri_set
 /*************************************************************************
 event SoulBound(uint256 id);
 *************************************************************************/
-CREATE TABLE IF NOT EXISTS nft.soulbound
+CREATE TABLE IF NOT EXISTS nft.soul_bound
 (
   token_id                                          uint256 NOT NULL
 ) INHERITS(core.transactions);

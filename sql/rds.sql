@@ -1401,7 +1401,6 @@ CREATE TABLE ve.gauge_controller_registry_pool_added_or_edited
 (
   sender                                            address NOT NULL,
   key                                               bytes32 NOT NULL,
-  current                                           address NOT NULL,
   name                                              text NOT NULL,
   info                                              text NOT NULL,
   platform_fee                                      uint256 NOT NULL,
