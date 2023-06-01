@@ -28,7 +28,7 @@ SELECT
   jsonb_agg(nft_activity_view) as activities
 FROM nfts
 INNER JOIN characters
-ON characters.name = nfts.family
+ON characters.name = nfts.category
 LEFT OUTER JOIN nft_activity_view
 ON nft_activity_view.token_id = nfts.token_id
 GROUP BY
