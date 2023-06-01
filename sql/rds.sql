@@ -1318,7 +1318,7 @@ ON factory.vault_deployed(cover_key);
 
 
 /*************************************************************************
-event VoteEscrowLock(address indexed accocunt, uint256 amount, uint256 durationInWeeks, uint256 previousUnlockAt, uint256 unlockAt, uint256 previousBalance, uint256 balance);
+event VoteEscrowLock(address indexed account, uint256 amount, uint256 durationInWeeks, uint256 previousUnlockAt, uint256 unlockAt, uint256 previousBalance, uint256 balance);
 *************************************************************************/
 CREATE TABLE ve.vote_escrow_lock
 (
@@ -1333,6 +1333,251 @@ CREATE TABLE ve.vote_escrow_lock
 
 CREATE INDEX vote_escrow_lock_account_inx
 ON ve.vote_escrow_lock(account);
+
+
+/*************************************************************************
+event TransferWhitelistUpdated(address indexed updatedBy, address[] accounts, bool[] statuses);
+*************************************************************************/
+CREATE TABLE ve.transfer_whitelist_updated
+(
+  updated_by                                        address NOT NULL,
+  accounts                                          address[] NOT NULL,
+  statuses                                          boolean[] NOT NULL  
+) INHERITS(core.transactions);
+
+CREATE INDEX transfer_whitelist_updated_updated_by_inx
+ON ve.transfer_whitelist_updated(updated_by);
+
+/*************************************************************************
+event VoteEscrowUnlock(address indexed account, uint256 amount, uint256 unlockAt, uint256 penalty);
+*************************************************************************/
+CREATE TABLE ve.vote_escrow_unlock
+(
+  account                                           address NOT NULL,
+  amount                                            uint256 NOT NULL,
+  unlock_at                                         uint256 NOT NULL,
+  penalty                                           uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX vote_escrow_unlock_account_inx
+ON ve.vote_escrow_unlock(account);
+
+/*************************************************************************
+event BlocksPerEpochSet(uint256 previous, uint256 current);
+*************************************************************************/
+CREATE TABLE ve.blocks_per_epoch_set
+(
+  previous                                          uint256 NOT NULL,
+  current                                           uint256 NOT NULL
+) INHERITS(core.transactions);
+
+
+/*************************************************************************
+event GaugeControllerRegistryOperatorSet(address previousOperator, address operator);
+*************************************************************************/
+CREATE TABLE ve.gauge_controller_registry_operator_set
+(
+  previous_operator                                 address NOT NULL,
+  operator                                          address NOT NULL
+) INHERITS(core.transactions);
+
+/*************************************************************************
+event GaugeControllerRegistryRewardsWithdrawn(bytes32 key, uint256 amount);
+*************************************************************************/
+CREATE TABLE ve.gauge_controller_registry_rewards_withdrawn
+(
+  key                                               bytes32 NOT NULL,
+  amount                                            address NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_controller_registry_rewards_withdrawn_key_inx
+ON ve.gauge_controller_registry_rewards_withdrawn(key);
+
+
+/*************************************************************************
+event GaugeControllerRegistryPoolAddedOrEdited(address indexed sender, bytes32 indexed key, PoolSetupArgs args);
+*************************************************************************/
+CREATE TABLE ve.gauge_controller_registry_pool_added_or_edited
+(
+  sender                                            address NOT NULL,
+  key                                               bytes32 NOT NULL,
+  current                                           address NOT NULL,
+  name                                              text NOT NULL,
+  info                                              text NOT NULL,
+  platform_fee                                      uint256 NOT NULL,
+  token                                             address NOT NULL,
+  lockup_period_in_blocks                           uint256 NOT NULL,
+  ratio                                             uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_controller_registry_pool_added_or_edited_sender_inx
+ON ve.gauge_controller_registry_pool_added_or_edited(sender);
+
+CREATE INDEX gauge_controller_registry_pool_added_or_edited_key_inx
+ON ve.gauge_controller_registry_pool_added_or_edited(key);
+
+/*************************************************************************
+event GaugeControllerRegistryPoolDeactivated(address indexed sender, bytes32 indexed key);
+*************************************************************************/
+CREATE TABLE ve.gauge_controller_registry_pool_deactivated
+(
+  sender                                            address NOT NULL,
+  key                                               bytes32 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_controller_registry_pool_deactivated_sender_inx
+ON ve.gauge_controller_registry_pool_deactivated(sender);
+
+CREATE INDEX gauge_controller_registry_pool_deactivated_key_inx
+ON ve.gauge_controller_registry_pool_deactivated(key);
+
+/*************************************************************************
+event GaugeControllerRegistryPoolActivated(address indexed sender, bytes32 indexed key);
+*************************************************************************/
+CREATE TABLE ve.gauge_controller_registry_pool_activated
+(
+  sender                                            address NOT NULL,
+  key                                               bytes32 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_controller_registry_pool_activated_sender_inx
+ON ve.gauge_controller_registry_pool_activated(sender);
+
+CREATE INDEX gauge_controller_registry_pool_activated_key_inx
+ON ve.gauge_controller_registry_pool_activated(key);
+
+/*************************************************************************
+event GaugeControllerRegistryPoolDeleted(address indexed sender, bytes32 key);
+*************************************************************************/
+CREATE TABLE ve.gauge_controller_registry_pool_deleted
+(
+  sender                                            address NOT NULL,
+  key                                               bytes32 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_controller_registry_pool_deleted_sender_inx
+ON ve.gauge_controller_registry_pool_deleted(sender);
+
+CREATE INDEX gauge_controller_registry_pool_deleted_key_inx
+ON ve.gauge_controller_registry_pool_deleted(key);
+
+/*************************************************************************
+event GaugeSet(uint256 indexed epoch, bytes32 indexed key, uint256 distribution);
+*************************************************************************/
+CREATE TABLE ve.gauge_set
+(
+  epoch                                             uint256 NOT NULL,
+  key                                               bytes32 NOT NULL,
+  distribution                                      uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_set_epoch_inx
+ON ve.gauge_set(epoch);
+
+CREATE INDEX gauge_set_key_inx
+ON ve.gauge_set(key);
+
+/*************************************************************************
+event GaugeAllocationTransferred(uint256 indexed epoch, uint256 totalAllocation);
+*************************************************************************/
+CREATE TABLE ve.gauge_allocation_transferred
+(
+  epoch                                             uint256 NOT NULL,
+  total_allocation                                  uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX gauge_allocation_transferred_epoch_inx
+ON ve.gauge_allocation_transferred(epoch);
+
+/*************************************************************************
+event VotingPowersUpdated(address indexed triggeredBy, uint256 previous, uint256 current, uint256 previousTotal, uint256 currentTotal);
+*************************************************************************/
+CREATE TABLE ve.voting_powers_updated
+(
+  triggered_by                                      address NOT NULL,
+  previous                                          uint256 NOT NULL,
+  current                                           uint256 NOT NULL,
+  previous_total                                    uint256 NOT NULL,
+  current_total                                     uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX voting_powers_updated_triggered_by_inx
+ON ve.voting_powers_updated(triggered_by);
+
+/*************************************************************************
+event LiquidityGaugeRewardsWithdrawn(bytes32 indexed key, address indexed account, address treasury, uint256 rewards, uint256 platformFee);
+*************************************************************************/
+CREATE TABLE ve.liquidity_gauge_rewards_withdrawn
+(
+  key                                               bytes32 NOT NULL,
+  account                                           address NOT NULL,
+  treasury                                          address NOT NULL,
+  rewards                                           uint256 NOT NULL,
+  platform_fee                                      uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX liquidity_gauge_rewards_withdrawn_key_inx
+ON ve.liquidity_gauge_rewards_withdrawn(key);
+
+CREATE INDEX liquidity_gauge_rewards_withdrawn_account_inx
+ON ve.liquidity_gauge_rewards_withdrawn(account);
+
+/*************************************************************************
+event LiquidityGaugeDeposited(bytes32 indexed key, address indexed account, address indexed stakingToken, uint256 amount);
+*************************************************************************/
+CREATE TABLE ve.liquidity_gauge_deposited
+(
+  key                                               bytes32 NOT NULL,
+  account                                           address NOT NULL,
+  staking_token                                     address NOT NULL,
+  amount                                            uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX liquidity_gauge_deposited_key_inx
+ON ve.liquidity_gauge_deposited(key);
+
+CREATE INDEX liquidity_gauge_deposited_account_inx
+ON ve.liquidity_gauge_deposited(account);
+
+CREATE INDEX liquidity_gauge_deposited_staking_token_inx
+ON ve.liquidity_gauge_deposited(staking_token);
+
+/*************************************************************************
+event LiquidityGaugeWithdrawn(bytes32 indexed key, address indexed account, address indexed stakingToken, uint256 amount);
+*************************************************************************/
+CREATE TABLE ve.liquidity_gauge_withdrawn
+(
+  key                                               bytes32 NOT NULL,
+  account                                           address NOT NULL,
+  staking_token                                     address NOT NULL,
+  amount                                            uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX liquidity_gauge_withdrawn_key_inx
+ON ve.liquidity_gauge_withdrawn(key);
+
+CREATE INDEX liquidity_gauge_withdrawn_account_inx
+ON ve.liquidity_gauge_withdrawn(account);
+
+CREATE INDEX liquidity_gauge_withdrawn_staking_token_inx
+ON ve.liquidity_gauge_withdrawn(staking_token);
+
+/*************************************************************************
+event LiquidityGaugePoolInitialized(address previousVeToken, address veToken, address previousRegistry, address registry, address previousTreasury, address treasury);
+*************************************************************************/
+CREATE TABLE ve.liquidity_gauge_pool_initialized
+(
+  previous_ve_token                                 address NOT NULL,
+  ve_token                                          address NOT NULL,
+  previous_registry                                 address NOT NULL,
+  registry                                          address NOT NULL,
+  previous_treasury                                 address NOT NULL,
+  treasury                                          address NOT NULL
+) INHERITS(core.transactions);
+
+/********************************************/
+/********************************************/
+/********************************************/
 
 CREATE OR REPLACE FUNCTION get_cover_key_by_vault_address(_chain_id uint256, _vault address)
 RETURNS bytes32
@@ -1892,7 +2137,6 @@ CREATE TRIGGER flash_loan_borrowed_amounts_trigger
 BEFORE INSERT OR UPDATE ON vault.flash_loan_borrowed
 FOR EACH ROW EXECUTE FUNCTION vault.flash_loan_borrowed_amounts_trigger();
 
-
 /********************************************/
 
 DROP FUNCTION IF EXISTS vault.npm_staken_amounts_trigger() CASCADE;
@@ -1932,6 +2176,8 @@ CREATE TRIGGER npm_unstaken_amounts_trigger
 BEFORE INSERT OR UPDATE ON vault.npm_unstaken
 FOR EACH ROW EXECUTE FUNCTION vault.npm_unstaken_amounts_trigger();
 
+/********************************************/
+
 DROP FUNCTION IF EXISTS ve.vote_escrow_lock_amounts_trigger() CASCADE;
 
 CREATE FUNCTION ve.vote_escrow_lock_amounts_trigger()
@@ -1949,6 +2195,63 @@ LANGUAGE plpgsql;
 CREATE TRIGGER vote_escrow_lock_amounts_trigger
 BEFORE INSERT OR UPDATE ON ve.vote_escrow_lock
 FOR EACH ROW EXECUTE FUNCTION ve.vote_escrow_lock_amounts_trigger();
+
+/********************************************/
+
+DROP FUNCTION IF EXISTS ve.vote_escrow_unlock_amounts_trigger() CASCADE;
+
+CREATE FUNCTION ve.vote_escrow_unlock_amounts_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  NEW.transaction_npm_amount = NEW.amount;
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER vote_escrow_unlock_amounts_trigger
+BEFORE INSERT OR UPDATE ON ve.vote_escrow_unlock
+FOR EACH ROW EXECUTE FUNCTION ve.vote_escrow_unlock_amounts_trigger();
+
+/********************************************/
+
+DROP FUNCTION IF EXISTS ve.gauge_controller_registry_rewards_withdrawn_amounts_trigger() CASCADE;
+
+CREATE FUNCTION ve.gauge_controller_registry_rewards_withdrawn_amounts_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  NEW.transaction_npm_amount = NEW.amount;
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER gauge_controller_registry_rewards_withdrawn_amounts_trigger
+BEFORE INSERT OR UPDATE ON ve.gauge_controller_registry_rewards_withdrawn
+FOR EACH ROW EXECUTE FUNCTION ve.gauge_controller_registry_rewards_withdrawn_amounts_trigger();
+
+/********************************************/
+
+DROP FUNCTION IF EXISTS ve.liquidity_gauge_rewards_withdrawn_amounts_trigger() CASCADE;
+
+CREATE FUNCTION ve.liquidity_gauge_rewards_withdrawn_amounts_trigger()
+RETURNS trigger
+AS
+$$
+BEGIN
+  NEW.transaction_npm_amount = NEW.rewards;
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER liquidity_gauge_rewards_withdrawn_amounts_trigger
+BEFORE INSERT OR UPDATE ON ve.liquidity_gauge_rewards_withdrawn
+FOR EACH ROW EXECUTE FUNCTION ve.liquidity_gauge_rewards_withdrawn_amounts_trigger();
 
 /********************************************/
 
