@@ -183,6 +183,7 @@ event MintedWithProof(bytes32[] proof, uint256 level, uint256 tokenId);
 *************************************************************************/
 CREATE TABLE IF NOT EXISTS nft.minted_with_proof
 (
+  account                                           address,
   proof                                             bytes32[] NOT NULL,
   level                                             uint256 NOT NULL,
   token_id                                          uint256 NOT NULL
