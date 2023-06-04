@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION log_like
 RETURNS uint256
 AS
 $$
-  DECLARE _previous                       boolean = false;
+  DECLARE _previous                       boolean;
   DECLARE _like_count                     uint256;
 BEGIN
   IF NOT EXISTS(SELECT 1 FROM nfts WHERE token_id = _token_id) THEN
@@ -15,7 +15,7 @@ BEGIN
   
   IF NOT EXISTS(SELECT * FROM likes WHERE token_id = _token_id AND liked_by = _account) THEN
     INSERT INTO likes(token_id, liked_by, liked)
-    SELECT _token_id, _account, true;
+    SELECT _token_id, _account, false;
   END IF;
 
   SELECT likes.liked
