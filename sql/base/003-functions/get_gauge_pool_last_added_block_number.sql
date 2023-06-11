@@ -12,11 +12,11 @@ BEGIN
   WHERE ve.gauge_controller_registry_pool_deleted.chain_id = _chain_id
   AND ve.gauge_controller_registry_pool_deleted.key = _key;
 
-  RETURN MIN(ve.gauge_controller_registry_pool_added_or_edited.block_number::numeric)
-  FROM ve.gauge_controller_registry_pool_added_or_edited
-  WHERE ve.gauge_controller_registry_pool_added_or_edited.chain_id = _chain_id
-  AND ve.gauge_controller_registry_pool_added_or_edited.key = _key
-  AND ve.gauge_controller_registry_pool_added_or_edited.block_number::numeric > COALESCE(_last_deleted_block_number, 0);
+  RETURN MIN(ve.liquidity_gauge_pool_set.block_number::numeric)
+  FROM ve.liquidity_gauge_pool_set
+  WHERE ve.liquidity_gauge_pool_set.chain_id = _chain_id
+  AND ve.liquidity_gauge_pool_set.key = _key
+  AND ve.liquidity_gauge_pool_set.block_number::numeric > COALESCE(_last_deleted_block_number, 0);
 END
 $$
 LANGUAGE plpgsql;

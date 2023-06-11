@@ -39,29 +39,30 @@ BEGIN
     IF(_r.action = 'add') THEN
       INSERT INTO _get_gauge_pools_result
       SELECT
-        add_or_edit.chain_id,
-        add_or_edit.key,
-        add_or_edit.name,
-        add_or_edit.info,
-        add_or_edit.platform_fee,
-        add_or_edit.token,
-        add_or_edit.lockup_period_in_blocks,
-        add_or_edit.ratio
-      FROM ve.gauge_controller_registry_pool_added_or_edited AS add_or_edit
-      WHERE add_or_edit.id = _r.id;
+        liquidity_gauge_pool_set.chain_id,
+        liquidity_gauge_pool_set.key,
+        liquidity_gauge_pool_set.name,
+        liquidity_gauge_pool_set.info,
+        liquidity_gauge_pool_set.platform_fee,
+        liquidity_gauge_pool_set.staking_token,
+        liquidity_gauge_pool_set.lockup_period_in_blocks,
+        liquidity_gauge_pool_set.ve_boost_ratio
+      FROM ve.liquidity_gauge_pool_set
+      WHERE liquidity_gauge_pool_set.id = _r.id;
     END IF;
     
     IF(_r.action = 'edit') THEN
       UPDATE _get_gauge_pools_result
       SET 
-        name = CASE WHEN COALESCE(add_or_edit.name, '') = '' THEN _get_gauge_pools_result.name ELSE add_or_edit.name END,
-        info = CASE WHEN COALESCE(add_or_edit.info, '') = '' THEN _get_gauge_pools_result.info ELSE add_or_edit.info END,
-        lockup_period_in_blocks = CASE WHEN COALESCE(add_or_edit.lockup_period_in_blocks, 0) = 0 THEN _get_gauge_pools_result.lockup_period_in_blocks ELSE add_or_edit.lockup_period_in_blocks END,
-        ratio = CASE WHEN COALESCE(add_or_edit.ratio, 0) = 0 THEN _get_gauge_pools_result.ratio ELSE add_or_edit.ratio END
-      FROM ve.gauge_controller_registry_pool_added_or_edited AS add_or_edit
-      WHERE _get_gauge_pools_result.key = add_or_edit.key
-      AND _get_gauge_pools_result.chain_id = add_or_edit.chain_id
-      AND add_or_edit.id = _r.id;
+        name = CASE WHEN COALESCE(liquidity_gauge_pool_set.name, '') = '' THEN _get_gauge_pools_result.name ELSE liquidity_gauge_pool_set.name END,
+        info = CASE WHEN COALESCE(liquidity_gauge_pool_set.info, '') = '' THEN _get_gauge_pools_result.info ELSE liquidity_gauge_pool_set.info END,
+        platform_fee = CASE WHEN COALESCE(liquidity_gauge_pool_set.platform_fee, 0) = 0 THEN _get_gauge_pools_result.platform_fee ELSE liquidity_gauge_pool_set.platform_fee END,
+        lockup_period_in_blocks = CASE WHEN COALESCE(liquidity_gauge_pool_set.lockup_period_in_blocks, 0) = 0 THEN _get_gauge_pools_result.lockup_period_in_blocks ELSE liquidity_gauge_pool_set.lockup_period_in_blocks END,
+        ratio = CASE WHEN COALESCE(liquidity_gauge_pool_set.ve_boost_ratio, 0) = 0 THEN _get_gauge_pools_result.ratio ELSE liquidity_gauge_pool_set.ve_boost_ratio END
+      FROM ve.liquidity_gauge_pool_set AS liquidity_gauge_pool_set
+      WHERE _get_gauge_pools_result.key = liquidity_gauge_pool_set.key
+      AND _get_gauge_pools_result.chain_id = liquidity_gauge_pool_set.chain_id
+      AND liquidity_gauge_pool_set.id = _r.id;
     END IF;
     
     IF(_r.action = 'deactivate') THEN
