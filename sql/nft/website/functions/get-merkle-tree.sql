@@ -77,6 +77,12 @@ BEGIN
     ELSE NULL
   END;
   
+  UPDATE _get_nft_merkle_tree_result
+  SET
+    family = 'Legendary Neptune', 
+    persona = 1
+  WHERE _get_nft_merkle_tree_result.eligible_level = 7
+  AND _get_nft_merkle_tree_result.level = 7;
 
   RETURN QUERY
   SELECT * FROM _get_nft_merkle_tree_result
@@ -86,5 +92,5 @@ $$
 LANGUAGE plpgsql;
 
 
-SELECT * FROM get_nft_merkle_tree(true);
+--SELECT * FROM get_nft_merkle_tree(true);
 

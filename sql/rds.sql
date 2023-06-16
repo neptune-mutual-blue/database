@@ -1369,6 +1369,7 @@ CREATE TABLE ve.liquidity_gauge_pool_set
 (
   key                                               bytes32 NOT NULL,
   triggered_by                                      address NOT NULL,
+  liquidity_gauge_pool                              address NOT NULL,
   name                                              text NOT NULL,
   info                                              bytes32 NOT NULL,
   lockup_period_in_blocks                           uint256 NOT NULL,
