@@ -12,7 +12,7 @@ SELECT
     ELSE 'add'
   END AS action,
   add_or_edit.key
-FROM ve.gauge_controller_registry_pool_added_or_edited AS add_or_edit
+FROM ve.liquidity_gauge_pool_set AS add_or_edit
 UNION ALL
 SELECT
   ve.gauge_controller_registry_pool_deactivated.id,
