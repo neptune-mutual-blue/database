@@ -10,8 +10,8 @@ AS
     expires_on,
     cover_duration AS duration,
     to_char(to_timestamp(expires_on), 'Mon-YY') AS expiry,
-    SUM(amount_to_cover) AS protection,
-    SUM(fee) AS income,
+    SUM(get_stablecoin_value(chain_id, amount_to_cover)) AS protection,
+    SUM(get_stablecoin_value(chain_id, fee)) AS income,
     to_timestamp(expires_on) < NOW() AS expired
   FROM policy.cover_purchased
   GROUP BY chain_id, expires_on, duration

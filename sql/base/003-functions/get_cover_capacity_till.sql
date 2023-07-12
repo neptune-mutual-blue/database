@@ -30,7 +30,7 @@ $$
   DECLARE _average_capital_efficiency                 numeric;
   DECLARE _capacity                                   uint256;
   DECLARE _siblings                                   integer;
-  DECLARE _multliplier                                integer = 10000;
+  DECLARE _multiplier                                 integer = 10000;
 BEGIN
   IF(_product_key IS NULL) THEN
     _product_key := string_to_bytes32('');
@@ -56,16 +56,16 @@ BEGIN
   END IF;
   
   IF(_capital_efficiency IS NULL) THEN
-    _capital_efficiency := _multliplier;
+    _capital_efficiency := _multiplier;
   END IF;
 
 
   IF(_product_key = string_to_bytes32('')) THEN
-    _capacity := (_stablecoin_balance * _leverage * _average_capital_efficiency) / _multliplier;
+    _capacity := (_stablecoin_balance * _leverage * _average_capital_efficiency) / _multiplier;
     RETURN _capacity;
   END IF;
   
-  _capacity := (_stablecoin_balance * _leverage * _capital_efficiency) / (_siblings * _multliplier);
+  _capacity := (_stablecoin_balance * _leverage * _capital_efficiency) / (_siblings * _multiplier);
   RETURN _capacity;
 END
 $$

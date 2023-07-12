@@ -2,6 +2,11 @@ DROP VIEW IF EXISTS config_product_view CASCADE;
 
 CREATE VIEW config_product_view
 AS
+SELECT 56     AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('alpaca-v1')        AS product_key, 7000 AS capital_efficiency UNION ALL
+SELECT 56     AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('dodo-v2')          AS product_key, 7000 AS capital_efficiency UNION ALL
+SELECT 56     AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('oneinch-v2')       AS product_key, 8000 AS capital_efficiency UNION ALL
+SELECT 56     AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('pancakeswap-v2')   AS product_key, 9000 AS capital_efficiency UNION ALL
+SELECT 56     AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('uniswap-v3')       AS product_key, 9500 AS capital_efficiency UNION ALL
 SELECT 1      AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('aave-v3')          AS product_key, 9000 AS capital_efficiency UNION ALL
 SELECT 1      AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('bancor-v3')        AS product_key, 5000 AS capital_efficiency UNION ALL
 SELECT 1      AS chain_id, string_to_bytes32('popular-defi-apps')       AS cover_key, string_to_bytes32('compound-v2')      AS product_key, 7000 AS capital_efficiency UNION ALL

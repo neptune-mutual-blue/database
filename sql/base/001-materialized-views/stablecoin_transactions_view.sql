@@ -9,7 +9,7 @@ AS
     'Liquidity Added' AS description,
     vault.pods_issued.chain_id,
     factory.vault_deployed.cover_key,
-    SUM(vault.pods_issued.liquidity_added) as total
+    SUM(get_stablecoin_value(vault.pods_issued.chain_id, vault.pods_issued.liquidity_added)) as total
   FROM vault.pods_issued
   INNER JOIN factory.vault_deployed
   ON factory.vault_deployed.vault = vault.pods_issued.address
@@ -22,7 +22,7 @@ AS
     'Liquidity Removed' AS description,
     vault.pods_redeemed.chain_id,
     factory.vault_deployed.cover_key,
-    SUM(vault.pods_redeemed.liquidity_released) as total_liquidity
+    SUM(get_stablecoin_value(vault.pods_redeemed.chain_id, vault.pods_redeemed.liquidity_released)) as total_liquidity
   FROM vault.pods_redeemed
   INNER JOIN factory.vault_deployed
   ON factory.vault_deployed.vault = vault.pods_redeemed.address
@@ -35,7 +35,7 @@ AS
     'Fee Earned' AS description,
     chain_id,
     cover_key,
-    SUM(fee - platform_fee) AS total_fee
+    SUM(get_stablecoin_value(chain_id, fee - platform_fee)) AS total_fee
   FROM policy.cover_purchased
   GROUP BY chain_id, cover_key
 )

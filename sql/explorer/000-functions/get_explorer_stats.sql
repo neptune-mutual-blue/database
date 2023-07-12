@@ -31,42 +31,42 @@ BEGIN
   UPDATE _get_explorer_stats_result
   SET policy_purchased = 
   COALESCE((
-    SELECT SUM(policy.cover_purchased.amount_to_cover)
+    SELECT SUM(get_stablecoin_value(policy.cover_purchased.chain_id, policy.cover_purchased.amount_to_cover))
     FROM policy.cover_purchased
   ), 0);
   
   UPDATE _get_explorer_stats_result
   SET liquidity_added =
   COALESCE((
-    SELECT SUM(vault.pods_issued.liquidity_added)
+    SELECT SUM(get_stablecoin_value(vault.pods_issued.chain_id, vault.pods_issued.liquidity_added))
     FROM vault.pods_issued
   ), 0);
   
   UPDATE _get_explorer_stats_result
   SET liquidity_removed =
   COALESCE((
-    SELECT SUM(vault.pods_redeemed.liquidity_released)
+    SELECT SUM(get_stablecoin_value(vault.pods_redeemed.chain_id, vault.pods_redeemed.liquidity_released))
     FROM vault.pods_redeemed
   ), 0);
   
   UPDATE _get_explorer_stats_result
   SET claimed =
   COALESCE((
-    SELECT SUM(cxtoken.claimed.amount)
+    SELECT SUM(wei_to_ether(cxtoken.claimed.amount))
     FROM cxtoken.claimed
   ), 0);
 
   UPDATE _get_explorer_stats_result
   SET staked =
   COALESCE((
-    SELECT SUM(amount)
+    SELECT SUM(get_npm_value(amount))
     FROM cover.stake_added
   ), 0);
 
   UPDATE _get_explorer_stats_result
   SET staked = COALESCE(_get_explorer_stats_result.staked, 0) -
   COALESCE((
-    SELECT SUM(amount)
+    SELECT SUM(get_npm_value(amount))
     FROM cover.stake_removed
   ), 0);
   
@@ -75,4 +75,3 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
-

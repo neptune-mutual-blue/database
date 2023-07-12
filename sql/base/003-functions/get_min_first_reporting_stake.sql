@@ -1,4 +1,4 @@
-DROP FUNCTION IF EXISTS get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32) CASCADE;
+DROP FUNCTION IF EXISTS get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32);
 
 CREATE FUNCTION get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32)
 RETURNS uint256
@@ -7,7 +7,7 @@ AS
 $$
   DECLARE _min_stake                            uint256;
 BEGIN
-  SELECT consensus.first_reporting_stake_set.current
+  SELECT get_npm_value(consensus.first_reporting_stake_set.current)
   INTO _min_stake
   FROM consensus.first_reporting_stake_set
   WHERE consensus.first_reporting_stake_set.chain_id = _chain_id
@@ -19,7 +19,7 @@ BEGIN
     RETURN _min_stake;
   END IF;
 
-  SELECT consensus.first_reporting_stake_set.current
+  SELECT get_npm_value(consensus.first_reporting_stake_set.current)
   INTO _min_stake
   FROM consensus.first_reporting_stake_set
   WHERE consensus.first_reporting_stake_set.chain_id = _chain_id
@@ -31,7 +31,7 @@ BEGIN
     RETURN _min_stake;
   END IF;
 
-  SELECT config_cover_view.minimum_first_reporting_stake
+  SELECT get_npm_value(config_cover_view.minimum_first_reporting_stake)
   INTO _min_stake
   FROM config_cover_view
   WHERE config_cover_view.chain_id = _chain_id
@@ -41,7 +41,7 @@ BEGIN
     RETURN _min_stake;
   END IF;
 
-  SELECT protocol.initialized.first_reporting_stake
+  SELECT get_npm_value(protocol.initialized.first_reporting_stake)
   INTO _min_stake
   FROM protocol.initialized
   WHERE protocol.initialized.chain_id = _chain_id;

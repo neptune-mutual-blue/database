@@ -9,12 +9,12 @@ $$
   DECLARE _added uint256;
   DECLARE _capitalized uint256;
 BEGIN
-  SELECT SUM(amount)
+  SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
   FROM reassurance.reassurance_added
   WHERE to_timestamp(block_timestamp) <= _date;
   
-  SELECT SUM(amount)
+  SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _capitalized
   FROM reassurance.pool_capitalized
   WHERE to_timestamp(block_timestamp) <= _date;
@@ -36,13 +36,13 @@ $$
   DECLARE _added uint256;
   DECLARE _capitalized uint256;
 BEGIN
-  SELECT SUM(amount)
+  SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
   FROM reassurance.reassurance_added
   WHERE to_timestamp(block_timestamp) <= _date
   AND chain_id = _chain_id;
   
-  SELECT SUM(amount)
+  SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _capitalized
   FROM reassurance.pool_capitalized
   WHERE to_timestamp(block_timestamp) <= _date
@@ -66,14 +66,14 @@ $$
   DECLARE _added uint256;
   DECLARE _capitalized uint256;
 BEGIN
-  SELECT SUM(amount)
+  SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
   FROM reassurance.reassurance_added
   WHERE to_timestamp(block_timestamp) <= _date
   AND chain_id = _chain_id
   AND cover_key = _cover_key;
   
-  SELECT SUM(amount)
+  SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _capitalized
   FROM reassurance.pool_capitalized
   WHERE to_timestamp(block_timestamp) <= _date
@@ -84,3 +84,6 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+SELECT * FROM get_reassurance_till_date(NOW());
+

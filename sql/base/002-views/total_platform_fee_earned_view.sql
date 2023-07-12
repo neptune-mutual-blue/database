@@ -5,7 +5,7 @@ AS
 SELECT
   chain_id,
   cover_key,
-  SUM(platform_fee) AS total_platform_fee
+  SUM(get_stablecoin_value(chain_id, platform_fee)) AS total_platform_fee
 FROM policy.cover_purchased
 GROUP BY chain_id, cover_key;
 

@@ -12,10 +12,10 @@ AS
     block_timestamp,
     cx_token,
     transaction_hash,
-    on_behalf_of                                AS account,
-    amount_to_cover                             AS cxtoken_amount,
-    fee                                         AS stablecoin_amount,
-    'cover_purchased'                           AS tx_type
+    on_behalf_of                                        AS account,
+    get_stablecoin_value(chain_id, amount_to_cover)     AS cxtoken_amount,
+    get_stablecoin_value(chain_id, fee)                 AS stablecoin_amount,
+    'cover_purchased'                                   AS tx_type
   FROM policy.cover_purchased
   UNION ALL
   SELECT
@@ -26,8 +26,8 @@ AS
     cx_token,
     transaction_hash,
     account                                     AS account,
-    amount                                      AS cxtoken_amount,
-    claimed                                     AS stablecoin_amount,
+    wei_to_ether(amount)                        AS cxtoken_amount,
+    wei_to_ether(claimed)                       AS stablecoin_amount,
     'claimed'                                   AS tx_type
   FROM cxtoken.claimed
 )
