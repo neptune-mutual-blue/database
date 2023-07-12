@@ -38,6 +38,5 @@ SELECT
   is_diversified(chain_id, cover_key) AS diversified,
   product_key,
   bytes32_to_string(product_key) AS product,
-  get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity') AS capacity,
-  format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity')) AS formatted_capacity
+  get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity') AS capacity
 FROM products;

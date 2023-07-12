@@ -1,10 +1,3 @@
-DROP FUNCTION IF EXISTS get_commitment
-(
-  _chain_id                                   uint256,
-  _cover_key                                  bytes32,
-  _product_key                                bytes32
-) CASCADE;
-
 CREATE OR REPLACE FUNCTION get_commitment
 (
   _chain_id                                   uint256,
@@ -30,7 +23,7 @@ BEGIN
     _starts_from := _incident_date;
   END IF;
 
-  SELECT SUM(amount_to_cover) AS commitment
+  SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover)) AS commitment
   INTO _commitment
   FROM policy.cover_purchased  
   WHERE expires_on > _starts_from
@@ -38,7 +31,7 @@ BEGIN
   AND policy.cover_purchased.cover_key = _cover_key
   AND policy.cover_purchased.product_key = _product_key;
 
-  SELECT SUM(cxtoken_to_stablecoin_units(_chain_id, cxtoken.claimed.amount))
+  SELECT SUM(wei_to_ether(cxtoken.claimed.amount))
   INTO _paid
   FROM cxtoken.claimed
   WHERE cxtoken.claimed.chain_id = _chain_id

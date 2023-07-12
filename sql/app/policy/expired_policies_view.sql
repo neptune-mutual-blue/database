@@ -20,8 +20,8 @@ AS
       product_key,
       block_timestamp,
       expires_on
-    )                                     AS incident_date,
-    amount_to_cover
+    )                                                   AS incident_date,
+    get_stablecoin_value(chain_id, amount_to_cover)     AS amount_to_cover
   FROM policy.cover_purchased
   WHERE expires_on <= extract(epoch FROM NOW() AT TIME ZONE 'UTC')
 )

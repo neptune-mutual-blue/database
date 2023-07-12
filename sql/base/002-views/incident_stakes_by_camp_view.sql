@@ -7,7 +7,7 @@ SELECT incident_stakes_view.activity AS camp,
   incident_stakes_view.cover_key,
   incident_stakes_view.product_key,
   incident_stakes_view.incident_date,
-  sum(incident_stakes_view.stake::numeric) AS camp_total
+  sum(get_npm_value(incident_stakes_view.stake::numeric)) AS camp_total
   FROM incident_stakes_view
 GROUP BY
   incident_stakes_view.activity,

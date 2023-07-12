@@ -112,7 +112,7 @@ BEGIN
   UPDATE _get_gauge_pools_result
   SET
     current_epoch = ve.gauge_set.epoch,
-    current_distribution = ve.gauge_set.distribution
+    current_distribution = get_npm_value(ve.gauge_set.distribution)
   FROM ve.gauge_set
   WHERE ve.gauge_set.key = _get_gauge_pools_result.key
   AND ve.gauge_set.chain_id = _get_gauge_pools_result.chain_id

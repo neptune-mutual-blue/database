@@ -10,7 +10,7 @@ $$
   DECLARE _result numeric;
 BEGIN
   SELECT
-    SUM(policy.cover_purchased.fee)
+    SUM(get_stablecoin_value(policy.cover_purchased.chain_id, policy.cover_purchased.fee))
   INTO
     _result
   FROM policy.cover_purchased
@@ -36,7 +36,7 @@ $$
   DECLARE _result numeric;
 BEGIN
   SELECT
-    SUM(policy.cover_purchased.fee)
+    SUM(get_stablecoin_value(policy.cover_purchased.chain_id, policy.cover_purchased.fee))
   INTO
     _result
   FROM policy.cover_purchased
@@ -63,7 +63,7 @@ $$
   DECLARE _result numeric;
 BEGIN
   SELECT
-    SUM(policy.cover_purchased.fee)
+    SUM(get_stablecoin_value(policy.cover_purchased.chain_id, policy.cover_purchased.fee))
   INTO
     _result
   FROM policy.cover_purchased

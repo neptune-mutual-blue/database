@@ -8,7 +8,7 @@ SELECT
   'Added' AS event,
   ve.liquidity_gauge_deposited.key,
   ve.liquidity_gauge_deposited.staking_token AS token,
-  ve.liquidity_gauge_deposited.amount
+  get_npm_value(ve.liquidity_gauge_deposited.amount) AS amount
 FROM ve.liquidity_gauge_deposited
 UNION ALL
 SELECT
@@ -19,7 +19,7 @@ SELECT
   'Removed' AS event,
   ve.liquidity_gauge_withdrawn.key,
   ve.liquidity_gauge_withdrawn.staking_token AS token,
-  ve.liquidity_gauge_withdrawn.amount
+  get_npm_value(ve.liquidity_gauge_withdrawn.amount)
 FROM ve.liquidity_gauge_withdrawn
 UNION ALL
 SELECT
@@ -30,7 +30,7 @@ SELECT
   'Get Reward' AS event,
   ve.liquidity_gauge_rewards_withdrawn.key,
   get_npm(ve.liquidity_gauge_rewards_withdrawn.chain_id) AS token,
-  ve.liquidity_gauge_rewards_withdrawn.rewards - ve.liquidity_gauge_rewards_withdrawn.platform_fee
+  get_npm_value(ve.liquidity_gauge_rewards_withdrawn.rewards - ve.liquidity_gauge_rewards_withdrawn.platform_fee)
 FROM ve.liquidity_gauge_rewards_withdrawn;
 
 

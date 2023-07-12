@@ -108,7 +108,7 @@ BEGIN
     consensus.reported.block_timestamp,
     consensus.reported.reporter,
     consensus.reported.info,
-    consensus.reported.initial_stake,
+    get_npm_value(consensus.reported.initial_stake),
     get_product_status(_chain_id, _cover_key, _product_key, _incident_date)
   FROM consensus.reported
   WHERE consensus.reported.chain_id     = _chain_id
@@ -122,14 +122,14 @@ BEGIN
     dispute_timestamp     = consensus.disputed.block_timestamp,
     disputer              = consensus.disputed.reporter,
     dispute_info          = consensus.disputed.info,
-    disputer_stake        = consensus.disputed.initial_stake
+    disputer_stake        = get_npm_value(consensus.disputed.initial_stake)
   FROM consensus.disputed
   WHERE consensus.disputed.chain_id     = _get_report_insight_result.chain_id
   AND consensus.disputed.cover_key      = _get_report_insight_result.cover_key
   AND consensus.disputed.product_key    = _get_report_insight_result.product_key
   AND consensus.disputed.incident_date  = _get_report_insight_result.incident_date;
   
-  SELECT COUNT(*), SUM(consensus.attested.stake)
+  SELECT COUNT(*), SUM(get_npm_value(consensus.attested.stake))
   INTO _attestation_count, _total_attestation
   FROM consensus.attested
   WHERE consensus.attested.chain_id     = _chain_id
@@ -137,7 +137,7 @@ BEGIN
   AND consensus.attested.product_key    = _product_key
   AND consensus.attested.incident_date  = _incident_date;
 
-  SELECT COUNT(*), SUM(consensus.refuted.stake)
+  SELECT COUNT(*), SUM(get_npm_value(consensus.refuted.stake))
   INTO _refutation_count, _total_refutation
   FROM consensus.refuted
   WHERE consensus.refuted.chain_id      = _chain_id
@@ -189,8 +189,6 @@ BEGIN
   AND resolution.cover_key                = _get_report_insight_result.cover_key
   AND resolution.product_key              = _get_report_insight_result.product_key
   AND resolution.incident_date            = _get_report_insight_result.incident_date;
-
-
 
   WITH emergency_resolution
   AS
@@ -248,19 +246,4 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
-
-
--- WITH resolved
--- AS
--- (
---   SELECT chain_id, cover_key, product_key, incident_date FROM consensus.resolved WHERE emergency ORDER BY chain_id, cover_key, product_key, incident_date DESC LIMIT 1
--- )
-
--- SELECT * FROM get_report_insight
--- (
---   (SELECT chain_id FROM resolved),
---   (SELECT cover_key FROM resolved),
---   (SELECT product_key FROM resolved),
---   (SELECT incident_date FROM resolved)
--- );
 

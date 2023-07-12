@@ -4,7 +4,7 @@ DROP FUNCTION IF EXISTS get_cover_stats
   _cover_key                              bytes32,
   _product_key                            bytes32,
   _account                                address
-) CASCADE;
+);
 
 CREATE FUNCTION get_cover_stats
 (

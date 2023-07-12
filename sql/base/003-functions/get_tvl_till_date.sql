@@ -10,7 +10,7 @@ $$
 BEGIN
   SELECT SUM
   (
-    core.transactions.transaction_stablecoin_amount
+    get_stablecoin_value(core.transactions.chain_id, core.transactions.transaction_stablecoin_amount)
     *
     CASE WHEN core.transactions.event_name IN ('Claimed') THEN -1 ELSE 1 END
   )
@@ -38,7 +38,7 @@ $$
 BEGIN
   SELECT SUM
   (
-    core.transactions.transaction_stablecoin_amount
+    get_stablecoin_value(core.transactions.chain_id, core.transactions.transaction_stablecoin_amount)
     *
     CASE WHEN core.transactions.event_name IN ('Claimed') THEN -1 ELSE 1 END
   )
@@ -68,7 +68,7 @@ $$
 BEGIN
   SELECT SUM
   (    
-    core.transactions.transaction_stablecoin_amount
+    get_stablecoin_value(core.transactions.chain_id, core.transactions.transaction_stablecoin_amount)
     *
     CASE WHEN core.transactions.event_name IN ('Claimed') THEN -1 ELSE 1 END
   )

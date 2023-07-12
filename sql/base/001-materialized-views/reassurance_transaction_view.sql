@@ -6,7 +6,7 @@ SELECT
   'Reassurance Added' AS description,  
   reassurance.reassurance_added.chain_id,
   reassurance.reassurance_added.cover_key,
-  SUM(reassurance.reassurance_added.amount) AS total
+  SUM(get_stablecoin_value(reassurance.reassurance_added.chain_id, reassurance.reassurance_added.amount)) AS total
 FROM reassurance.reassurance_added
 GROUP BY 
   reassurance.reassurance_added.chain_id,
@@ -16,7 +16,7 @@ SELECT
   'Pool Capitalized' AS description,  
   reassurance.pool_capitalized.chain_id,
   reassurance.pool_capitalized.cover_key,
-  SUM(reassurance.pool_capitalized.amount) * -1
+  SUM(get_stablecoin_value(reassurance.pool_capitalized.chain_id, reassurance.pool_capitalized.amount)) * -1
 FROM reassurance.pool_capitalized
 GROUP BY 
   reassurance.pool_capitalized.chain_id,

@@ -27,7 +27,7 @@ DROP DOMAIN IF EXISTS transaction_type;
 CREATE DOMAIN bytes32 AS text;
 CREATE DOMAIN address AS text;
 CREATE DOMAIN ipfs_url AS text;
-CREATE DOMAIN uint256 AS numeric(180,0);
+CREATE DOMAIN uint256 AS numeric(180, 0);
 CREATE DOMAIN uint8 AS integer;
 
 CREATE SCHEMA core;
@@ -1385,6 +1385,32 @@ CREATE TABLE ve.liquidity_gauge_pool_set
 
 CREATE INDEX liquidity_gauge_pool_set_key_inx
 ON ve.liquidity_gauge_pool_set(key);
+
+/*************************************************************************
+ event EpochDurationUpdated(bytes32 indexed key, uint256 previous, uint256 current);
+*************************************************************************/
+CREATE TABLE ve.epoch_duration_updated
+(
+  key                                               bytes32 NOT NULL,
+  previous                                          uint256 NOT NULL,
+  current                                           uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX epoch_duration_updated_key_inx
+ON ve.epoch_duration_updated(key);
+
+/*************************************************************************
+event EpochRewardSet(bytes32 indexed key, address indexed triggeredBy, uint256 rewards);
+*************************************************************************/
+CREATE TABLE ve.epoch_reward_set
+(
+  key                                               bytes32 NOT NULL,
+  triggered_by                                      address NOT NULL,
+  rewards                                           uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX epoch_reward_set_key_inx
+ON ve.epoch_reward_set(key);
 
 
 /*************************************************************************
@@ -3394,16 +3420,30 @@ $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION get_stablecoin_value(_chain_id uint256, _amount uint256)
-RETURNS NUMERIC
+RETURNS numeric
 IMMUTABLE
 AS
 $$
 BEGIN
+  IF(_chain_id = 56) THEN
+    RETURN _amount / POWER(10, 18);  
+  END IF;
+
   RETURN _amount / POWER(10, 6);
 END
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_npm_value(_amount uint256)
+RETURNS numeric
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN _amount / POWER(10, 18);
+END
+$$
+LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION format_npm
 (
