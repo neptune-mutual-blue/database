@@ -17,6 +17,8 @@ RETURNS TABLE
   views                                           uint256,
   want_to_mint                                    uint256,
   siblings                                        integer,
+  soulbound                                       boolean,
+  token_owner                                     address,
   page_size                                       integer,
   page_number                                     integer,
   total_records                                   integer,
@@ -47,6 +49,8 @@ BEGIN
     views                                           uint256,
     want_to_mint                                    uint256,
     siblings                                        integer,
+    soulbound                                       boolean,
+    token_owner                                     address,
     page_size                                       integer,
     page_number                                     integer,
     total_records                                   integer,
@@ -61,9 +65,12 @@ BEGIN
     FROM nfts
     WHERE 1 = 1
     AND (%1$L IS NULL OR attributes @> %1$L)
-    AND CONCAT(nfts.family, nfts.description, nfts.token_id, nfts.attributes::text) ILIKE %s
+    AND CONCAT(nfts.family, nfts.description, nfts.token_id, nfts.attributes::text) ILIKE %2$s
+    AND (%3$L IS NULL OR %3$L = (get_owner(nfts.token_id) IS NOT NULL))
+    AND (%4$L IS NULL OR nfts.soulbound = %4$L)
+    AND (array_length(%5$L::text[], 1) IS NULL OR get_nft_role(nfts.token_id) = ANY(%5$L::text[]))
   )
-  SELECT COUNT(*) FROM result;', _props, quote_literal_ilike(_search));
+  SELECT COUNT(*) FROM result;', _props, quote_literal_ilike(_search), _minted, _soulbound, _roles);
 
   EXECUTE _query
   INTO _total_records;
@@ -75,7 +82,9 @@ BEGIN
     token_id,
     views,
     want_to_mint,
-    siblings
+    siblings,
+    soulbound,
+    token_owner
   )
   SELECT
     nfts.nickname,
@@ -84,7 +93,9 @@ BEGIN
     nfts.token_id,
     nfts.views,
     nfts.want_to_mint,
-    get_sibling_count(nfts.category)
+    get_sibling_count(nfts.category),
+    nfts.soulbound,
+    get_owner(nfts.token_id)
   FROM nfts
   WHERE 1 = 1
   AND (_props     IS NULL OR attributes @> _props)
@@ -112,14 +123,10 @@ LANGUAGE plpgsql;
 -- SELECT * FROM search_nfts
 -- (
 --   '',
---   NULL,
---   NULL,
+--   true,
+--   true,
 --   array[]::text[],
---   '[{
---     "value": "Evolution",
---     "trait_type": "Type"
---   }]'::jsonb,
---   2,
+--   '[]'::jsonb,
+--   1,
 --   10
 -- );
-
