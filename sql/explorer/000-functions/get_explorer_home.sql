@@ -95,9 +95,9 @@ BEGIN
     AND core.transactions.address = ANY(%L)
     AND 
     (
-      REPLACE(LOWER(bytes32_to_string(core.transactions.ck)), ''-'', '''') ILIKE %s
+      REPLACE(bytes32_to_string(core.transactions.ck), ''-'', '''') ILIKE %s
       OR 
-      REPLACE(LOWER(bytes32_to_string(core.transactions.pk)), ''-'', '''') ILIKE %s
+      REPLACE(bytes32_to_string(core.transactions.pk), ''-'', '''') ILIKE %s
     )
     AND core.transactions.event_name ILIKE %s
     AND bytes32_to_string(core.transactions.coupon_code) ILIKE %s
@@ -140,9 +140,9 @@ BEGIN
   AND core.transactions.address = ANY(%L)
   AND 
   (
-    REPLACE(LOWER(bytes32_to_string(core.transactions.ck)), ''-'', '''') ILIKE %s
+    REPLACE(bytes32_to_string(core.transactions.ck), ''-'', '''') ILIKE %s
     OR 
-    REPLACE(LOWER(bytes32_to_string(core.transactions.pk)), ''-'', '''') ILIKE %s
+    REPLACE(bytes32_to_string(core.transactions.pk), ''-'', '''') ILIKE %s
   )
   AND core.transactions.event_name ILIKE %s
   AND bytes32_to_string(core.transactions.coupon_code) ILIKE %s
