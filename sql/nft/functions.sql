@@ -112,28 +112,19 @@ $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION get_nft_role(_token_id uint256)
-RETURNS address
+RETURNS text
 STABLE
 AS
 $$
-  DECLARE _nft_role                                           text;
 BEGIN
-  SELECT
+  RETURN
     CASE
-      WHEN nfts.family = 'Aquavallo'      THEN 'Guardian'
-      WHEN nfts.family = 'Merman Serpent' THEN 'Beast'
-      WHEN nfts.family = 'Gargantuworm'   THEN 'Beast'
-      WHEN nfts.family = 'Delphinus'      THEN 'Guardian'
-      WHEN nfts.family = 'Salacia'        THEN 'Guardian'
-      WHEN nfts.family = 'Grim Wyvern'    THEN 'Beast'
-      WHEN nfts.family = 'Neptune'        THEN 'Neptune'
-      WHEN nfts.family = 'Sabersquatch'   THEN 'Beast'
-    END                                                       INTO _nft_role
+      WHEN nfts.family IN('Aquavallo', 'Delphinus', 'Salacia') THEN 'Guardian'
+      WHEN nfts.family IN('Merman Serpent', 'Gargantuworm', 'Grim Wyvern', 'Sabersquatch') THEN 'Beast'
+      WHEN nfts.family = 'Neptune' THEN 'Neptune'
+    END
   FROM nfts
-  WHERE nft.token_id = _token_id
-  LIMIT 1;
-
-  RETURN _nft_role;
+  WHERE nfts.token_id = _token_id;
 END
 $$
 LANGUAGE plpgsql;

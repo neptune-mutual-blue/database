@@ -1,6 +1,9 @@
 CREATE OR REPLACE FUNCTION search_nfts
 (
   _search                                         national character varying(128),
+  _minted                                         boolean,
+  _soulbound                                      boolean,
+  _roles                                          text[],
   _props                                          jsonb,
   _page_number                                    integer,
   _page_size                                      integer
@@ -65,12 +68,30 @@ BEGIN
   EXECUTE _query
   INTO _total_records;
 
-  INSERT INTO _search_nfts_result(nickname, family, category, token_id, views, want_to_mint, siblings)
-  SELECT nfts.nickname, nfts.family, nfts.category, nfts.token_id, nfts.views, nfts.want_to_mint, get_sibling_count(nfts.category)
+  INSERT INTO _search_nfts_result(
+    nickname,
+    family,
+    category,
+    token_id,
+    views,
+    want_to_mint,
+    siblings
+  )
+  SELECT
+    nfts.nickname,
+    nfts.family,
+    nfts.category,
+    nfts.token_id,
+    nfts.views,
+    nfts.want_to_mint,
+    get_sibling_count(nfts.category)
   FROM nfts
   WHERE 1 = 1
-  AND (_props IS NULL OR attributes @> _props)
+  AND (_props     IS NULL OR attributes @> _props)
   AND CONCAT(nfts.family, nfts.description, nfts.token_id, nfts.attributes::text) ILIKE CONCAT('%', TRIM(_search), '%')
+  AND (_soulbound IS NULL OR nfts.soulbound = _soulbound)
+  AND (_minted    IS NULL OR _minted = (get_owner(nfts.token_id) IS NOT NULL))
+  AND (array_length(_roles,1) IS NULL OR get_nft_role(nfts.token_id) = ANY(_roles))
   ORDER BY nfts.views DESC, nfts.nickname
   LIMIT _page_size
   OFFSET _page_size * (_page_number -1);
@@ -91,6 +112,9 @@ LANGUAGE plpgsql;
 -- SELECT * FROM search_nfts
 -- (
 --   '',
+--   NULL,
+--   NULL,
+--   array[]::text[],
 --   '[{
 --     "value": "Evolution",
 --     "trait_type": "Type"
