@@ -1,3 +1,11 @@
+DROP FUNCTION IF EXISTS search_nfts
+(
+  _search                                         national character varying(128),
+  _props                                          jsonb,
+  _page_number                                    integer,
+  _page_size                                      integer
+);
+
 CREATE OR REPLACE FUNCTION search_nfts
 (
   _search                                         national character varying(128),
