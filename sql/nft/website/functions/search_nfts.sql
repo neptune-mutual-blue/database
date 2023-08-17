@@ -1,6 +1,17 @@
+DROP FUNCTION IF EXISTS search_nfts
+(
+  _search                                         national character varying(128),
+  _props                                          jsonb,
+  _page_number                                    integer,
+  _page_size                                      integer
+);
+
 CREATE OR REPLACE FUNCTION search_nfts
 (
   _search                                         national character varying(128),
+  _minted                                         boolean,
+  _soulbound                                      boolean,
+  _roles                                          text[],
   _props                                          jsonb,
   _page_number                                    integer,
   _page_size                                      integer
@@ -14,6 +25,8 @@ RETURNS TABLE
   views                                           uint256,
   want_to_mint                                    uint256,
   siblings                                        integer,
+  soulbound                                       boolean,
+  token_owner                                     address,
   page_size                                       integer,
   page_number                                     integer,
   total_records                                   integer,
@@ -44,6 +57,8 @@ BEGIN
     views                                           uint256,
     want_to_mint                                    uint256,
     siblings                                        integer,
+    soulbound                                       boolean,
+    token_owner                                     address,
     page_size                                       integer,
     page_number                                     integer,
     total_records                                   integer,
@@ -58,19 +73,44 @@ BEGIN
     FROM nfts
     WHERE 1 = 1
     AND (%1$L IS NULL OR attributes @> %1$L)
-    AND CONCAT(nfts.family, nfts.description, nfts.token_id, nfts.attributes::text) ILIKE %s
+    AND CONCAT(nfts.family, nfts.description, nfts.token_id, nfts.attributes::text) ILIKE %2$s
+    AND (%3$L IS NULL OR %3$L = (get_owner(nfts.token_id) IS NOT NULL))
+    AND (%4$L IS NULL OR nfts.soulbound = %4$L)
+    AND (array_length(%5$L::text[], 1) IS NULL OR get_nft_role(nfts.token_id) = ANY(%5$L::text[]))
   )
-  SELECT COUNT(*) FROM result;', _props, quote_literal_ilike(_search));
+  SELECT COUNT(*) FROM result;', _props, quote_literal_ilike(_search), _minted, _soulbound, _roles);
 
   EXECUTE _query
   INTO _total_records;
 
-  INSERT INTO _search_nfts_result(nickname, family, category, token_id, views, want_to_mint, siblings)
-  SELECT nfts.nickname, nfts.family, nfts.category, nfts.token_id, nfts.views, nfts.want_to_mint, get_sibling_count(nfts.category)
+  INSERT INTO _search_nfts_result(
+    nickname,
+    family,
+    category,
+    token_id,
+    views,
+    want_to_mint,
+    siblings,
+    soulbound,
+    token_owner
+  )
+  SELECT
+    nfts.nickname,
+    nfts.family,
+    nfts.category,
+    nfts.token_id,
+    nfts.views,
+    nfts.want_to_mint,
+    get_sibling_count(nfts.category),
+    nfts.soulbound,
+    get_owner(nfts.token_id)
   FROM nfts
   WHERE 1 = 1
-  AND (_props IS NULL OR attributes @> _props)
+  AND (_props     IS NULL OR attributes @> _props)
   AND CONCAT(nfts.family, nfts.description, nfts.token_id, nfts.attributes::text) ILIKE CONCAT('%', TRIM(_search), '%')
+  AND (_soulbound IS NULL OR nfts.soulbound = _soulbound)
+  AND (_minted    IS NULL OR _minted = (get_owner(nfts.token_id) IS NOT NULL))
+  AND (array_length(_roles,1) IS NULL OR get_nft_role(nfts.token_id) = ANY(_roles))
   ORDER BY nfts.views DESC, nfts.nickname
   LIMIT _page_size
   OFFSET _page_size * (_page_number -1);
@@ -91,11 +131,10 @@ LANGUAGE plpgsql;
 -- SELECT * FROM search_nfts
 -- (
 --   '',
---   '[{
---     "value": "Evolution",
---     "trait_type": "Type"
---   }]'::jsonb,
---   2,
+--   true,
+--   true,
+--   array[]::text[],
+--   '[]'::jsonb,
+--   1,
 --   10
 -- );
-
