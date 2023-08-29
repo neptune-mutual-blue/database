@@ -324,7 +324,7 @@ SELECT 7 AS level, 'Guardian' AS role, 'Legendary Neptune' AS name, 'The all-pow
 UNION ALL
 SELECT NULL AS level, 'Beast' AS role, 'Grim Wyvern' AS name, 'A monstrous flying dragon vengefully targeting the chain' AS description, 180000 AS start_index, -1 AS siblings, 3 AS rarity, 'Soulbound' AS stage
 UNION ALL
-SELECT NULL AS level, 'Beast' AS role, 'Diabolic Grim Wyvern' AS name, 'A monstrous flying dragon vengefully targeting the chain' AS description, 190000 AS start_index, 100 AS siblings, 10 AS rarity, NULL AS stage
+SELECT NULL AS level, 'Beast' AS role, 'Diabolic Grim Wyvern' AS name, 'A monstrous flying dragon vengefully targeting the chain' AS description, 190000 AS start_index, 1000 AS siblings, 5 AS rarity, NULL AS stage
 UNION ALL
 SELECT NULL AS level, 'Guardian' AS role, 'Neptune' AS name, 'The all-powerful god of the sea and protector of the chain' AS description, 199000 AS start_index, 25 AS siblings, 10 AS rarity, NULL AS stage;
 
