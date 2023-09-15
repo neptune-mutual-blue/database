@@ -90,6 +90,16 @@ AS
 $$
   DECLARE _owner                         address;
 BEGIN
+  SELECT "receiver" INTO _owner
+  FROM      nft.neptune_legends_transfer
+  WHERE     nft.neptune_legends_transfer.token_id = _token_id
+  ORDER BY  nft.neptune_legends_transfer.block_timestamp DESC
+  LIMIT 1;
+
+  IF(_owner IS NOT NULL) THEN
+    RETURN _owner;
+  END IF;
+
   SELECT "to" INTO _owner
   FROM      transfer_single
   WHERE     transfer_single.id = _token_id
