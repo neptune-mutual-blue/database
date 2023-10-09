@@ -253,8 +253,8 @@ CREATE TABLE IF NOT EXISTS nft.send_to_chain
 (
   sender                                            address NOT NULL,
   receiver                                          address NOT NULL,
-  token_ids                                         uint256[] NOT NULL
-  dst_chain_id                                         uint256 NOT NULL
+  token_ids                                         uint256[] NOT NULL,
+  dst_chain_id                                      uint256 NOT NULL
 ) INHERITS(core.transactions);
 
 CREATE INDEX IF NOT EXISTS send_to_chain_sender_inx
