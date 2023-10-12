@@ -11,7 +11,7 @@ SELECT
   6                                             AS stablecoin_decimals,
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
-  '0xb31ab812aad7e905a7b8f3263560d2f610d582d7'  AS npm_address,
+  '0x57f12fe6a4e5fe819eec699fadf9db2d06606bb4'  AS npm_address,
   'https://etherscan.io/'                       AS explorer UNION ALL
 SELECT 42161                                    AS chain_id,
   'Arbitrum One'                                AS network_name,
@@ -21,7 +21,7 @@ SELECT 42161                                    AS chain_id,
   6                                             AS stablecoin_decimals,
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
-  '0xb31ab812aad7e905a7b8f3263560d2f610d582d7'  AS npm_address,
+  '0x57f12fe6a4e5fe819eec699fadf9db2d06606bb4'  AS npm_address,
   'https://arbiscan.io/'                        AS explorer UNION ALL
 SELECT 80001                                    AS chain_id,
   'Polygon Mumbai'                              AS network_name,
