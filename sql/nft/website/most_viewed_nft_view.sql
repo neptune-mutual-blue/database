@@ -17,4 +17,4 @@ SELECT
   stage
 FROM characters
 ORDER BY views DESC
-LIMIT 4;
+LIMIT 5;

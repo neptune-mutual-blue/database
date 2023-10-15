@@ -8,6 +8,6 @@ SELECT
   chain_id,
   sender,
   receiver,
-  token_ids,
+  get_nft_name_info(token_ids) AS tokens,
   dst_chain_id
 FROM nft.send_to_chain

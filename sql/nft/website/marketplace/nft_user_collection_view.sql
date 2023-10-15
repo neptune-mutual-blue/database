@@ -2,11 +2,11 @@ CREATE OR REPLACE VIEW nft_user_collection_view
 AS
 SELECT
   token_id,
-  "name",
+  name,
   nickname,
-  "family",
+  family,
   soulbound,
-  "attributes",
-  get_owner(token_id) as token_owner
+  attributes,
+  get_owner(token_id) AS token_owner
 FROM nfts
 WHERE get_owner(token_id) IS NOT NULL;

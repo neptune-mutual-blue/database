@@ -7,11 +7,11 @@ BEGIN
   SELECT nfts.id INTO _id
   FROM nfts
   WHERE nfts.token_id = (_metadata->'edition')::uint256;
-  
+
   IF(_id IS NOT NULL) THEN
     RETURN _id;
   END IF;
-  
+
   INSERT INTO nfts
   (
     token_id,
@@ -49,7 +49,7 @@ BEGIN
   AS
   (
     SELECT id, values->>'value' AS nickname
-    FROM nft_attributes 
+    FROM nft_attributes
     WHERE values->>'trait_type' = 'Nickname'
   )
   UPDATE nfts
@@ -68,55 +68,59 @@ BEGIN
   AS
   (
     SELECT id, values->>'value' AS family
-    FROM nft_attributes 
+    FROM nft_attributes
     WHERE values->>'trait_type' = 'Family'
   )
   UPDATE nfts
   SET family = families.family
   FROM families
   WHERE nfts.id = families.id;
-    
+
   RETURN _id;
 END
 $$
 LANGUAGE plpgsql;
 
-
-
-CREATE OR REPLACE FUNCTION get_owner(_token_id uint256)
-RETURNS address
-STABLE
+CREATE OR REPLACE FUNCTION get_nft_name_info(_token_ids uint256[])
+RETURNS jsonb
 AS
 $$
-  DECLARE _owner                         address;
 BEGIN
-  SELECT "receiver" INTO _owner
-  FROM      nft.neptune_legends_transfer
-  WHERE     nft.neptune_legends_transfer.token_id = _token_id
-  ORDER BY  nft.neptune_legends_transfer.block_timestamp DESC
-  LIMIT 1;
+  RETURN
+  (
+    WITH intermediate
+    AS
+    (
+      SELECT nfts.name, nfts.token_id
+      FROM nfts
+      WHERE token_id = ANY(_token_ids)
+    )
+    SELECT jsonb_agg(intermediate) FROM intermediate
+  );
+END
+$$
+LANGUAGE plpgsql;
 
-  IF(_owner IS NOT NULL) THEN
-    RETURN _owner;
-  END IF;
-
-  SELECT "to" INTO _owner
-  FROM      transfer_single
-  WHERE     transfer_single.id = _token_id
-  ORDER BY  transfer_single.block_timestamp DESC
-  LIMIT 1;
-
-  IF(_owner IS NOT NULL) THEN
-    RETURN _owner;
-  END IF;
-  
-  SELECT "account" INTO _owner
-  FROM      nft.soulbound_minted
-  WHERE     nft.soulbound_minted.token_id = _token_id
-  ORDER BY  nft.soulbound_minted.block_timestamp DESC
-  LIMIT 1;
-
-  RETURN _owner;
+CREATE OR REPLACE FUNCTION get_owner(_token_id uint256)
+RETURNS jsonb
+AS
+$$
+BEGIN
+  RETURN
+  (
+    WITH intermediate
+    AS
+    (
+      SELECT
+        receiver AS owner,
+        chain_id AS chain_id
+      FROM      nft.neptune_legends_transfer
+      WHERE     token_id = _token_id
+      ORDER BY  block_timestamp DESC
+      LIMIT 1
+    )
+    SELECT jsonb_agg(intermediate) FROM intermediate
+  );
 END
 $$
 LANGUAGE plpgsql;
