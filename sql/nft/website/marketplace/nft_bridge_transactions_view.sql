@@ -10,4 +10,4 @@ SELECT
   receiver,
   get_nft_name_info(token_ids) AS tokens,
   dst_chain_id
-FROM nft.send_to_chain
+FROM nft.send_to_chain;
