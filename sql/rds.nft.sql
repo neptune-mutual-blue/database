@@ -247,6 +247,23 @@ CREATE INDEX IF NOT EXISTS neptune_legends_transfer_receiver_inx
 ON nft.neptune_legends_transfer(receiver);
 
 /*************************************************************************
+event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes indexed _toAddress, uint[] _tokenIds);
+*************************************************************************/
+CREATE TABLE IF NOT EXISTS nft.send_to_chain
+(
+  sender                                            address NOT NULL,
+  receiver                                          address NOT NULL,
+  token_ids                                         uint256[] NOT NULL,
+  dst_chain_id                                      uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE INDEX IF NOT EXISTS send_to_chain_sender_inx
+ON nft.send_to_chain(sender);
+
+CREATE INDEX IF NOT EXISTS send_to_chain_receiver_inx
+ON nft.send_to_chain(receiver);
+
+/*************************************************************************
 event DefaultRoyaltyDeleted(address indexed sender);
 *************************************************************************/
 CREATE TABLE IF NOT EXISTS nft.default_royalty_deleted
