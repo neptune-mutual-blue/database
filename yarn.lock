@@ -718,10 +718,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@neptunemutual/sdk@^0.6.0-beta":
-  version "0.6.0-beta"
-  resolved "https://registry.yarnpkg.com/@neptunemutual/sdk/-/sdk-0.6.0-beta.tgz#0154c7eef6575898249af1881892522943f84587"
-  integrity sha512-X4pzpqQArUrEduKk14sLD9jMrMwRsLxQyBIvIOrFqEwb4TaP1atlBy2tywlzXtqywzWa05f0bDgFPJQks6FUIg==
+"@neptunemutual/sdk@^0.6.1-beta":
+  version "0.6.1-beta"
+  resolved "https://registry.yarnpkg.com/@neptunemutual/sdk/-/sdk-0.6.1-beta.tgz#9eb0df436785763b2223e5db65a6e53aca02c065"
+  integrity sha512-8x1oLuc3djjRRdfnC8I6cCQK4wlNEk3MWznzjE6SrhQZ+Kl/0oJKFMhsi579KBIf57mlzuHicjxsIZL64qrbYg==
   dependencies:
     "@ethersproject/abstract-signer" "5.4.1"
     "@ethersproject/constants" "5.4.0"

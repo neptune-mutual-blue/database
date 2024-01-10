@@ -60,7 +60,7 @@ const getSelectStatement = async (chainId, coverKey) => {
   const rpc = rpcs[chainId]
   const provider = new ethers.providers.JsonRpcProvider(rpc)
 
-  console.log('Fetching', chainId, coverKey)
+  console.log('Fetching', chainId, ethers.utils.parseBytes32String(coverKey))
 
   const data = await utils.store.readStorage(chainId, [
     {

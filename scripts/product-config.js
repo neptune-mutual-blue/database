@@ -89,7 +89,7 @@ const getCoverProductData = async (chainId, coverKey, productKey) => {
   const rpc = rpcs[chainId]
   const provider = new ethers.providers.JsonRpcProvider(rpc)
 
-  console.log('Fetching', chainId, coverKey, productKey)
+  console.log('Fetching', chainId, ethers.utils.parseBytes32String(coverKey), ethers.utils.parseBytes32String(productKey))
 
   const data = await utils.store.readStorage(chainId, [
     {
