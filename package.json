@@ -12,6 +12,8 @@
     "nft": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=nft"
   },
   "devDependencies": {
+    "@neptunemutual/sdk": "^0.6.0-beta",
+    "ethers": "5.5.2",
     "dotenv": "^16.0.3",
     "standard": "^17.0.0"
   }
