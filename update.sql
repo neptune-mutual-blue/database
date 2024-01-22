@@ -3,38 +3,38 @@ DROP TRIGGER IF EXISTS refresh_reassurance_transaction_view_trigger ON core.tran
 DROP FUNCTION IF EXISTS core.refresh_stablecoin_transactions_view_trigger();
 DROP FUNCTION IF EXISTS core.refresh_reassurance_transaction_view_trigger();
 
-DROP FUNCTION get_tvl_till_date
+DROP FUNCTION IF EXISTS get_tvl_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION get_tvl_till_date
+DROP FUNCTION IF EXISTS get_tvl_till_date
 (
   _chain_id                                 uint256,
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION get_tvl_till_date
+DROP FUNCTION IF EXISTS get_tvl_till_date
 (
   _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION sum_cover_purchased_during
+DROP FUNCTION IF EXISTS sum_cover_purchased_during
 (
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION sum_cover_purchased_during
+DROP FUNCTION IF EXISTS sum_cover_purchased_during
 (
   _chain_id                                   uint256,
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION sum_cover_purchased_during
+DROP FUNCTION IF EXISTS sum_cover_purchased_during
 (
   _chain_id                                   uint256,
   _cover_key                                  bytes32,
@@ -42,18 +42,18 @@ DROP FUNCTION sum_cover_purchased_during
   _end                                        TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION get_reassurance_till_date
+DROP FUNCTION IF EXISTS get_reassurance_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION get_reassurance_till_date
+DROP FUNCTION IF EXISTS get_reassurance_till_date
 (
   _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION get_reassurance_till_date
+DROP FUNCTION IF EXISTS get_reassurance_till_date
 (
   _chain_id                                 uint256,
   _cover_key                                bytes32,
@@ -130,7 +130,7 @@ DROP FUNCTION IF EXISTS get_cover_capacity_till
   _till                                               TIMESTAMP WITH TIME ZONE
 );
 
-DROP FUNCTION get_commitment
+DROP FUNCTION IF EXISTS get_commitment
 (
   _chain_id                                   uint256,
   _cover_key                                  bytes32,

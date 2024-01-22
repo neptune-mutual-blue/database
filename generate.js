@@ -4,7 +4,7 @@ import {
   findFiles,
   readFile,
   saveToDiskRaw
-} from './src/util/io'
+} from './src/util/io.js'
 
 const getType = () => {
   const last = process.argv.pop() ?? ''

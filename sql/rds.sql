@@ -1600,6 +1600,13 @@ CREATE TABLE ve.liquidity_gauge_pool_initialized
   treasury                                          address NOT NULL
 ) INHERITS(core.transactions);
 
+CREATE TABLE core.role_admin_changed
+(
+  role                                              bytes32 NOT NULL,
+  previous_admin_role                               bytes32 NOT NULL,
+  new_admin_role                                    bytes32 NOT NULL
+) INHERITS(core.transactions);
+
 /********************************************/
 /********************************************/
 /********************************************/
