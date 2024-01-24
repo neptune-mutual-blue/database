@@ -1607,6 +1607,35 @@ CREATE TABLE core.role_admin_changed
   new_admin_role                                    bytes32 NOT NULL
 ) INHERITS(core.transactions);
 
+CREATE TABLE core.transfer
+(
+  "from"                                            address NOT NULL,
+  "to"                                              address NOT NULL,
+  value                                             uint256 NOT NULL
+) INHERITS(core.transactions);
+
+CREATE TABLE core.role_granted
+(
+  role                                              bytes32 NOT NULL,
+  account                                           address NOT NULL,
+  sender                                            address NOT NULL
+) INHERITS(core.transactions);
+
+CREATE TABLE core.transparent_upgradeable_proxy_initialized
+(
+  version                                           uint256 NOT NULL
+) INHERITS(core.transactions);
+
+
+CREATE TABLE core.nft_transfer
+(
+  "from"                                            address NOT NULL,
+  "to"                                              address NOT NULL,
+  token_id                                          uint256 NOT NULL
+) INHERITS(core.transactions);
+
+
+
 /********************************************/
 /********************************************/
 /********************************************/
