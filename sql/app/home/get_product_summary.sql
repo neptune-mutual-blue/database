@@ -10,6 +10,7 @@ RETURNS TABLE
   cover_info_details                    text,
   product_key                           bytes32,
   product_key_string                    text,
+  policy_status                         text,
   product_info                          text,
   product_info_details                  text,
   product_status_enum                   product_status_type,
@@ -46,6 +47,7 @@ BEGIN
     cover_info_details                  text,
     product_key                         bytes32,
     product_key_string                  text,
+    policy_status                       text,
     product_info                        text,
     product_info_details                text,
     product_status_enum                 product_status_type,
@@ -127,6 +129,7 @@ BEGIN
     reassurance                   = get_reassurance_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity'),
     is_user_whitelisted           = check_if_user_whitelisted(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, _get_product_summary_result.product_key, _account),
     tvl                           = get_tvl_till_date(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key, 'infinity'),
+    policy_status                 = (SELECT json_agg(p) FROM get_policy_status(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key,  _get_product_summary_result.product_key) AS p),
     product_info                  = (SELECT p.product_info FROM get_product_info(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key,  _get_product_summary_result.product_key) AS p),
     product_info_details          = (SELECT p.product_info_details FROM get_product_info(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key,  _get_product_summary_result.product_key) AS p),
     cover_info                    = (SELECT c.cover_info FROM get_cover_info(_get_product_summary_result.chain_id, _get_product_summary_result.cover_key) AS c),
@@ -144,6 +147,5 @@ END
 $$
 LANGUAGE plpgsql;
 
---SELECT * FROM get_product_summary();
-
+-- SELECT * FROM get_product_summary();
 
