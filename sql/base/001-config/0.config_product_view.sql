@@ -306,10 +306,52 @@ SELECT
   80001                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('synthetix-v2')        AS product_key,
-  7000                                     AS capital_efficiency
+  8000                                     AS capital_efficiency
 UNION ALL
 SELECT
   80001                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('uniswap-v2')          AS product_key,
-  9000                                     AS capital_efficiency;
+  9000                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('prime')               AS cover_key,
+  string_to_bytes32('aave-v2-and-v3')      AS product_key,
+  9000                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('prime')               AS cover_key,
+  string_to_bytes32('safe-v1')             AS product_key,
+  9500                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('prime')               AS cover_key,
+  string_to_bytes32('uniswap-v2-and-v3')   AS product_key,
+  9000                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('defi')                AS cover_key,
+  string_to_bytes32('compound-v3')         AS product_key,
+  7000                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('defi')                AS cover_key,
+  string_to_bytes32('gmx-v2')              AS product_key,
+  6000                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('defi')                AS cover_key,
+  string_to_bytes32('oneinch-v3')          AS product_key,
+  4000                                     AS capital_efficiency
+UNION ALL
+SELECT
+  80001                                    AS chain_id,
+  string_to_bytes32('defi')                AS cover_key,
+  string_to_bytes32('sushiswap-v3')        AS product_key,
+  5000                                     AS capital_efficiency;
