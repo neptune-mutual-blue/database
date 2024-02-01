@@ -9,9 +9,10 @@ import { saveToDiskRaw } from '../src/util/io.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
+// SELECT chain_id, cover_key FROM cover.cover_created
+
 const covers = [
-  // obtained using SELECT chain_id, cover_key FROM cover.cover_created
-  // on both mainnet and testnet
+  // run above query on both mainnet and testnet
   { chainId: 42161, coverKey: '0x7072696d65000000000000000000000000000000000000000000000000000000' },
   { chainId: 42161, coverKey: '0x62696e616e636500000000000000000000000000000000000000000000000000' },
   { chainId: 42161, coverKey: '0x6f6b780000000000000000000000000000000000000000000000000000000000' },
