@@ -28,7 +28,7 @@ $$
   )
   */
   DECLARE _CHAIN_ID CONSTANT                        uint256 = 56;
-  DECLARE _MIN_COVER_AMOUNT_REQUIRED CONSTANT       uint256 = get_stablecoin_value(_chain_id, 50);
+  DECLARE _MIN_COVER_AMOUNT_REQUIRED CONSTANT       uint256 = 50 * POWER(10, 18);
   DECLARE _PURCHASE_AFTER CONSTANT                  TIMESTAMP WITH TIME ZONE = '12 Jan, 2024' AT TIME ZONE 'UTC';
   DECLARE _MIN_POLICY_PURCHASE_DURATION CONSTANT    uint256 = 3;
   DECLARE _result                                   boolean = true;
