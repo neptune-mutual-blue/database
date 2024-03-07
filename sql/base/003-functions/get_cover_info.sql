@@ -9,22 +9,35 @@ RETURNS TABLE
 STABLE
 AS
 $$
-  DECLARE _cover_info                 text;
-  DECLARE _cover_info_details         text;
 BEGIN
-  SELECT cover.cover_created.info
-  INTO _cover_info
-  FROM cover.cover_created
-  WHERE cover.cover_created.chain_id = _chain_id
-  AND cover.cover_created.cover_key = _cover_key;
-
-  SELECT config_known_ipfs_hashes_view.ipfs_details
-  INTO _cover_info_details
-  FROM config_known_ipfs_hashes_view
-  WHERE config_known_ipfs_hashes_view.ipfs_hash = _cover_info;
-
   RETURN QUERY
-  SELECT _cover_info, _cover_info_details;
+  WITH result AS (
+    SELECT
+      cover.cover_updated.info,
+      config_known_ipfs_hashes_view.ipfs_details,
+      cover.cover_updated.block_timestamp
+    FROM cover.cover_updated
+    INNER JOIN config_known_ipfs_hashes_view
+    ON config_known_ipfs_hashes_view.ipfs_hash = cover.cover_updated.info
+    WHERE cover.cover_updated.chain_id = _chain_id
+    AND cover.cover_updated.cover_key = _cover_key
+    UNION
+    SELECT
+      cover.cover_created.info,
+      config_known_ipfs_hashes_view.ipfs_details,
+      cover.cover_created.block_timestamp
+    FROM cover.cover_created
+    INNER JOIN config_known_ipfs_hashes_view
+    ON config_known_ipfs_hashes_view.ipfs_hash = cover.cover_created.info
+    WHERE cover.cover_created.chain_id = _chain_id
+    AND cover.cover_created.cover_key = _cover_key
+  )
+  SELECT 
+    info,
+    ipfs_details
+  FROM result
+  ORDER BY block_timestamp DESC
+  LIMIT 1;
 END
 $$
 LANGUAGE plpgsql;
