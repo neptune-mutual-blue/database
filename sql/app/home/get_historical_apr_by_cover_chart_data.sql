@@ -1,5 +1,3 @@
-DROP FUNCTION IF EXISTS get_historical_apr_by_cover_chart_data();
-
 CREATE OR REPLACE FUNCTION get_historical_apr_by_cover_chart_data()
 RETURNS TABLE
 (

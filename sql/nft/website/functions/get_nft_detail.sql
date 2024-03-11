@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS get_nft_detail(_token_id uint256);
-
-CREATE FUNCTION get_nft_detail(_token_id uint256)
+CREATE OR REPLACE FUNCTION get_nft_detail(_token_id uint256)
 RETURNS TABLE
 (
   token_id                                  uint256,

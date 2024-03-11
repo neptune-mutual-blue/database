@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS get_gauge_pools();
-
-CREATE FUNCTION get_gauge_pools()
+CREATE OR REPLACE FUNCTION get_gauge_pools()
 RETURNS TABLE
 (
   chain_id                                          numeric,
