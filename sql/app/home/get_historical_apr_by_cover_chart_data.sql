@@ -1,4 +1,4 @@
-DROP FUNCTION get_historical_apr_by_cover_chart_data();
+DROP FUNCTION IF EXISTS get_historical_apr_by_cover_chart_data();
 
 CREATE OR REPLACE FUNCTION get_historical_apr_by_cover_chart_data()
 RETURNS TABLE
@@ -66,7 +66,7 @@ BEGIN
   
   UPDATE _get_historical_apr_chart_data_result
   SET apr = (_get_historical_apr_chart_data_result.policy_fee_earned * 365) / (average(_get_historical_apr_chart_data_result.start_balance, _get_historical_apr_chart_data_result.end_balance) * _get_historical_apr_chart_data_result.duration)
-  WHERE _get_historical_apr_chart_data_result.> 0;
+  WHERE _get_historical_apr_chart_data_result.start_balance > 0;
   
   UPDATE _get_historical_apr_chart_data_result
   SET network_name = config_blockchain_network_view.nick_name
@@ -80,7 +80,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM get_historical_apr_by_cover_chart_data() ORDER BY APR DESC;
+-- SELECT * FROM get_historical_apr_by_cover_chart_data() ORDER BY APR DESC;
 
 
 

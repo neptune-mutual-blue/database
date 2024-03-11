@@ -55,7 +55,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM get_nft_detail(121411);
+-- SELECT * FROM get_nft_detail(121411);
 
 -- select * from nfts limit 1
 -- SELECT * FROM CHARACTERS

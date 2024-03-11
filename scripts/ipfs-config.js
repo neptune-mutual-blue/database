@@ -15,6 +15,8 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 //   SELECT info FROM cover.product_updated UNION ALL
 //   SELECT info FROM cover.cover_updated UNION ALL
 //   SELECT info FROM consensus.reported UNION ALL
+//   SELECT info FROM ve.liquidity_gauge_pool_initialized UNION ALL
+//   SELECT info FROM ve.liquidity_gauge_pool_set UNION ALL
 //   SELECT info FROM consensus.disputed
 // )
 // SELECT DISTINCT info

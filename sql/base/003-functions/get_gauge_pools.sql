@@ -139,7 +139,7 @@ $$
 LANGUAGE plpgsql;
 
 
-SELECT * FROM get_gauge_pools();
+-- SELECT * FROM get_gauge_pools();
 
 
 

@@ -1363,23 +1363,38 @@ CREATE INDEX vote_escrow_unlock_account_inx
 ON ve.vote_escrow_unlock(account);
 
 /*************************************************************************
-event LiquidityGaugePoolSet(bytes32 indexed key, address indexed triggeredBy, PoolInfo args);
+event LiquidityGaugePoolInitialized(bytes32 indexed key, address indexed initializedBy, tuple(bytes32 key, address stakingToken, address veToken, address rewardToken, address registry, tuple(string name, string info, uint256 epochDuration, uint256 veBoostRatio, uint256 platformFee, address treasury) poolInfo) args);
 *************************************************************************/
-CREATE TABLE ve.liquidity_gauge_pool_set
+CREATE TABLE ve.liquidity_gauge_pool_initialized
 (
   key                                               bytes32 NOT NULL,
-  triggered_by                                      address NOT NULL,
-  liquidity_gauge_pool                              address NOT NULL,
-  name                                              text NOT NULL,
-  info                                              bytes32 NOT NULL,
-  lockup_period_in_blocks                           uint256 NOT NULL,
-  epoch_duration                                    uint256 NOT NULL,
-  ve_boost_ratio                                    uint256 NOT NULL,
-  platform_fee                                      uint256 NOT NULL,
+  initialized_by                                    address NOT NULL,
   staking_token                                     address NOT NULL,
   ve_token                                          address NOT NULL,
   reward_token                                      address NOT NULL,
   registry                                          address NOT NULL,
+  name                                              text NOT NULL,
+  info                                              text NOT NULL,
+  epoch_duration                                    uint256 NOT NULL,
+  ve_boost_ratio                                    uint256 NOT NULL,
+  platform_fee                                      uint256 NOT NULL,
+  treasury                                          address NOT NULL
+) INHERITS(core.transactions);
+
+/*************************************************************************
+event LiquidityGaugePoolSet(bytes32 indexed key, address indexed triggeredBy, address liquidityGaugePool, tuple(bytes32 key, string name, string info, uint256 lockupPeriodInBlocks, uint256 epochDuration, uint256 veBoostRatio, uint256 platformFee, address stakingToken, address veToken, address rewardToken, address registry, address treasury) args);
+*************************************************************************/
+CREATE TABLE ve.liquidity_gauge_pool_set
+(
+  -- lockup_period_in_blocks                        hard coded to 100
+  key                                               bytes32 NOT NULL,
+  triggered_by                                      address NOT NULL,
+  liquidity_gauge_pool                              address NOT NULL,
+  name                                              text NOT NULL,
+  info                                              text NOT NULL,
+  epoch_duration                                    uint256 NOT NULL,
+  ve_boost_ratio                                    uint256 NOT NULL,
+  platform_fee                                      uint256 NOT NULL,
   treasury                                          address NOT NULL
 ) INHERITS(core.transactions);
 
@@ -1586,19 +1601,6 @@ ON ve.liquidity_gauge_withdrawn(account);
 
 CREATE INDEX liquidity_gauge_withdrawn_staking_token_inx
 ON ve.liquidity_gauge_withdrawn(staking_token);
-
-/*************************************************************************
-event LiquidityGaugePoolInitialized(address previousVeToken, address veToken, address previousRegistry, address registry, address previousTreasury, address treasury);
-*************************************************************************/
-CREATE TABLE ve.liquidity_gauge_pool_initialized
-(
-  previous_ve_token                                 address NOT NULL,
-  ve_token                                          address NOT NULL,
-  previous_registry                                 address NOT NULL,
-  registry                                          address NOT NULL,
-  previous_treasury                                 address NOT NULL,
-  treasury                                          address NOT NULL
-) INHERITS(core.transactions);
 
 CREATE TABLE core.role_admin_changed
 (
