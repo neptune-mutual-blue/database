@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS string_to_bytes32(_bytes32 text) CASCADE;
-
-CREATE FUNCTION string_to_bytes32(_string text)
+CREATE OR REPLACE FUNCTION string_to_bytes32(_string text)
 RETURNS text
 IMMUTABLE
 AS

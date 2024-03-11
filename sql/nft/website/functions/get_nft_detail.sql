@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS get_nft_detail(_token_id uint256);
-
-CREATE FUNCTION get_nft_detail(_token_id uint256)
+CREATE OR REPLACE FUNCTION get_nft_detail(_token_id uint256)
 RETURNS TABLE
 (
   token_id                                  uint256,
@@ -55,7 +53,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM get_nft_detail(121411);
+-- SELECT * FROM get_nft_detail(121411);
 
 -- select * from nfts limit 1
 -- SELECT * FROM CHARACTERS

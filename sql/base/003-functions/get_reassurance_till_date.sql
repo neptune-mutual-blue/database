@@ -85,5 +85,5 @@ END
 $$
 LANGUAGE plpgsql;
 
-SELECT * FROM get_reassurance_till_date(NOW());
+-- SELECT * FROM get_reassurance_till_date(NOW());
 

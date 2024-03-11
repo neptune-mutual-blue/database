@@ -1,12 +1,4 @@
-DROP FUNCTION IF EXISTS get_report_insight
-(
-  _chain_id                                       uint256,
-  _cover_key                                      bytes32,
-  _product_key                                    bytes32,
-  _incident_date                                  uint256
-);
-
-CREATE FUNCTION get_report_insight
+CREATE OR REPLACE FUNCTION get_report_insight
 (
   _chain_id                                       uint256,
   _cover_key                                      bytes32,
