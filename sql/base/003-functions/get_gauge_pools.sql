@@ -49,19 +49,19 @@ BEGIN
     IF(_r.action = 'add') THEN
       INSERT INTO _get_gauge_pools_result
       SELECT
-        liquidity_gauge_pool_set.chain_id,
-        liquidity_gauge_pool_set.key,
-        liquidity_gauge_pool_set.epoch_duration,
-        liquidity_gauge_pool_set.address,
-        liquidity_gauge_pool_set.staking_token,        
-        liquidity_gauge_pool_set.name,
-        liquidity_gauge_pool_set.info,
-        liquidity_gauge_pool_set.platform_fee,
-        liquidity_gauge_pool_set.staking_token,
-        liquidity_gauge_pool_set.lockup_period_in_blocks,
-        liquidity_gauge_pool_set.ve_boost_ratio
-      FROM ve.liquidity_gauge_pool_set
-      WHERE liquidity_gauge_pool_set.id = _r.id;
+        liquidity_gauge_pool_initialized.chain_id,
+        liquidity_gauge_pool_initialized.key,
+        liquidity_gauge_pool_initialized.epoch_duration,
+        liquidity_gauge_pool_initialized.address,
+        liquidity_gauge_pool_initialized.staking_token,        
+        liquidity_gauge_pool_initialized.name,
+        liquidity_gauge_pool_initialized.info,
+        liquidity_gauge_pool_initialized.platform_fee,
+        liquidity_gauge_pool_initialized.staking_token,
+        100 AS lockup_period_in_blocks,
+        liquidity_gauge_pool_initialized.ve_boost_ratio
+      FROM ve.liquidity_gauge_pool_initialized
+      WHERE liquidity_gauge_pool_initialized.id = _r.id;
     END IF;
     
     IF(_r.action = 'edit') THEN
@@ -70,7 +70,6 @@ BEGIN
         name = CASE WHEN COALESCE(liquidity_gauge_pool_set.name, '') = '' THEN _get_gauge_pools_result.name ELSE liquidity_gauge_pool_set.name END,
         info = CASE WHEN COALESCE(liquidity_gauge_pool_set.info, '') = '' THEN _get_gauge_pools_result.info ELSE liquidity_gauge_pool_set.info END,
         platform_fee = CASE WHEN COALESCE(liquidity_gauge_pool_set.platform_fee, 0) = 0 THEN _get_gauge_pools_result.platform_fee ELSE liquidity_gauge_pool_set.platform_fee END,
-        lockup_period_in_blocks = CASE WHEN COALESCE(liquidity_gauge_pool_set.lockup_period_in_blocks, 0) = 0 THEN _get_gauge_pools_result.lockup_period_in_blocks ELSE liquidity_gauge_pool_set.lockup_period_in_blocks END,
         ratio = CASE WHEN COALESCE(liquidity_gauge_pool_set.ve_boost_ratio, 0) = 0 THEN _get_gauge_pools_result.ratio ELSE liquidity_gauge_pool_set.ve_boost_ratio END
       FROM ve.liquidity_gauge_pool_set AS liquidity_gauge_pool_set
       WHERE _get_gauge_pools_result.key = liquidity_gauge_pool_set.key
@@ -116,19 +115,20 @@ BEGIN
   AND ve.gauge_set.chain_id = _get_gauge_pools_result.chain_id
   AND ve.gauge_set.epoch = (SELECT MAX(epoch) FROM ve.gauge_set);
   
+  UPDATE _get_gauge_pools_result
+  SET epoch_duration =
+  COALESCE
+  (
+    (
+      SELECT current
+      FROM ve.epoch_duration_updated
+      WHERE ve.epoch_duration_updated.key = _get_gauge_pools_result.key
+      AND ve.epoch_duration_updated.chain_id = _get_gauge_pools_result.chain_id    
+      ORDER BY ve.epoch_duration_updated.block_timestamp DESC
+      LIMIT 1
+    )
+  , _get_gauge_pools_result.epoch_duration);
 
-  -- @todo: The event EpochDurationUpdated hasn't been synchronized yet  
-  -- UPDATE _get_gauge_pools_result
-  -- SET epoch_duration =
-  -- (
-  --   SELECT current
-  --   FROM ve.epoch_duration_updated
-  --   WHERE ve.epoch_duration_updated.key = _get_gauge_pools_result.key
-  --   AND ve.epoch_duration_updated.chain_id = _get_gauge_pools_result.chain_id    
-  --   ORDER BY ve.epoch_duration_updated.block_timestamp DESC
-  --   LIMIT 1
-  -- );
-  
 
   RETURN QUERY
   SELECT * FROM _get_gauge_pools_result;
@@ -138,7 +138,4 @@ LANGUAGE plpgsql;
 
 
 -- SELECT * FROM get_gauge_pools();
-
-
-
 
