@@ -1,12 +1,15 @@
-CREATE OR REPLACE FUNCTION get_account_nft_info()
+CREATE OR REPLACE FUNCTION get_account_nft_info
+(
+  _account                        address
+)
 RETURNS TABLE
 (
-  account                                                   address,
-  unlocked_level                                            numeric,
-  minted_level                                              numeric,
-  token_id                                                  uint256,
-  nickname                                                  text,
-  persona_info                                              jsonb
+  account                                                     address,
+  unlocked_level                                              numeric,
+  minted_level                                                numeric,
+  token_id                                                    uint256,
+  nickname                                                    text,
+  persona_info                                                jsonb
 )
 AS
 $$
@@ -22,12 +25,15 @@ BEGIN
     persona_info                                              jsonb
   ) ON COMMIT DROP;
 
+  -- There could be an account with one of these criteria
+  -- minted soulbound token, but not set persona
+  -- set persona, but not minted soulbound token
+  -- minted soulbound token and set persona
   INSERT INTO _get_account_info_result(account, unlocked_level)
-  SELECT nft.merkle_root_update_details.account, MAX(level)
+  SELECT _account, COALESCE(MAX(level), 0)
   FROM nft.merkle_root_update_details
   WHERE nft.merkle_root_update_details.active = true
-  AND nft.merkle_root_update_details.family IS NOT NULL
-  GROUP BY nft.merkle_root_update_details.account;
+  AND nft.merkle_root_update_details.account = _account;
   
   UPDATE _get_account_info_result
   SET token_id = nft.soulbound_minted.token_id
@@ -60,3 +66,5 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+-- SELECT * FROM get_account_nft_info('0x0000000000000000000000000000000000000000')
