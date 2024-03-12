@@ -1,2 +1,8 @@
 node_modules
 .*
+build/*
+
+## Allows
+!build/all.sql
+!.github
+!.husky
