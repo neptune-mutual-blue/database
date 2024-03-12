@@ -1,18 +1,20 @@
-DROP VIEW IF EXISTS gauge_pool_lifecycle_view;
-
-CREATE VIEW gauge_pool_lifecycle_view
+CREATE OR REPLACE VIEW gauge_pool_lifecycle_view
 AS
 SELECT
-  add_or_edit.id,
-  add_or_edit.block_number,
-  add_or_edit.chain_id,
-  CASE
-    WHEN get_gauge_pool_last_added_block_number(add_or_edit.chain_id, add_or_edit.key) != add_or_edit.block_number::numeric
-    THEN 'edit'
-    ELSE 'add'
-  END AS action,
-  add_or_edit.key
-FROM ve.liquidity_gauge_pool_set AS add_or_edit
+  ve.liquidity_gauge_pool_initialized.id,
+  ve.liquidity_gauge_pool_initialized.block_number,
+  ve.liquidity_gauge_pool_initialized.chain_id,
+  'add' AS action,
+  ve.liquidity_gauge_pool_initialized.key
+FROM ve.liquidity_gauge_pool_initialized
+UNION ALL
+SELECT
+	ve.liquidity_gauge_pool_set.id,
+  ve.liquidity_gauge_pool_set.block_number,
+  ve.liquidity_gauge_pool_set.chain_id,
+  'edit' AS action,
+  ve.liquidity_gauge_pool_set.key
+FROM ve.liquidity_gauge_pool_set
 UNION ALL
 SELECT
   ve.gauge_controller_registry_pool_deactivated.id,
