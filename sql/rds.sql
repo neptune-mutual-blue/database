@@ -50,6 +50,21 @@ CREATE SCHEMA nft;
 DROP TYPE IF EXISTS product_status_type CASCADE;
 CREATE TYPE product_status_type AS ENUM ('Normal','Stopped','IncidentHappened','FalseReporting','Claimable');
 
+DO 
+$$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'readonlyuser') THEN
+    CREATE ROLE readonlyuser NOLOGIN;
+  END IF;
+  
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'writeuser') THEN
+    CREATE ROLE writeuser NOLOGIN;
+    GRANT readonlyuser TO writeuser;
+  END IF;
+END
+$$
+LANGUAGE plpgsql;
+
 CREATE TABLE core.locks
 (
   namespace                                         text NOT NULL PRIMARY KEY,
