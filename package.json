@@ -10,7 +10,7 @@
     "app": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=app",
     "explorer": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=explorer",
     "nft": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=nft",
-    "all": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=base,app,explorer,nft --name=all",
+    "all": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=base,app,explorer,nft --name=db",
     "prepare": "husky"
   },
   "devDependencies": {

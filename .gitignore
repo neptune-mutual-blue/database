@@ -3,6 +3,6 @@ node_modules
 build/*
 
 ## Allows
-!build/all.sql
+!build/db.sql
 !.github
 !.husky

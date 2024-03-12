@@ -29,6 +29,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y postgresql-client
-        psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -a -f build/all.sql
+        psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -a -f build/db.sql
       env:
         PGPASSWORD: postgres
