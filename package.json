@@ -9,12 +9,15 @@
     "generate": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=base",
     "app": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=app",
     "explorer": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=explorer",
-    "nft": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=nft"
+    "nft": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=nft",
+    "all": "node -r dotenv/config --experimental-specifier-resolution=node ./generate.js --type=base,app,explorer,nft --name=allzzz",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@neptunemutual/sdk": "^0.6.1-beta",
     "dotenv": "^16.0.3",
     "ethers": "5.5.2",
+    "husky": "^9.0.11",
     "standard": "^17.0.0"
   }
 }

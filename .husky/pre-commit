@@ -1,0 +1,2 @@
+yarn all
+git add build/all.sql

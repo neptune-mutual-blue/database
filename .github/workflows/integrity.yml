@@ -1,0 +1,34 @@
+name: SQL Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-sql-syntax:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Validate SQL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        psql -h localhost -U postgres -d postgres -a -f build/all.sql
+      env:
+        PGPASSWORD: postgres
