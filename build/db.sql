@@ -1624,6 +1624,12 @@ CREATE TABLE core.role_admin_changed
   new_admin_role                                    bytes32 NOT NULL
 ) INHERITS(core.transactions);
 
+CREATE TABLE core.ownership_transferred
+(
+  previous_owner                                    bytes32 NOT NULL,
+  new_owner                                         bytes32 NOT NULL
+) INHERITS(core.transactions);
+
 CREATE TABLE core.transfer
 (
   "from"                                            address NOT NULL,
