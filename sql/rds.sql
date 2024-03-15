@@ -1617,6 +1617,13 @@ ON ve.liquidity_gauge_withdrawn(account);
 CREATE INDEX liquidity_gauge_withdrawn_staking_token_inx
 ON ve.liquidity_gauge_withdrawn(staking_token);
 
+CREATE TABLE approval_for_all
+(
+  owner                                             address NOT NULL,
+  operator                                          address NOT NULL,
+  approved                                          boolean NOT NULL
+) INHERITS (core.transactions);
+
 CREATE TABLE core.role_admin_changed
 (
   role                                              bytes32 NOT NULL,
@@ -1666,7 +1673,8 @@ BEGIN
   RETURN factory.vault_deployed.cover_key
   FROM factory.vault_deployed
   WHERE factory.vault_deployed.chain_id = _chain_id
-  AND factory.vault_deployed.vault = _vault;
+  AND factory.vault_deployed.vault = _vault
+  LIMIT 1;
 END
 $$
 LANGUAGE plpgsql;
