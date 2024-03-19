@@ -1,19 +1,13 @@
-DROP FUNCTION IF EXISTS get_policy_ceiling
-(
-  _chain_id uint256,
-  _cover_key bytes32
-) CASCADE;
-
-CREATE FUNCTION get_policy_ceiling
+CREATE OR REPLACE FUNCTION get_policy_ceiling
 (
   _chain_id uint256,
   _cover_key bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS 
 $$ 
-  DECLARE _ceiling uint256;
+  DECLARE _ceiling numeric;
 BEGIN
   SELECT policy.cover_policy_rate_set.ceiling
   INTO _ceiling

@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION get_tvl_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
@@ -24,13 +24,12 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION get_tvl_till_date
 (
   _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -60,7 +59,7 @@ CREATE OR REPLACE FUNCTION get_tvl_till_date
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$

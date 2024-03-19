@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION get_commitment
   _cover_key                                  bytes32,
   _product_key                                bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -66,7 +66,7 @@ CREATE FUNCTION get_sum_commitment
   _chain_id                                   uint256,
   _cover_key                                  bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$

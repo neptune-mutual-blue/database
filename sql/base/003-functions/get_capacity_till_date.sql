@@ -1,18 +1,9 @@
-DROP FUNCTION IF EXISTS get_capacity_till_date
-(
-  _date                                     TIMESTAMP WITH TIME ZONE
-) CASCADE;
-
-DROP FUNCTION IF EXISTS get_total_capacity_by_date
-(
-  _date                                     TIMESTAMP WITH TIME ZONE
-) CASCADE;
 
 CREATE OR REPLACE FUNCTION get_total_capacity_by_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
