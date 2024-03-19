@@ -1,7 +1,5 @@
-DROP FUNCTION IF EXISTS get_claim_platform_fee(_chain_id uint256) CASCADE;
-
-CREATE FUNCTION get_claim_platform_fee(_chain_id uint256)
-RETURNS uint256
+CREATE OR REPLACE FUNCTION get_claim_platform_fee(_chain_id uint256)
+RETURNS numeric
 STABLE
 AS
 $$

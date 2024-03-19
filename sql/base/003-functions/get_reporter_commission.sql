@@ -1,11 +1,9 @@
-DROP FUNCTION IF EXISTS get_reporter_commission(_chain_id uint256) CASCADE;
-
-CREATE FUNCTION get_reporter_commission(_chain_id uint256)
-RETURNS uint256
+CREATE OR REPLACE FUNCTION get_reporter_commission(_chain_id uint256)
+RETURNS numeric
 STABLE
 AS
 $$
-  DECLARE _commission                      uint256;
+  DECLARE _commission                      numeric;
 BEGIN
   SELECT consensus.reporter_commission_set.current
   INTO _commission

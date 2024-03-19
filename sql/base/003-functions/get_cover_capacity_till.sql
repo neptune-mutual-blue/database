@@ -1,34 +1,19 @@
-DROP FUNCTION IF EXISTS get_cover_capacity_till
-(
-  _chain_id                                           uint256,
-  _cover_key                                          bytes32,
-  _till                                               TIMESTAMP WITH TIME ZONE
-) CASCADE;
-
-DROP FUNCTION IF EXISTS get_cover_capacity_till
-(
-  _chain_id                                           uint256,
-  _cover_key                                          bytes32,
-  _product_key                                        bytes32,
-  _till                                               TIMESTAMP WITH TIME ZONE
-) CASCADE;
-
-CREATE FUNCTION get_cover_capacity_till
+CREATE OR REPLACE FUNCTION get_cover_capacity_till
 (
   _chain_id                                           uint256,
   _cover_key                                          bytes32,
   _product_key                                        bytes32,
   _till                                               TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
-  DECLARE _stablecoin_balance                         uint256;
+  DECLARE _stablecoin_balance                         numeric;
   DECLARE _leverage                                   uint256;
   DECLARE _capital_efficiency                         numeric;
   DECLARE _average_capital_efficiency                 numeric;
-  DECLARE _capacity                                   uint256;
+  DECLARE _capacity                                   numeric;
   DECLARE _siblings                                   integer;
   DECLARE _multiplier                                 integer = 10000;
 BEGIN

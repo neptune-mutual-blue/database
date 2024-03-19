@@ -2,12 +2,12 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
-  DECLARE _added uint256;
-  DECLARE _capitalized uint256;
+  DECLARE _added numeric;
+  DECLARE _capitalized numeric;
 BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
@@ -29,12 +29,12 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
-  DECLARE _added uint256;
-  DECLARE _capitalized uint256;
+  DECLARE _added numeric;
+  DECLARE _capitalized numeric;
 BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
@@ -59,12 +59,12 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
-  DECLARE _added uint256;
-  DECLARE _capitalized uint256;
+  DECLARE _added numeric;
+  DECLARE _capitalized numeric;
 BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added

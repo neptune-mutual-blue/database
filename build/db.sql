@@ -3486,17 +3486,17 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION get_stablecoin_value(_chain_id uint256, _amount uint256)
-RETURNS numeric
+CREATE OR REPLACE FUNCTION get_stablecoin_value(_chain_id uint256, _amount numeric(100, 32))
+RETURNS numeric(100, 32)
 IMMUTABLE
 AS
 $$
 BEGIN
-  IF(_chain_id = 56) THEN
-    RETURN _amount / POWER(10, 18);  
+  IF(_chain_id IN (56)) THEN
+    RETURN _amount / POWER(10, 18)::numeric(100, 32);  
   END IF;
 
-  RETURN _amount / POWER(10, 6);
+  RETURN _amount / POWER(10, 6)::numeric(100, 32);
 END
 $$
 LANGUAGE plpgsql;
@@ -3528,7 +3528,7 @@ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION ether(amount uint256)
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
@@ -3540,7 +3540,7 @@ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION wei_to_ether(amount uint256)
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
@@ -4159,7 +4159,7 @@ CREATE FUNCTION cxtoken_to_stablecoin_units
   _chain_id                                         uint256,
   _amount_in_cxtoken                                uint256
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -4281,7 +4281,7 @@ CREATE OR REPLACE FUNCTION get_commitment
   _cover_key                                  bytes32,
   _product_key                                bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -4343,7 +4343,7 @@ CREATE FUNCTION get_sum_commitment
   _chain_id                                   uint256,
   _cover_key                                  bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -5716,7 +5716,7 @@ CREATE OR REPLACE FUNCTION get_total_capacity_by_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -5782,7 +5782,7 @@ LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS get_claim_platform_fee(_chain_id uint256) CASCADE;
 
 CREATE FUNCTION get_claim_platform_fee(_chain_id uint256)
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -5823,15 +5823,15 @@ CREATE FUNCTION get_cover_capacity_till
   _product_key                                        bytes32,
   _till                                               TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
-  DECLARE _stablecoin_balance                         uint256;
+  DECLARE _stablecoin_balance                         numeric;
   DECLARE _leverage                                   uint256;
   DECLARE _capital_efficiency                         numeric;
   DECLARE _average_capital_efficiency                 numeric;
-  DECLARE _capacity                                   uint256;
+  DECLARE _capacity                                   numeric;
   DECLARE _siblings                                   integer;
   DECLARE _multiplier                                 integer = 10000;
 BEGIN
@@ -6164,11 +6164,11 @@ LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32);
 
 CREATE FUNCTION get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32)
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
-  DECLARE _min_stake                            uint256;
+  DECLARE _min_stake                            numeric;
 BEGIN
   SELECT get_npm_value(consensus.first_reporting_stake_set.current)
   INTO _min_stake
@@ -6228,11 +6228,11 @@ CREATE FUNCTION get_policy_ceiling
   _chain_id uint256,
   _cover_key bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS 
 $$ 
-  DECLARE _ceiling uint256;
+  DECLARE _ceiling numeric;
 BEGIN
   SELECT policy.cover_policy_rate_set.ceiling
   INTO _ceiling
@@ -6281,11 +6281,11 @@ CREATE FUNCTION get_policy_floor
   _chain_id uint256,
   _cover_key bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS 
 $$ 
-  DECLARE _floor uint256;
+  DECLARE _floor numeric;
 BEGIN
   SELECT policy.cover_policy_rate_set.floor
   INTO _floor
@@ -6435,12 +6435,12 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
-  DECLARE _added uint256;
-  DECLARE _capitalized uint256;
+  DECLARE _added numeric;
+  DECLARE _capitalized numeric;
 BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
@@ -6462,12 +6462,12 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
-  DECLARE _added uint256;
-  DECLARE _capitalized uint256;
+  DECLARE _added numeric;
+  DECLARE _capitalized numeric;
 BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
@@ -6492,12 +6492,12 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
-  DECLARE _added uint256;
-  DECLARE _capitalized uint256;
+  DECLARE _added numeric;
+  DECLARE _capitalized numeric;
 BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount))
   INTO _added
@@ -6524,11 +6524,11 @@ LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS get_reporter_commission(_chain_id uint256) CASCADE;
 
 CREATE FUNCTION get_reporter_commission(_chain_id uint256)
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
-  DECLARE _commission                      uint256;
+  DECLARE _commission                      numeric;
 BEGIN
   SELECT consensus.reporter_commission_set.current
   INTO _commission
@@ -6633,7 +6633,7 @@ CREATE OR REPLACE FUNCTION get_tvl_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
@@ -6655,13 +6655,12 @@ END
 $$
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION get_tvl_till_date
 (
   _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -6691,7 +6690,7 @@ CREATE OR REPLACE FUNCTION get_tvl_till_date
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -6714,7 +6713,6 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION get_user_milestones
 (
   _account                        address
@@ -6786,7 +6784,7 @@ CREATE OR REPLACE FUNCTION sum_cover_purchased_during
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -6812,7 +6810,7 @@ CREATE OR REPLACE FUNCTION sum_cover_purchased_during
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -6839,7 +6837,7 @@ CREATE OR REPLACE FUNCTION sum_cover_purchased_during
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -6860,9 +6858,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-DROP VIEW IF EXISTS capacity_view;
-
-CREATE VIEW capacity_view
+CREATE OR REPLACE VIEW capacity_view
 AS
 WITH chains
 AS

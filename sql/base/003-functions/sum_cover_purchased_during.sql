@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION sum_cover_purchased_during
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION sum_cover_purchased_during
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$
@@ -56,7 +56,7 @@ CREATE OR REPLACE FUNCTION sum_cover_purchased_during
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$

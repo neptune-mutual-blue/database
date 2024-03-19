@@ -1,19 +1,13 @@
-DROP FUNCTION IF EXISTS get_policy_floor
-(
-  _chain_id uint256,
-  _cover_key bytes32
-) CASCADE;
-
-CREATE FUNCTION get_policy_floor
+CREATE OR REPLACE FUNCTION get_policy_floor
 (
   _chain_id uint256,
   _cover_key bytes32
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS 
 $$ 
-  DECLARE _floor uint256;
+  DECLARE _floor numeric;
 BEGIN
   SELECT policy.cover_policy_rate_set.floor
   INTO _floor

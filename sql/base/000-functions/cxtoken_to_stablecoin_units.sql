@@ -1,15 +1,9 @@
-DROP FUNCTION IF EXISTS cxtoken_to_stablecoin_units
-(
-  _chain_id                                         uint256,
-  _amount_in_cxtoken                                uint256
-) CASCADE;
-
-CREATE FUNCTION cxtoken_to_stablecoin_units
+CREATE OR REPLACE FUNCTION cxtoken_to_stablecoin_units
 (
   _chain_id                                         uint256,
   _amount_in_cxtoken                                uint256
 )
-RETURNS uint256
+RETURNS numeric
 STABLE
 AS
 $$

@@ -1,11 +1,9 @@
-DROP FUNCTION IF EXISTS get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32);
-
-CREATE FUNCTION get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32)
-RETURNS uint256
+CREATE OR REPLACE FUNCTION get_min_first_reporting_stake(_chain_id uint256, _cover_key bytes32)
+RETURNS numeric
 STABLE
 AS
 $$
-  DECLARE _min_stake                            uint256;
+  DECLARE _min_stake                            numeric;
 BEGIN
   SELECT get_npm_value(consensus.first_reporting_stake_set.current)
   INTO _min_stake

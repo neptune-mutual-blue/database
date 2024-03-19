@@ -3528,7 +3528,7 @@ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION ether(amount uint256)
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
@@ -3540,7 +3540,7 @@ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION wei_to_ether(amount uint256)
-RETURNS uint256
+RETURNS numeric
 IMMUTABLE
 AS
 $$
@@ -3561,4 +3561,5 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
 
