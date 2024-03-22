@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS get_protocol_contracts();
-
-CREATE FUNCTION get_protocol_contracts()
+CREATE OR REPLACE FUNCTION get_protocol_contracts()
 RETURNS TABLE
 (
   chain_id                                          uint256,
@@ -29,7 +27,11 @@ BEGIN
   INSERT INTO _get_protocol_contracts_result(chain_id, namespace, contract_address, added_on, transaction_hash)
   SELECT
     protocol.contract_added.chain_id,
-    protocol.contract_added.namespace,
+    CASE
+      WHEN protocol.contract_added.namespace ILIKE '0x%'
+      THEN bytes32_to_string(protocol.contract_added.namespace)
+      ELSE protocol.contract_added.namespace
+    END,
     protocol.contract_added.contract_address,
     protocol.contract_added.block_timestamp,
     protocol.contract_added.transaction_hash
