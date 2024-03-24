@@ -8,6 +8,7 @@ RETURNS TABLE
   staking_token                                     address,
   name                                              text,
   info                                              text,
+  info_details                                      text,
   platform_fee                                      uint256,
   token                                             address,
   lockup_period_in_blocks                           uint256,
@@ -30,6 +31,7 @@ BEGIN
     staking_token                                   address,
     name                                            text,
     info                                            text,
+    info_details                                    text,
     platform_fee                                    uint256,
     token                                           address,
     lockup_period_in_blocks                         uint256,
@@ -98,6 +100,12 @@ BEGIN
     END IF;
   END LOOP;
   
+  UPDATE _get_gauge_pools_result
+  SET info_details = config_known_ipfs_hashes_view.ipfs_details
+  FROM config_known_ipfs_hashes_view
+  WHERE 1 = 1
+  AND config_known_ipfs_hashes_view.ipfs_hash = _get_gauge_pools_result.info;
+
   --@todo: drop this when address bug of the `ve.liquidity_gauge_pool_set` is fixed
   UPDATE _get_gauge_pools_result
   SET pool_address = ve.liquidity_gauge_pool_added.pool
