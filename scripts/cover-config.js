@@ -3,6 +3,8 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import * as config from './config.js'
+
 import { utils, initialize } from '@neptunemutual/sdk'
 import { ethers } from 'ethers'
 import { saveToDiskRaw } from '../src/util/io.js'
@@ -32,33 +34,13 @@ const covers = [
   { chainId: 80001, coverKey: '0x7072696d65000000000000000000000000000000000000000000000000000000' }
 ]
 
-const rpcs = {
-  1: 'https://ethereum.publicnode.com',
-  42161: 'https://arb1.arbitrum.io/rpc',
-  56: 'https://bsc-dataseed.bnbchain.org',
-  80001: 'https://rpc-mumbai.maticvigil.com'
-}
-// const rpcs = {
-//   "1": "https://eth.llamarpc.com",
-//   "42161": "https://arbitrum.llamarpc.com",
-//   "56": "https://binance.llamarpc.com",
-//   "80001": "https://polygon.llamarpc.com",
-// }
-
-initialize({
-  store: {
-    1: '0x6579dF8f986e4A982F200DAfa0c1b955A438f620',
-    56: '0x6579dF8f986e4A982F200DAfa0c1b955A438f620',
-    42161: '0x6579dF8f986e4A982F200DAfa0c1b955A438f620',
-    80001: '0xA483aF3eD0DF092EC4b9b93DA400f84922c92Be9'
-  }
-})
+initialize({ store: config.store })
 
 const selectStatements = []
 let maxValueLengthTillNow = 0
 
 const getSelectStatement = async (chainId, coverKey) => {
-  const rpc = rpcs[chainId]
+  const rpc = config.rpcs[chainId]
   const provider = new ethers.providers.JsonRpcProvider(rpc)
 
   console.log('Fetching', chainId, ethers.utils.parseBytes32String(coverKey))
@@ -324,12 +306,9 @@ export async function updateCoverConfigView () {
   }
 
   const content =
-`DROP VIEW IF EXISTS config_cover_view CASCADE;
-
-CREATE VIEW config_cover_view
+`CREATE OR REPLACE VIEW config_cover_view
 AS
 ${selectStatements.join('\nUNION ALL\n')};\n`
 
-  saveToDiskRaw(path.resolve(__dirname, '../sql/base/000-config/0.config_cover_view.sql'), content)
   saveToDiskRaw(path.resolve(__dirname, '../sql/base/001-config/0.config_cover_view.sql'), content)
 }

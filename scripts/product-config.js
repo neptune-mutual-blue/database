@@ -3,6 +3,8 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import * as config from './config.js'
+
 import { utils, initialize } from '@neptunemutual/sdk'
 import { ethers } from 'ethers'
 import { saveToDiskRaw } from '../src/util/io.js'
@@ -76,27 +78,13 @@ const products = [
   { chainId: 80001, coverKey: '0x7072696d65000000000000000000000000000000000000000000000000000000', productKey: '0x756e69737761702d763200000000000000000000000000000000000000000000' }
 ]
 
-const rpcs = {
-  1: 'https://ethereum.publicnode.com',
-  42161: 'https://arb1.arbitrum.io/rpc',
-  56: 'https://bsc-dataseed.bnbchain.org',
-  80001: 'https://rpc-mumbai.maticvigil.com'
-}
-
-initialize({
-  store: {
-    1: '0x6579dF8f986e4A982F200DAfa0c1b955A438f620',
-    56: '0x6579dF8f986e4A982F200DAfa0c1b955A438f620',
-    42161: '0x6579dF8f986e4A982F200DAfa0c1b955A438f620',
-    80001: '0xA483aF3eD0DF092EC4b9b93DA400f84922c92Be9'
-  }
-})
+initialize({ store: config.store })
 
 const selectStatements = []
 let maxValueLengthTillNow = 0
 
 const getCoverProductData = async (chainId, coverKey, productKey) => {
-  const rpc = rpcs[chainId]
+  const rpc = config.rpcs[chainId]
   const provider = new ethers.providers.JsonRpcProvider(rpc)
 
   console.log('Fetching', chainId, ethers.utils.parseBytes32String(coverKey), ethers.utils.parseBytes32String(productKey))
@@ -199,9 +187,7 @@ export async function updateProductConfigView () {
   }
 
   const content = (
-`DROP VIEW IF EXISTS config_product_view CASCADE;
-
-CREATE VIEW config_product_view
+`CREATE OR REPLACE VIEW config_product_view
 AS
 ${selectStatements.join('\nUNION ALL\n')};\n`
   )

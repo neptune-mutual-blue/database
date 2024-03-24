@@ -1,6 +1,4 @@
-DROP VIEW IF EXISTS config_cover_view CASCADE;
-
-CREATE VIEW config_cover_view
+CREATE OR REPLACE VIEW config_cover_view
 AS
 SELECT
   1                              AS chain_id,
