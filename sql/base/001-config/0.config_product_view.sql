@@ -1,6 +1,4 @@
-DROP VIEW IF EXISTS config_product_view CASCADE;
-
-CREATE VIEW config_product_view
+CREATE OR REPLACE VIEW config_product_view
 AS
 SELECT
   1                                        AS chain_id,

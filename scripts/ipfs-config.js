@@ -52,6 +52,7 @@ const hashes = [
   'QmfD3Pp6tockqnhzzDLT1TDiZJZ7B4o56QY6aSepYGduDP',
   'QmfDdLWy3DdY5GAqnWJ8VoXD24Uv9AAssQeHrrnk6uu1Ve',
   'QmfEViRmvDaE8GaGWrgEjkAHsTx9Dmcsiwtu2TTYfi8M9Y',
+  'QmNcZcTr28zvyHMWjBoumzUq5E6HqnLujVcYADiMBpMUgw',
   'QmNkoMt274zKMXFz5cKzNUNvfXNFpBgm3nZTTFKA47wmDu',
   'QmNrtsqPhdDwNZwsxyjPjgFzD1XM2VvLPhEiTMu9uiikXM',
   'QmNTWRJnb1Luk4PwbqGZ3XY78bGRHeU7vw95HqmoySDnQa',
@@ -63,6 +64,7 @@ const hashes = [
   'QmPJHouJz6vx1JWX4ZG93CSLTp9wuM1JS6cQJz7tzsE4fd',
   'QmPmBngN7neCy2ZGJyvu64drGscBjptF4x1QNWgRQiZCuF',
   'QmPoihzcsB7P1gjFmm8XQKt7ydnNnLgiWhjWnjaMJnHhiQ',
+  'QmPUaeCC6Di4SEz8jJApvrqeThUchCXXBgBZ4EHbWFzcyv',
   'QmPuZBJ4CDXs71KmQaUtBLWTLHD4kWBH9N79mGgoZXkQNK',
   'QmQVtftRbnz7imWHAkc1q8jiZbRMDeB5kkiXXf8swWQf61',
   'QmQY5QPMmz2kizsV6WDZC5pzMsHF9rVFJyWLS5irTRyF9T',
@@ -93,29 +95,7 @@ const hashes = [
   'QmYyjCcdjmRAB21EjAVPBWe2GAuNWGeMa9M7L23DzQ3f3y',
   'QmYzbk1mWWodnUtCZ8uUwMuLosDXuoMjKpKBECf9D8UF4t',
   'QmZ9cjxk8ye3qui8JEgPjxDaFF48CbxNswtCfBMTLKnaj6',
-  'QmZXDq4Cn9ZnEGhm68UN7HLpuxduesH5cx6QrhWuRccJLY',
-  'QmNTWRJnb1Luk4PwbqGZ3XY78bGRHeU7vw95HqmoySDnQa',
-  'QmNrtsqPhdDwNZwsxyjPjgFzD1XM2VvLPhEiTMu9uiikXM',
-  'QmPiKWDUPVUJuW7bpqVpXRUyeC1rr3HNu9cUFrCE114BSB',
-  'QmQY5QPMmz2kizsV6WDZC5pzMsHF9rVFJyWLS5irTRyF9T',
-  'QmRmw7C2sHCLraMjByQec9xN7PXf3kTafdsc7gpTw7BrYa',
-  'QmTwXYSsMjEZFCCcsJx7JS89Rs4gezQvgqEhf7rb7tm3z1',
-  'QmVSGRGf2xrCN9U76G8S7BN9bhZbi74wX9gkDnujCixasS',
-  'QmWBQG45NLNiWoQYFA2RYs6fF8PQiQG8E9Xd5kgHY8jReg',
-  'QmWJjgxNEJ1Ue3mHqGeiaHn91EDJW4JBaKsvFhdCHHsWBK',
-  'QmXFX5NCii3nwPtVw5Ax7q73JeTS5oZnpqGPCnz33TGC2Y',
-  'QmXPkuacaiXrh9aUdiMybBmTjJbZjSEgqq7CnetQuTywVG',
-  'QmYzbk1mWWodnUtCZ8uUwMuLosDXuoMjKpKBECf9D8UF4t',
-  'QmaKba8ZJdvVHTxXDD8ycajgzXwG1zSbGHD5fvnhHyyHJx',
-  'Qmbuk5Bz1WFL7N3fPiPeofXrjdTH9owa97QXVstDrCYg8v',
-  'QmcGnscy5Mfdu6sc8sLWdHTMgjEuXS5rMZbc3MzWEV3yJq',
-  'QmcyCnFeKwM7mnvz4w3x7cvcjJ1HD9uHGrTv8bdZWc1rDi',
-  'QmdpPqKV1QVxjq21FHa4UP7Hn4urWAK23BWaYxyWoLvUkP',
-  'Qme5v1qf7tBZWASYpBMBzQ3shB61KXJwAKrDEuFcyrjSAn',
-  'QmeUY4Lo9VuRL2Fr5aftCv21rLGbuDMB8tg7LkiTpUeaKX',
-  'Qmeu6eZfyQt25bW6JWWqwWPVBGythbBnFZEFytwY23iRgc',
-  'QmfD3Pp6tockqnhzzDLT1TDiZJZ7B4o56QY6aSepYGduDP',
-  'QmfEViRmvDaE8GaGWrgEjkAHsTx9Dmcsiwtu2TTYfi8M9Y'
+  'QmZXDq4Cn9ZnEGhm68UN7HLpuxduesH5cx6QrhWuRccJLY'
 ]
 
 const selectStatements = []
@@ -153,9 +133,7 @@ export async function updateIpfsConfigView () {
   }
 
   const content = (
-`DROP VIEW IF EXISTS config_known_ipfs_hashes_view CASCADE;
-
-CREATE VIEW config_known_ipfs_hashes_view
+`CREATE OR REPLACE VIEW config_known_ipfs_hashes_view
 AS
 ${selectStatements.join(' UNION ALL\n')};\n`
   )

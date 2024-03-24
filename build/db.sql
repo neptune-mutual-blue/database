@@ -4512,9 +4512,7 @@ SELECT 'cns:liquidity:engine' AS namespace,         'LiquidityEngine' AS contrac
 SELECT 'cns:cover:vault' AS namespace,              'Vault' AS contract_name;
 
 
-DROP VIEW IF EXISTS config_cover_view CASCADE;
-
-CREATE VIEW config_cover_view
+CREATE OR REPLACE VIEW config_cover_view
 AS
 SELECT
   1                              AS chain_id,
@@ -4751,9 +4749,7 @@ SELECT 'QmYzbk1mWWodnUtCZ8uUwMuLosDXuoMjKpKBECf9D8UF4t', '{"coverKey":"0x6465666
 SELECT 'QmZ9cjxk8ye3qui8JEgPjxDaFF48CbxNswtCfBMTLKnaj6', '{"coverKey":"0x706f70756c61722d646566692d61707073000000000000000000000000000000","productKey":"0x636f6d706f756e642d7632000000000000000000000000000000000000000000","productName":"Compound Finance","requiresWhitelist":false,"efficiency":"7000","tags":["borrowing","loan","interest","interest-bearing","lending","yield","staking"],"about":"Compound  is a decentralized non-custodial liquidity protocol on Ethereum where users can participate as depositors or borrowers. Depositors provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) fashion.","blockchains":[{"chainId":1,"name":"Main Ethereum Network"}],"parameters":[{"parameter":"Cover Policy Conditions","type":"condition","text":"This cover is not a contract of insurance. Cover is provided on a parametric basis and the decision as to whether or not an incident is validated is determined by Neptune Mutual’s incident reporting and resolution process whereby the result is based on the number of NPM tokens or vouchers staked by the community in the resolution process; this incident reporting and validation process is community driven, but in exceptional circumstances can be overridden by the Neptune Mutual Association in order to protect against certain types of on-chain consensus attacks.","list":{"type":"unordered","items":["This policy relates exclusively to the Compound V2 protocol deployed on the Ethereum blockchain.","To be eligible for a claim, policyholder must hold at least 99 NPM tokens in the wallet used for the policy transaction for the full duration of the cover policy."]}},{"parameter":"Cover Parameters","type":"parameter","text":"All of the following parameters must be applicable for the policy to be validated:","list":{"type":"ordered","items":["Minimum total loss of user funds from the reported incident should exceed $5 million.","The designated protocol suffers a hack of user funds in which the user funds are permanently and irrecoverably stolen from the protocol.","The loss arises from a smart contract vulnerability.","The loss must arise from one of the following blockchains: Ethereum."]}},{"parameter":"Cover Exclusions","type":"exclusion","list":{"type":"ordered","items":["Incident on any blockchain that is not supported by this cover.","Frontend, hosting, server or network infrastructure, database, DNS server, CI/CD, and/or supply-chain attacks.","All exclusions present in the standard terms and conditions."]}}],"links":{"website":"https://compound.finance/","discord":"https://discord.com/invite/fq6JSPkpJn","github":"https://github.com/compound-finance/compound-protocol","blog":"https://medium.com/compound-finance","twitter":"https://twitter.com/compoundfinance","app":"https://app.compound.finance/"},"resolutionSources":[{"text":"Compound Twitter","uri":"https://twitter.com/compoundfinance"},{"text":"Neptune Mutual Twitter","uri":"https://twitter.com/neptunemutual"}]}' UNION ALL
 SELECT 'QmZXDq4Cn9ZnEGhm68UN7HLpuxduesH5cx6QrhWuRccJLY', '{"coverKey":"0x706f70756c61722d646566692d61707073000000000000000000000000000000","productKey":"0x756e69737761702d763300000000000000000000000000000000000000000000","productName":"Uniswap v3","requiresWhitelist":false,"efficiency":"9000","tags":["exchange","dex","swap","nft"],"about":"The Uniswap protocol is a peer-to-peer system designed for exchanging cryptocurrencies (ERC-20 Tokens) on the Ethereum blockchain. The protocol is implemented as a set of persistent, non-upgradable smart contracts; designed to prioritize censorship resistance, security, self-custody, and to function without any trusted intermediaries who may selectively restrict access.","blockchains":[{"chainId":1,"name":"Main Ethereum Network"},{"chainId":42161,"name":"Arbitrum"}],"parameters":[{"parameter":"Cover Policy Conditions","type":"condition","text":"This cover is not a contract of insurance. Cover is provided on a parametric basis and the decision as to whether or not an incident is validated is determined by Neptune Mutual’s incident reporting and resolution process whereby the result is based on the number of NPM tokens or vouchers staked by the community in the resolution process; this incident reporting and validation process is community driven, but in exceptional circumstances can be overridden by the Neptune Mutual Association in order to protect against certain types of on-chain consensus attacks.","list":{"type":"unordered","items":["This policy relates exclusively to the Uniswap V3 deployed on the Ethereum and Arbitrum blockchain.","To be eligible for a claim, policyholder must hold at least 49 NPM tokens in the wallet used for the policy transaction for the full duration of the cover policy."]}},{"parameter":"Cover Parameters","type":"parameter","text":"All of the following parameters must be applicable for the policy to be validated:","list":{"type":"ordered","items":["Minimum total loss of user funds from the reported incident should exceed $5 million.","The designated protocol suffers a hack of user funds in which the user funds are permanently and irrecoverably stolen from the protocol.","The loss arises from a smart contract vulnerability.","The loss must arise from one of the following blockchains: Ethereum and Arbitrum."]}},{"parameter":"Cover Exclusions","type":"exclusion","list":{"type":"ordered","items":["Incident on any blockchain that is not supported by this cover.","Frontend, hosting, server or network infrastructure, database, DNS server, CI/CD, and/or supply-chain attacks.","All exclusions present in the standard terms and conditions."]}}],"links":{"website":"https://uniswap.org/","app":"https://app.uniswap.org/#/swap?use=V2","twitter":"https://twitter.com/Uniswap","blog":"https://uniswap.org/blog","discord":"https://discord.com/invite/FCfyBSbCU5","github":"https://github.com/Uniswap","docs":"https://docs.uniswap.org/protocol/V2/introduction"},"resolutionSources":[{"text":"Uniswap Blog","uri":"https://uniswap.org/blog"},{"text":"Uniswap Twitter","uri":"https://twitter.com/Uniswap"},{"text":"Neptune Mutual Twitter","uri":"https://twitter.com/neptunemutual"}]}';
 
-DROP VIEW IF EXISTS config_product_view CASCADE;
-
-CREATE VIEW config_product_view
+CREATE OR REPLACE VIEW config_product_view
 AS
 SELECT
   1                                        AS chain_id,
@@ -5929,35 +5925,6 @@ LANGUAGE plpgsql;
 
 -- SELECT get_coverage_lag(42161, '0x62696e616e636500000000000000000000000000000000000000000000000000');
 
-
-CREATE OR REPLACE FUNCTION get_gauge_pool_info
-(
-  _chain_id                       uint256,
-  _key                            bytes32
-)
-RETURNS TABLE
-(
-  _info                           text,
-  _info_details                   text
-)
-STABLE
-AS
-$$
-BEGIN
-  RETURN QUERY
-  SELECT
-    ve.liquidity_gauge_pool_set.info,
-    config_known_ipfs_hashes_view.ipfs_details
-  FROM ve.liquidity_gauge_pool_set
-  INNER JOIN config_known_ipfs_hashes_view
-  ON config_known_ipfs_hashes_view.ipfs_hash = ve.liquidity_gauge_pool_set.info
-  WHERE ve.liquidity_gauge_pool_set.chain_id = _chain_id
-  AND ve.liquidity_gauge_pool_set.key = _key;
-END
-$$
-LANGUAGE plpgsql;
-
--- SELECT * FROM get_gauge_pool_info(80001, string_to_bytes32('prime'));
 
 CREATE OR REPLACE FUNCTION get_gauge_pools()
 RETURNS TABLE
