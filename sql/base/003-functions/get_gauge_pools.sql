@@ -50,6 +50,19 @@ BEGIN
   LOOP
     IF(_r.action = 'add') THEN
       INSERT INTO _get_gauge_pools_result
+      (
+        chain_id,
+        key,
+        epoch_duration,
+        pool_address,
+        staking_token,
+        name,
+        info,
+        platform_fee,
+        token,
+        lockup_period_in_blocks,
+        ratio
+      )
       SELECT
         liquidity_gauge_pool_initialized.chain_id,
         liquidity_gauge_pool_initialized.key,
