@@ -36,7 +36,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY reassurance_transaction_view;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY public.reassurance_transaction_view;
   RETURN NEW;
 END
 $$
