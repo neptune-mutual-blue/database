@@ -2393,7 +2393,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  NEW.ck = get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
+  NEW.ck = public.get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
   RETURN NEW;
 END
 $$
@@ -2412,7 +2412,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  NEW.ck = get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
+  NEW.ck = public.get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
   RETURN NEW;
 END
 $$
@@ -5149,7 +5149,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY reassurance_transaction_view;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY public.reassurance_transaction_view;
   RETURN NEW;
 END
 $$
@@ -5219,7 +5219,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY stablecoin_transactions_view;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY public.stablecoin_transactions_view;
   RETURN NEW;
 END
 $$

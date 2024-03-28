@@ -2393,7 +2393,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  NEW.ck = get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
+  NEW.ck = public.get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
   RETURN NEW;
 END
 $$
@@ -2412,7 +2412,7 @@ RETURNS trigger
 AS
 $$
 BEGIN
-  NEW.ck = get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
+  NEW.ck = public.get_cover_key_by_vault_address(NEW.chain_id, NEW.address);
   RETURN NEW;
 END
 $$
