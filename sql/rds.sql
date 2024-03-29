@@ -108,7 +108,8 @@ CREATE TABLE core.pot_whitelist_updated
 (
   updated_by                                        address NOT NULL,
   accounts                                          address[] NOT NULL,
-  statuses                                          bool[] NOT NULL
+  statuses                                          bool[] NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX whitelist_updated_updated_by_inx
@@ -124,7 +125,8 @@ CREATE TABLE staking.bond_pool_setup
   bond_discount_rate                                uint256 NOT NULL,
   max_bond_amount                                   uint256 NOT NULL,
   vesting_term                                      uint256 NOT NULL,
-  npm_to_top_up_now                                 uint256 NOT NULL
+  npm_to_top_up_now                                 uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /****************************************************************************************************
@@ -135,7 +137,8 @@ CREATE TABLE staking.bond_created
   account                                           address NOT NULL,
   lp_tokens                                         uint256 NOT NULL,
   npm_to_vest                                       uint256 NOT NULL,
-  unlock_date                                       uint256 NOT NULL
+  unlock_date                                       uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX bond_created_account_inx
@@ -147,7 +150,8 @@ event BondClaimed(address indexed account, uint256 amount);
 CREATE TABLE staking.bond_claimed
 (
   account                                           address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX bond_claimed_account_inx
@@ -167,7 +171,8 @@ CREATE TABLE cxtoken.claimed
   amount                                            uint256 NOT NULL,
   reporter_fee                                      uint256 NOT NULL,
   platform_fee                                      uint256 NOT NULL,
-  claimed                                           uint256 NOT NULL
+  claimed                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX claimed_cover_key_inx
@@ -186,7 +191,8 @@ CREATE TABLE claim.claim_period_set
 (
   cover_key                                         bytes32 NOT NULL,
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX claim_period_set_cover_key_inx
@@ -201,7 +207,8 @@ CREATE TABLE claim.blacklist_set
   product_key                                       bytes32 NOT NULL,
   incident_date                                     uint256 NOT NULL,
   account                                           address NOT NULL,
-  status                                            bool NOT NULL
+  status                                            bool NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX blacklist_set_cover_key_inx
@@ -223,7 +230,8 @@ CREATE TABLE cover.cover_created
   token_name                                        text NOT NULL,
   token_symbol                                      text NOT NULL,
   supports_products                                 bool NOT NULL,
-  requires_whitelist                                bool NOT NULL
+  requires_whitelist                                bool NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cover_created_cover_key_inx
@@ -242,7 +250,8 @@ CREATE TABLE cover.product_created
 (
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
-  info                                              text NOT NULL
+  info                                              text NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX product_created_cover_key_inx
@@ -254,7 +263,8 @@ event CoverUpdated(bytes32 indexed coverKey, string info);
 CREATE TABLE cover.cover_updated
 (
   cover_key                                         bytes32 NOT NULL,
-  info                                              text NOT NULL
+  info                                              text NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cover_updated_cover_key_inx
@@ -267,7 +277,8 @@ CREATE TABLE cover.product_updated
 (
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
-  info                                              text NOT NULL
+  info                                              text NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX product_updated_cover_key_inx
@@ -282,7 +293,8 @@ CREATE TABLE cover.product_state_updated
   product_key                                       bytes32 NOT NULL,
   updated_by                                        address NOT NULL,
   status                                            bool NOT NULL,
-  reason                                            text NOT NULL
+  reason                                            text NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX product_state_updated_cover_key_inx
@@ -300,7 +312,8 @@ event CoverCreatorWhitelistUpdated(address account, bool status);
 CREATE TABLE cover.cover_creator_whitelist_updated
 (
   account                                           address NOT NULL,
-  status                                            bool NOT NULL
+  status                                            bool NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /*************************************************************
@@ -309,7 +322,8 @@ event CoverCreationFeeSet(uint256 previous, uint256 current);
 CREATE TABLE cover.cover_creation_fee_set
 (
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /******************************************************************
@@ -318,7 +332,8 @@ event MinCoverCreationStakeSet(uint256 previous, uint256 current);
 CREATE TABLE cover.min_cover_creation_stake_set
 (
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /*******************************************************************
@@ -327,7 +342,8 @@ event MinStakeToAddLiquiditySet(uint256 previous, uint256 current);
 CREATE TABLE cover.min_stake_to_add_liquidity_set
 (
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /*********************************************************************
@@ -336,7 +352,8 @@ event CoverInitialized(address indexed stablecoin, bytes32 withName);
 CREATE TABLE cover.cover_initialized
 (
   stablecoin                                        address NOT NULL,
-  with_name                                         bytes32 NOT NULL
+  with_name                                         bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cover_initialized_stablecoin_inx
@@ -350,7 +367,8 @@ CREATE TABLE cover.cover_user_whitelist_updated
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
   account                                           address NOT NULL,
-  status                                            bool NOT NULL
+  status                                            bool NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cover_user_whitelist_updated_cover_key_inx
@@ -369,7 +387,8 @@ CREATE TABLE reassurance.reassurance_added
 (
   cover_key                                         bytes32 NOT NULL,
   on_behalf_of                                      address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX reassurance_added_cover_key_inx
@@ -384,7 +403,8 @@ event WeightSet(bytes32 indexed coverKey, uint256 weight);
 CREATE TABLE reassurance.weight_set
 (
   cover_key                                         bytes32 NOT NULL,
-  weight                                            uint256 NOT NULL
+  weight                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX weight_set_cover_key_inx
@@ -398,7 +418,8 @@ CREATE TABLE reassurance.pool_capitalized
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
   incident_date                                     uint256 NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX pool_capitalized_cover_key_inx
@@ -417,7 +438,8 @@ CREATE TABLE cover.stake_added
 (
   cover_key                                         bytes32 NOT NULL,
   account                                           address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX stake_added_cover_key_inx
@@ -433,7 +455,8 @@ CREATE TABLE cover.stake_removed
 (
   cover_key                                         bytes32 NOT NULL,
   account                                           address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX stake_removed_cover_key_inx
@@ -448,7 +471,8 @@ event FeeBurned(bytes32 indexed coverKey, uint256 amount);
 CREATE TABLE cover.fee_burned
 (
   cover_key                                         bytes32 NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX fee_burned_cover_key_inx
@@ -464,7 +488,8 @@ CREATE TABLE cxtoken.coverage_start_set
   product_key                                       bytes32 NOT NULL,
   account                                           address NOT NULL,
   effective_from                                    uint256 NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /*********************************************************************************************************************************************************
@@ -477,7 +502,8 @@ CREATE TABLE factory.cx_token_deployed
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
   token_name                                        text NOT NULL,
-  expiry_date                                       uint256 NOT NULL
+  expiry_date                                       uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cx_token_deployed_cover_key_inx
@@ -497,7 +523,8 @@ CREATE TABLE consensus.finalized
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
   finalizer                                         address NOT NULL,
-  incident_date                                     uint256 NOT NULL
+  incident_date                                     uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX finalized_cover_key_inx
@@ -520,7 +547,8 @@ CREATE TABLE consensus.reported
   incident_date                                     uint256 NOT NULL,
   info                                              text NOT NULL,
   initial_stake                                     uint256 NOT NULL,
-  resolution_timestamp                              uint256 NOT NULL
+  resolution_timestamp                              uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX reported_cover_key_inx
@@ -542,7 +570,8 @@ CREATE TABLE consensus.disputed
   reporter                                          address NOT NULL,
   incident_date                                     uint256 NOT NULL,
   info                                              text NOT NULL,
-  initial_stake                                     uint256 NOT NULL
+  initial_stake                                     uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX disputed_cover_key_inx
@@ -560,7 +589,8 @@ event ReportingBurnRateSet(uint256 previous, uint256 current);
 CREATE TABLE consensus.reporting_burn_rate_set
 (
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /**********************************************************************************
@@ -570,7 +600,8 @@ CREATE TABLE consensus.first_reporting_stake_set
 (
   cover_key                                         bytes32 NOT NULL,
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /***************************************************************
@@ -579,7 +610,8 @@ event ReporterCommissionSet(uint256 previous, uint256 current);
 CREATE TABLE consensus.reporter_commission_set
 (
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /***********************************************************************************************************************************
@@ -591,7 +623,8 @@ CREATE TABLE consensus.attested
   product_key                                       bytes32 NOT NULL,
   witness                                           address NOT NULL,
   incident_date                                     uint256 NOT NULL,
-  stake                                             uint256 NOT NULL
+  stake                                             uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX attested_cover_key_inx
@@ -612,7 +645,8 @@ CREATE TABLE consensus.refuted
   product_key                                       bytes32 NOT NULL,
   witness                                           address NOT NULL,
   incident_date                                     uint256 NOT NULL,
-  stake                                             uint256 NOT NULL
+  stake                                             uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX refuted_cover_key_inx
@@ -633,7 +667,8 @@ CREATE TABLE consensus.unstaken
   product_key                                       bytes32 NOT NULL,
   caller                                            address NOT NULL,
   original_stake                                    uint256 NOT NULL,
-  reward                                            uint256 NOT NULL
+  reward                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX unstaken_cover_key_inx
@@ -655,7 +690,8 @@ CREATE TABLE consensus.reporter_reward_distributed
   caller                                            address NOT NULL,
   reporter                                          address NOT NULL,
   original_reward                                   uint256 NOT NULL,
-  reporter_reward                                   uint256 NOT NULL
+  reporter_reward                                   uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX reporter_reward_distributed_cover_key_inx
@@ -677,7 +713,8 @@ CREATE TABLE consensus.governance_burned
   caller                                            address NOT NULL,
   burner                                            address NOT NULL,
   original_reward                                   uint256 NOT NULL,
-  burned_amount                                     uint256 NOT NULL
+  burned_amount                                     uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX governance_burned_cover_key_inx
@@ -701,7 +738,8 @@ CREATE TABLE consensus.resolved
   decision                                          bool NOT NULL,
   emergency                                         bool NOT NULL,
   claim_begins_from                                 uint256 NOT NULL,
-  claim_expires_at                                  uint256 NOT NULL
+  claim_expires_at                                  uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX resolved_cover_key_inx
@@ -716,7 +754,8 @@ event CooldownPeriodConfigured(bytes32 indexed coverKey, uint256 period);
 CREATE TABLE consensus.cooldown_period_configured
 (
   cover_key                                         bytes32 NOT NULL,
-  period                                            uint256 NOT NULL
+  period                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cooldown_period_configured_cover_key_inx
@@ -730,7 +769,8 @@ CREATE TABLE consensus.report_closed
   cover_key                                         bytes32 NOT NULL,
   product_key                                       bytes32 NOT NULL,
   closed_by                                         address NOT NULL,
-  incident_date                                     uint256 NOT NULL
+  incident_date                                     uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX report_closed_cover_key_inx
@@ -752,7 +792,8 @@ CREATE TABLE strategy.log_deposit
   amount                                            uint256 NOT NULL,
   certificate_received                              uint256 NOT NULL,
   deposit_total                                     uint256 NOT NULL,
-  withdrawal_total                                  uint256 NOT NULL
+  withdrawal_total                                  uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX log_deposit_name_inx
@@ -766,7 +807,8 @@ CREATE TABLE strategy.deposited
   key                                               bytes32 NOT NULL,
   on_behalf_of                                      address NOT NULL,
   stablecoin_deposited                              uint256 NOT NULL,
-  certificate_token_issued                          uint256 NOT NULL
+  certificate_token_issued                          uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX deposited_key_inx
@@ -785,7 +827,8 @@ CREATE TABLE strategy.log_withdrawal
   stablecoin_withdrawn                              uint256 NOT NULL,
   certificate_redeemed                              uint256 NOT NULL,
   deposit_total                                     uint256 NOT NULL,
-  withdrawal_total                                  uint256 NOT NULL
+  withdrawal_total                                  uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX log_withdrawal_name_inx
@@ -799,7 +842,8 @@ CREATE TABLE strategy.withdrawn
   key                                               bytes32 NOT NULL,
   send_to                                           address NOT NULL,
   stablecoin_withdrawn                              uint256 NOT NULL,
-  certificate_token_redeemed                        uint256 NOT NULL
+  certificate_token_redeemed                        uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX withdrawn_key_inx
@@ -814,7 +858,8 @@ event Drained(IERC20 indexed asset, uint256 amount);
 CREATE TABLE strategy.drained
 (
   asset                                             address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX drained_asset_inx
@@ -827,7 +872,8 @@ event StrategyDisabled(address indexed strategy);
 *************************************************/
 CREATE TABLE strategy.strategy_disabled
 (
-  strategy                                          address NOT NULL
+  strategy                                          address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX strategy_disabled_strategy_inx
@@ -838,7 +884,8 @@ event StrategyDeleted(address indexed strategy);
 ************************************************/
 CREATE TABLE strategy.strategy_deleted
 (
-  strategy                                          address NOT NULL
+  strategy                                          address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX strategy_deleted_strategy_inx
@@ -849,7 +896,8 @@ event LiquidityStateUpdateIntervalSet(uint256 duration);
 ********************************************************/
 CREATE TABLE strategy.liquidity_state_update_interval_set
 (
-  duration                                          uint256 NOT NULL
+  duration                                          uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /**********************************************
@@ -857,7 +905,8 @@ event StrategyAdded(address indexed strategy);
 **********************************************/
 CREATE TABLE strategy.strategy_added
 (
-  strategy                                          address NOT NULL
+  strategy                                          address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX strategy_added_strategy_inx
@@ -870,7 +919,8 @@ CREATE TABLE strategy.risk_pooling_period_set
 (
   key                                               bytes32 NOT NULL,
   lending_period                                    uint256 NOT NULL,
-  withdrawal_window                                 uint256 NOT NULL
+  withdrawal_window                                 uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX risk_pooling_period_set_key_inx
@@ -881,7 +931,8 @@ event MaxLendingRatioSet(uint256 ratio);
 ****************************************/
 CREATE TABLE strategy.max_lending_ratio_set
 (
-  ratio                                             uint256 NOT NULL
+  ratio                                             uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /*********************************************************************************************************************************************
@@ -899,7 +950,8 @@ CREATE TABLE policy.cover_purchased
   fee                                               uint256 NOT NULL,
   platform_fee                                      uint256 NOT NULL,
   expires_on                                        uint256 NOT NULL,
-  policy_id                                         uint256 NOT NULL
+  policy_id                                         uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cover_purchased_cx_token_inx
@@ -933,7 +985,8 @@ CREATE TABLE policy.cover_policy_rate_set
 (
   cover_key                                         bytes32 NOT NULL,
   floor                                             uint256 NOT NULL,
-  ceiling                                           uint256 NOT NULL
+  ceiling                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX cover_policy_rate_set_cover_key_inx
@@ -945,7 +998,8 @@ event CoverageLagSet(bytes32 indexed coverKey, uint256 window);
 CREATE TABLE policy.coverage_lag_set
 (
   cover_key                                         bytes32 NOT NULL,
-  "window"                                          uint256 NOT NULL
+  "window"                                          uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX coverage_lag_set_cover_key_inx
@@ -979,7 +1033,8 @@ CREATE TABLE protocol.initialized
   lending_period                                    uint256 NOT NULL,
   withdrawal_window                                 uint256 NOT NULL,
   policy_floor                                      uint256 NOT NULL,
-  policy_ceiling                                    uint256 NOT NULL
+  policy_ceiling                                    uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 
@@ -990,7 +1045,8 @@ CREATE TABLE protocol.contract_added
 (
   namespace                                         bytes32 NOT NULL,
   key                                               bytes32 NOT NULL,
-  contract_address                                  address NOT NULL
+  contract_address                                  address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX contract_added_namespace_inx
@@ -1010,7 +1066,8 @@ CREATE TABLE protocol.contract_upgraded
   namespace                                         bytes32 NOT NULL,
   key                                               bytes32 NOT NULL,
   previous                                          address NOT NULL,
-  current                                           address NOT NULL
+  current                                           address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX contract_upgraded_namespace_inx
@@ -1027,7 +1084,8 @@ event MemberAdded(address member);
 **********************************/
 CREATE TABLE protocol.member_added
 (
-  member                                            address NOT NULL
+  member                                            address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /************************************
@@ -1035,7 +1093,8 @@ event MemberRemoved(address member);
 ************************************/
 CREATE TABLE protocol.member_removed
 (
-  member                                            address NOT NULL
+  member                                            address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /***************************************************************
@@ -1055,7 +1114,8 @@ CREATE TABLE staking.pool_updated
   platform_fee                                      uint256 NOT NULL,
   reward_per_block                                  uint256 NOT NULL,
   lockup_period                                     uint256 NOT NULL,
-  reward_token_to_deposit                           uint256 NOT NULL
+  reward_token_to_deposit                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX pool_updated_key_inx
@@ -1067,7 +1127,8 @@ event PoolClosed(bytes32 indexed key, string name);
 CREATE TABLE staking.pool_closed
 (
   key                                               bytes32 NOT NULL,
-  name                                              text NOT NULL
+  name                                              text NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX pool_closed_key_inx
@@ -1081,7 +1142,8 @@ CREATE TABLE staking.deposited
   key                                               bytes32 NOT NULL,
   account                                           address NOT NULL,
   token                                             address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX deposited_key_inx
@@ -1101,7 +1163,8 @@ CREATE TABLE staking.withdrawn
   key                                               bytes32 NOT NULL,
   account                                           address NOT NULL,
   token                                             address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX withdrawn_key_inx
@@ -1122,7 +1185,8 @@ CREATE TABLE staking.rewards_withdrawn
   account                                           address NOT NULL,
   token                                             address NOT NULL,
   rewards                                           uint256 NOT NULL,
-  platform_fee                                      uint256 NOT NULL
+  platform_fee                                      uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX rewards_withdrawn_key_inx
@@ -1141,7 +1205,8 @@ CREATE TABLE store.pausers_set
 (
   added_by                                          address NOT NULL,
   accounts                                          address[] NOT NULL,
-  statuses                                          bool[] NOT NULL
+  statuses                                          bool[] NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX pausers_set_added_by_inx
@@ -1153,7 +1218,8 @@ event GovernanceTransfer(address indexed to, uint256 amount);
 CREATE TABLE vault.governance_transfer
 (
   "to"                                              address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX governance_transfer_to_inx
@@ -1167,7 +1233,8 @@ CREATE TABLE vault.strategy_transfer
   token                                             address NOT NULL,
   strategy                                          address NOT NULL,
   name                                              bytes32 NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX strategy_transfer_token_inx
@@ -1189,7 +1256,8 @@ CREATE TABLE vault.strategy_receipt
   name                                              bytes32 NOT NULL,
   amount                                            uint256 NOT NULL,
   income                                            uint256 NOT NULL,
-  loss                                              uint256 NOT NULL
+  loss                                              uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX strategy_receipt_token_inx
@@ -1209,7 +1277,8 @@ CREATE TABLE vault.pods_issued
   account                                           address NOT NULL,
   issued                                            uint256 NOT NULL,
   liquidity_added                                   uint256 NOT NULL,
-  referral_code                                     bytes32 NOT NULL
+  referral_code                                     bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX pods_issued_account_inx
@@ -1225,7 +1294,8 @@ CREATE TABLE vault.pods_redeemed
 (
   account                                           address NOT NULL,
   redeemed                                          uint256 NOT NULL,
-  liquidity_released                                uint256 NOT NULL
+  liquidity_released                                uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX pods_redeemed_account_inx
@@ -1240,7 +1310,8 @@ CREATE TABLE vault.flash_loan_borrowed
   borrower                                          address NOT NULL,
   stablecoin                                        address NOT NULL,
   amount                                            uint256 NOT NULL,
-  fee                                               uint256 NOT NULL
+  fee                                               uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX flash_loan_borrowed_lender_inx
@@ -1258,7 +1329,8 @@ event NpmStaken(address indexed account, uint256 amount);
 CREATE TABLE vault.npm_staken
 (
   account                                         address NOT NULL,
-  amount                                          uint256 NOT NULL
+  amount                                          uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX npm_staken_account_inx
@@ -1270,7 +1342,8 @@ event NpmUnstaken(address indexed account, uint256 amount);
 CREATE TABLE vault.npm_unstaken
 (
   account                                         address NOT NULL,
-  amount                                          uint256 NOT NULL
+  amount                                          uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX npm_unstaken_account_inx
@@ -1281,7 +1354,8 @@ event InterestAccrued(bytes32 indexed coverKey);
 ************************************************/
 CREATE TABLE vault.interest_accrued
 (
-  cover_key                                       bytes32 NOT NULL
+  cover_key                                       bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX interest_accrued_cover_key_inx
@@ -1293,7 +1367,8 @@ event Entered(bytes32 indexed coverKey, address indexed account);
 CREATE TABLE vault.entered
 (
   cover_key                                       bytes32 NOT NULL,
-  account                                         address NOT NULL
+  account                                         address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX entered_cover_key_inx
@@ -1308,7 +1383,8 @@ event Exited(bytes32 indexed coverKey, address indexed account);
 CREATE TABLE vault.exited
 (
   cover_key                                       bytes32 NOT NULL,
-  account                                         address NOT NULL
+  account                                         address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX exited_cover_key_inx
@@ -1325,7 +1401,8 @@ CREATE TABLE factory.vault_deployed
   vault                                           address NOT NULL,
   cover_key                                       bytes32 NOT NULL,
   name                                            text NOT NULL,
-  symbol                                          text NOT NULL
+  symbol                                          text NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX vault_deployed_cover_key_inx
@@ -1343,7 +1420,8 @@ CREATE TABLE ve.vote_escrow_lock
   previous_unlock_at                                uint256 NOT NULL,
   unlock_at                                         uint256 NOT NULL,
   previous_balance                                  uint256 NOT NULL,
-  balance                                           uint256 NOT NULL  
+  balance                                           uint256 NOT NULL  ,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX vote_escrow_lock_account_inx
@@ -1357,7 +1435,8 @@ CREATE TABLE ve.transfer_whitelist_updated
 (
   updated_by                                        address NOT NULL,
   accounts                                          address[] NOT NULL,
-  statuses                                          boolean[] NOT NULL  
+  statuses                                          boolean[] NOT NULL  ,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX transfer_whitelist_updated_updated_by_inx
@@ -1371,7 +1450,8 @@ CREATE TABLE ve.vote_escrow_unlock
   account                                           address NOT NULL,
   amount                                            uint256 NOT NULL,
   unlock_at                                         uint256 NOT NULL,
-  penalty                                           uint256 NOT NULL
+  penalty                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX vote_escrow_unlock_account_inx
@@ -1393,7 +1473,8 @@ CREATE TABLE ve.liquidity_gauge_pool_initialized
   epoch_duration                                    uint256 NOT NULL,
   ve_boost_ratio                                    uint256 NOT NULL,
   platform_fee                                      uint256 NOT NULL,
-  treasury                                          address NOT NULL
+  treasury                                          address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 /*************************************************************************
@@ -1410,7 +1491,8 @@ CREATE TABLE ve.liquidity_gauge_pool_set
   epoch_duration                                    uint256 NOT NULL,
   ve_boost_ratio                                    uint256 NOT NULL,
   platform_fee                                      uint256 NOT NULL,
-  treasury                                          address NOT NULL
+  treasury                                          address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX liquidity_gauge_pool_set_key_inx
@@ -1423,7 +1505,8 @@ CREATE TABLE ve.epoch_duration_updated
 (
   key                                               bytes32 NOT NULL,
   previous                                          uint256 NOT NULL,
-  current                                           uint256 NOT NULL
+  current                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX epoch_duration_updated_key_inx
@@ -1436,7 +1519,8 @@ CREATE TABLE ve.epoch_reward_set
 (
   key                                               bytes32 NOT NULL,
   triggered_by                                      address NOT NULL,
-  rewards                                           uint256 NOT NULL
+  rewards                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX epoch_reward_set_key_inx
@@ -1449,7 +1533,8 @@ event LiquidityGaugePoolAdded(bytes32 key, ILiquidityGaugePool pool);
 CREATE TABLE ve.liquidity_gauge_pool_added
 (
   key                                               bytes32 NOT NULL,
-  pool                                              address NOT NULL
+  pool                                              address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX liquidity_gauge_pool_added_key_inx
@@ -1463,7 +1548,8 @@ CREATE TABLE ve.liquidity_gauge_pool_updated
 (
   key                                               bytes32 NOT NULL,
   previous                                          address NOT NULL,
-  current                                           address NOT NULL
+  current                                           address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX liquidity_gauge_pool_updated_key_inx
@@ -1475,7 +1561,8 @@ event GaugeControllerRegistryPoolDeactivated(address indexed sender, bytes32 ind
 CREATE TABLE ve.gauge_controller_registry_pool_deactivated
 (
   sender                                            address NOT NULL,
-  key                                               bytes32 NOT NULL
+  key                                               bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX gauge_controller_registry_pool_deactivated_sender_inx
@@ -1490,7 +1577,8 @@ event GaugeControllerRegistryPoolActivated(address indexed sender, bytes32 index
 CREATE TABLE ve.gauge_controller_registry_pool_activated
 (
   sender                                            address NOT NULL,
-  key                                               bytes32 NOT NULL
+  key                                               bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX gauge_controller_registry_pool_activated_sender_inx
@@ -1505,7 +1593,8 @@ event GaugeControllerRegistryPoolDeleted(address indexed sender, bytes32 key);
 CREATE TABLE ve.gauge_controller_registry_pool_deleted
 (
   sender                                            address NOT NULL,
-  key                                               bytes32 NOT NULL
+  key                                               bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX gauge_controller_registry_pool_deleted_sender_inx
@@ -1522,7 +1611,8 @@ CREATE TABLE ve.gauge_set
   epoch                                             uint256 NOT NULL,
   key                                               bytes32 NOT NULL,
   pool                                              address NOT NULL,
-  distribution                                      uint256 NOT NULL
+  distribution                                      uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX gauge_set_epoch_inx
@@ -1537,7 +1627,8 @@ event GaugeAllocationTransferred(uint256 indexed epoch, uint256 totalAllocation)
 CREATE TABLE ve.gauge_allocation_transferred
 (
   epoch                                             uint256 NOT NULL,
-  total_allocation                                  uint256 NOT NULL
+  total_allocation                                  uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX gauge_allocation_transferred_epoch_inx
@@ -1553,7 +1644,8 @@ CREATE TABLE ve.voting_powers_updated
   previous                                          uint256 NOT NULL,
   current                                           uint256 NOT NULL,
   previous_total                                    uint256 NOT NULL,
-  current_total                                     uint256 NOT NULL
+  current_total                                     uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX voting_powers_updated_triggered_by_inx
@@ -1568,7 +1660,8 @@ CREATE TABLE ve.liquidity_gauge_rewards_withdrawn
   account                                           address NOT NULL,
   treasury                                          address NOT NULL,
   rewards                                           uint256 NOT NULL,
-  platform_fee                                      uint256 NOT NULL
+  platform_fee                                      uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX liquidity_gauge_rewards_withdrawn_key_inx
@@ -1585,7 +1678,8 @@ CREATE TABLE ve.liquidity_gauge_deposited
   key                                               bytes32 NOT NULL,
   account                                           address NOT NULL,
   staking_token                                     address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX liquidity_gauge_deposited_key_inx
@@ -1605,7 +1699,8 @@ CREATE TABLE ve.liquidity_gauge_withdrawn
   key                                               bytes32 NOT NULL,
   account                                           address NOT NULL,
   staking_token                                     address NOT NULL,
-  amount                                            uint256 NOT NULL
+  amount                                            uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE INDEX liquidity_gauge_withdrawn_key_inx
@@ -1621,39 +1716,45 @@ CREATE TABLE approval_for_all
 (
   owner                                             address NOT NULL,
   operator                                          address NOT NULL,
-  approved                                          boolean NOT NULL
+  approved                                          boolean NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS (core.transactions);
 
 CREATE TABLE core.role_admin_changed
 (
   role                                              bytes32 NOT NULL,
   previous_admin_role                               bytes32 NOT NULL,
-  new_admin_role                                    bytes32 NOT NULL
+  new_admin_role                                    bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE TABLE core.ownership_transferred
 (
   previous_owner                                    bytes32 NOT NULL,
-  new_owner                                         bytes32 NOT NULL
+  new_owner                                         bytes32 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE TABLE core.transfer
 (
   "from"                                            address NOT NULL,
   "to"                                              address NOT NULL,
-  value                                             uint256 NOT NULL
+  value                                             uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE TABLE core.role_granted
 (
   role                                              bytes32 NOT NULL,
   account                                           address NOT NULL,
-  sender                                            address NOT NULL
+  sender                                            address NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 CREATE TABLE core.transparent_upgradeable_proxy_initialized
 (
-  version                                           uint256 NOT NULL
+  version                                           uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 
@@ -1661,7 +1762,8 @@ CREATE TABLE core.nft_transfer
 (
   "from"                                            address NOT NULL,
   "to"                                              address NOT NULL,
-  token_id                                          uint256 NOT NULL
+  token_id                                          uint256 NOT NULL,
+  PRIMARY KEY (id)
 ) INHERITS(core.transactions);
 
 
