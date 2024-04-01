@@ -10,7 +10,8 @@ DROP FUNCTION IF EXISTS get_explorer_home
   _contracts                                      text[],
   _cover_key_like                                 text,
   _event_name_like                                text,
-  _coupon_code_like                               text
+  _coupon_code_like                               text,
+  _transaction_sender_like                        text
 );
 
 CREATE FUNCTION get_explorer_home
@@ -25,7 +26,8 @@ CREATE FUNCTION get_explorer_home
   _contracts                                      text[],
   _cover_key_like                                 text,
   _event_name_like                                text,
-  _coupon_code_like                               text
+  _coupon_code_like                               text,
+  _transaction_sender_like                        text
 )
 RETURNS TABLE
 (
@@ -101,8 +103,9 @@ BEGIN
     )
     AND core.transactions.event_name ILIKE %s
     AND bytes32_to_string(core.transactions.coupon_code) ILIKE %s
+    AND core.transactions.transaction_sender ILIKE %s
   )
-  SELECT COUNT(*) FROM result;', _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like));
+  SELECT COUNT(*) FROM result;', _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like), quote_literal_ilike(_transaction_sender_like));
   
   -- RAISE NOTICE '%', _query;
 
@@ -146,10 +149,11 @@ BEGIN
   )
   AND core.transactions.event_name ILIKE %s
   AND bytes32_to_string(core.transactions.coupon_code) ILIKE %s
+  AND core.transactions.transaction_sender ILIKE %s
   ORDER BY %I %s
   LIMIT %s::integer
   OFFSET %s::integer * %s::integer  
-  ', _page_size, _page_number, _total_records, _total_pages, _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like), _sort_by, _sort_direction, _page_size, _page_number - 1, _page_size);
+  ', _page_size, _page_number, _total_records, _total_pages, _date_from, _date_to, _networks, _contracts, quote_literal_ilike(_cover_key_like), quote_literal_ilike(_cover_key_like), quote_literal_ilike(_event_name_like), quote_literal_ilike(_coupon_code_like), quote_literal_ilike(_transaction_sender_like), _sort_by, _sort_direction, _page_size, _page_number - 1, _page_size);
 
   --RAISE NOTICE '%', _query;
   RETURN QUERY EXECUTE _query;
