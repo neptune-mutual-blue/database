@@ -7712,6 +7712,21 @@ BEGIN
   CREATE INDEX IF NOT EXISTS datewise_liquidity_summary_date_inx
   ON public.datewise_liquidity_summary(date);
 
+  -- The final cache row is inevitably stale as its execution might have occurred prior to the end of the day.
+  WITH stale_data
+  AS
+  (
+    SELECT public.datewise_liquidity_summary.chain_id, MAX(public.datewise_liquidity_summary.date) AS date
+    FROM public.datewise_liquidity_summary
+    GROUP BY public.datewise_liquidity_summary.chain_id
+  )
+  DELETE FROM public.datewise_liquidity_summary
+  WHERE (public.datewise_liquidity_summary.chain_id, public.datewise_liquidity_summary.date) IN
+  (
+    SELECT * FROM stale_data
+  );
+
+
   WITH date_ranges
   AS
   (
