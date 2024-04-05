@@ -48,21 +48,21 @@ BEGIN
       is_diversified(chain_id, cover_key) AS diversified,
       product_key,
       bytes32_to_string(product_key) AS product,
-      get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity') AS capacity,
-      format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity')) AS formatted_capacity
+      get_cover_capacity_till(chain_id, cover_key, product_key, _date) AS capacity,
+      format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, _date)) AS formatted_capacity
     FROM products
   )
   SELECT SUM(capacity)
   INTO _capacity
   FROM summary
   WHERE 1 = 1
-  AND NOT (diversified = true AND product_key != string_to_bytes32(''))
-  ORDER BY product;
+  AND NOT (diversified = true AND product_key != string_to_bytes32(''));
 
   RETURN COALESCE(_capacity, 0);
 END
 $$
 LANGUAGE plpgsql;
 
+ALTER FUNCTION get_total_capacity_by_date(TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
 
 --SELECT get_total_capacity_by_date('infinity')

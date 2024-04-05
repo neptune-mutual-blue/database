@@ -5650,6 +5650,81 @@ LANGUAGE plpgsql;
 
 --SELECT * FROM check_if_user_whitelisted(84531, '0x62696e616e636500000000000000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000001');
 
+CREATE OR REPLACE FUNCTION count_cover_purchase_during
+(
+  _start                                      TIMESTAMP WITH TIME ZONE,
+  _end                                        TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  SELECT COUNT(*)
+  INTO _result
+  FROM policy.cover_purchased
+  WHERE to_timestamp(policy.cover_purchased.block_timestamp) BETWEEN _start AND _end;
+
+  RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION count_cover_purchase_during
+(
+  _chain_id                                   uint256,
+  _start                                      TIMESTAMP WITH TIME ZONE,
+  _end                                        TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  SELECT COUNT(*)
+  INTO _result
+  FROM policy.cover_purchased
+  WHERE policy.cover_purchased.chain_id = _chain_id
+  AND to_timestamp(policy.cover_purchased.block_timestamp) BETWEEN _start AND _end;
+
+  RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION count_cover_purchase_during
+(
+  _chain_id                                   uint256,
+  _cover_key                                  bytes32,
+  _start                                      TIMESTAMP WITH TIME ZONE,
+  _end                                        TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  SELECT COUNT(*)
+  INTO _result
+  FROM policy.cover_purchased
+  WHERE policy.cover_purchased.chain_id = _chain_id
+  AND policy.cover_purchased.cover_key = _cover_key
+  AND to_timestamp(policy.cover_purchased.block_timestamp) BETWEEN _start AND _end;
+
+  RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+
+ALTER FUNCTION count_cover_purchase_during(TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION count_cover_purchase_during(uint256, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION count_cover_purchase_during(uint256, bytes32, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+
 DROP FUNCTION IF EXISTS get_active_incident_date
 (
   _chain_id                                   uint256,
@@ -5845,22 +5920,22 @@ BEGIN
       is_diversified(chain_id, cover_key) AS diversified,
       product_key,
       bytes32_to_string(product_key) AS product,
-      get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity') AS capacity,
-      format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity')) AS formatted_capacity
+      get_cover_capacity_till(chain_id, cover_key, product_key, _date) AS capacity,
+      format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, _date)) AS formatted_capacity
     FROM products
   )
   SELECT SUM(capacity)
   INTO _capacity
   FROM summary
   WHERE 1 = 1
-  AND NOT (diversified = true AND product_key != string_to_bytes32(''))
-  ORDER BY product;
+  AND NOT (diversified = true AND product_key != string_to_bytes32(''));
 
   RETURN COALESCE(_capacity, 0);
 END
 $$
 LANGUAGE plpgsql;
 
+ALTER FUNCTION get_total_capacity_by_date(TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
 
 --SELECT get_total_capacity_by_date('infinity')
 CREATE OR REPLACE FUNCTION get_claim_platform_fee(_chain_id uint256)
@@ -6701,6 +6776,81 @@ LANGUAGE plpgsql;
 
 
 
+CREATE OR REPLACE FUNCTION get_total_covered_till_date
+(
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover))
+  INTO _result
+  FROM policy.cover_purchased
+  WHERE to_timestamp(expires_on) <= _date;
+
+  RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_total_covered_till_date
+(
+  _chain_id                                 uint256,
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover))
+  INTO _result
+  FROM policy.cover_purchased
+  WHERE chain_id = _chain_id
+  AND to_timestamp(expires_on) <= _date;
+
+  RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION get_total_covered_till_date
+(
+  _chain_id                                 uint256,
+  _cover_key                                bytes32,
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover))
+  INTO _result
+  FROM policy.cover_purchased
+  WHERE chain_id = _chain_id
+  AND cover_key = _cover_key
+  AND to_timestamp(expires_on) <= _date;
+
+  RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION get_total_covered_till_date(TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_total_covered_till_date(uint256, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_total_covered_till_date(uint256, bytes32, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+
+-- SELECT * FROM get_total_covered_till_date('2021-01-01'::TIMESTAMP WITH TIME ZONE);
+-- SELECT * FROM get_total_covered_till_date(1, '0x1234'::bytes32, '2021-01-01'::TIMESTAMP WITH TIME ZONE);
+-- SELECT * FROM get_total_covered_till_date(1, '2021-01-01'::TIMESTAMP WITH TIME ZONE);
+
 CREATE OR REPLACE FUNCTION get_tvl_till_date
 (
   _date                                     TIMESTAMP WITH TIME ZONE
@@ -6851,7 +7001,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION sum_cover_purchased_during
+CREATE OR REPLACE FUNCTION sum_cover_fee_earned_during
 (
   _start                                      TIMESTAMP WITH TIME ZONE,
   _end                                        TIMESTAMP WITH TIME ZONE
@@ -6876,7 +7026,7 @@ $$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION sum_cover_purchased_during
+CREATE OR REPLACE FUNCTION sum_cover_fee_earned_during
 (
   _chain_id                                   uint256,
   _start                                      TIMESTAMP WITH TIME ZONE,
@@ -6902,7 +7052,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION sum_cover_purchased_during
+CREATE OR REPLACE FUNCTION sum_cover_fee_earned_during
 (
   _chain_id                                   uint256,
   _cover_key                                  bytes32,
@@ -6929,6 +7079,11 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+
+ALTER FUNCTION sum_cover_fee_earned_during(TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION sum_cover_fee_earned_during(uint256, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION sum_cover_fee_earned_during(uint256, bytes32, TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
 
 DROP VIEW IF EXISTS capacity_view;
 
@@ -7523,6 +7678,132 @@ LANGUAGE plpgsql;
 -- SELECT  *
 -- FROM get_capacity_chart_data();
 
+CREATE OR REPLACE FUNCTION get_datewise_liquidity_summary()
+RETURNS TABLE
+(
+  id                                                        bigint,
+  date                                                      TIMESTAMP WITH TIME ZONE,
+  total_liquidity                                           numeric,
+  total_capacity                                            numeric,
+  total_covered                                             numeric,
+  total_cover_fee                                           numeric,
+  total_purchase_count                                      numeric  
+)
+SECURITY DEFINER
+AS
+$$
+  DECLARE _start                                            TIMESTAMP WITH TIME ZONE;
+  DECLARE _end                                              TIMESTAMP WITH TIME ZONE;
+BEGIN
+  CREATE UNLOGGED TABLE IF NOT EXISTS public.datewise_liquidity_summary
+  (
+    id                                                      BIGSERIAL,
+    chain_id                                                integer,
+    date                                                    TIMESTAMP WITH TIME ZONE,
+    total_liquidity                                         numeric,
+    total_capacity                                          numeric,
+    total_covered                                           numeric,
+    total_cover_fee                                         numeric,
+    total_purchase_count                                    numeric  
+  );
+
+  ALTER TABLE public.datewise_liquidity_summary OWNER TO writeuser;
+
+  CREATE INDEX IF NOT EXISTS datewise_liquidity_summary_date_inx
+  ON public.datewise_liquidity_summary(date);
+
+  WITH date_ranges
+  AS
+  (
+    SELECT
+      min(block_timestamp) AS min,
+      max(block_timestamp) AS max
+    FROM core.transactions
+  )
+  SELECT to_timestamp(min), to_timestamp(max)
+  INTO _start, _end
+  FROM date_ranges;
+
+
+  SELECT COALESCE(summary.max_date, _start)
+  INTO _start
+  FROM
+  (
+    SELECT MAX(datewise_liquidity_summary.date) AS max_date
+    FROM datewise_liquidity_summary
+  ) AS summary;
+
+  RAISE NOTICE 'Start date: %. End date: %', _start, _end;
+
+  WITH chains
+  AS
+  (
+    SELECT DISTINCT core.transactions.chain_id
+    FROM core.transactions
+  ),
+  dates
+  AS
+  (
+    SELECT date_trunc('day', dates)::date + interval '1 day' - interval '1 second' AS date
+    FROM generate_series(_start, _end, INTERVAL '1 days') AS dates
+  ),
+  chainwise
+  AS
+  (
+    SELECT DISTINCT chains.chain_id, dates.date
+    FROM chains
+    CROSS JOIN dates
+  )
+  INSERT INTO public.datewise_liquidity_summary(chain_id, date)
+  SELECT chainwise.chain_id, chainwise.date
+  FROM chainwise
+  LEFT JOIN public.datewise_liquidity_summary
+  ON chainwise.chain_id = public.datewise_liquidity_summary.chain_id
+  AND chainwise.date = public.datewise_liquidity_summary.date
+  WHERE public.datewise_liquidity_summary.chain_id IS NULL;
+
+  UPDATE public.datewise_liquidity_summary
+  SET total_liquidity = get_tvl_till_date(public.datewise_liquidity_summary.chain_id, public.datewise_liquidity_summary.date)
+  WHERE public.datewise_liquidity_summary.total_liquidity IS NULL;
+
+  UPDATE public.datewise_liquidity_summary
+  SET total_capacity = get_total_capacity_by_date(public.datewise_liquidity_summary.date)
+  WHERE public.datewise_liquidity_summary.total_capacity IS NULL;
+
+  UPDATE public.datewise_liquidity_summary
+  SET total_covered = get_total_covered_till_date(public.datewise_liquidity_summary.date)
+  WHERE public.datewise_liquidity_summary.total_covered IS NULL;
+
+  UPDATE public.datewise_liquidity_summary
+  SET total_cover_fee = sum_cover_fee_earned_during('-infinity', public.datewise_liquidity_summary.date)
+  WHERE public.datewise_liquidity_summary.total_cover_fee IS NULL;
+
+  UPDATE public.datewise_liquidity_summary
+  SET total_purchase_count = count_cover_purchase_during('-infinity', public.datewise_liquidity_summary.date)
+  WHERE public.datewise_liquidity_summary.total_purchase_count IS NULL;
+
+  RETURN QUERY
+  SELECT
+    row_number() OVER(ORDER BY public.datewise_liquidity_summary.date) AS id,
+    public.datewise_liquidity_summary.date,
+    SUM(public.datewise_liquidity_summary.total_liquidity) AS total_liquidity,
+    SUM(public.datewise_liquidity_summary.total_capacity) AS total_capacity,
+    SUM(public.datewise_liquidity_summary.total_covered) AS total_covered,
+    SUM(public.datewise_liquidity_summary.total_cover_fee) AS total_cover_fee,
+    SUM(public.datewise_liquidity_summary.total_purchase_count) AS total_purchase_count
+  FROM public.datewise_liquidity_summary
+  GROUP BY public.datewise_liquidity_summary.date;
+END
+$$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION get_datewise_liquidity_summary() OWNER TO writeuser;
+ALTER TABLE core.transactions owner to writeuser;
+ALTER TABLE IF EXISTS public.datewise_liquidity_summary owner to writeuser;
+
+-- SELECT * FROM get_datewise_liquidity_summary();
+
+
 CREATE OR REPLACE FUNCTION get_historical_apr_by_cover_chart_data()
 RETURNS TABLE
 (
@@ -7583,7 +7864,7 @@ BEGIN
 
   UPDATE _get_historical_apr_chart_data_result
   SET
-    policy_fee_earned = sum_cover_purchased_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
+    policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
     duration = _get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date,
     end_balance       = get_tvl_till_date(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.end_date);
   
@@ -7602,6 +7883,8 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+ALTER FUNCTION get_historical_apr_by_cover_chart_data() OWNER TO writeuser;
 
 -- SELECT * FROM get_historical_apr_by_cover_chart_data() ORDER BY APR DESC;
 
@@ -7664,7 +7947,7 @@ BEGIN
 
   UPDATE _get_historical_apr_chart_data_result
   SET
-    policy_fee_earned = sum_cover_purchased_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
+    policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
     duration = _get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date;
   
   UPDATE _get_historical_apr_chart_data_result
@@ -7682,6 +7965,8 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+ALTER FUNCTION get_historical_apr_chart_data() OWNER TO writeuser;
 
 --SELECT * FROM get_historical_apr_chart_data();
 
