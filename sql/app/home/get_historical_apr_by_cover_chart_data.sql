@@ -58,7 +58,7 @@ BEGIN
 
   UPDATE _get_historical_apr_chart_data_result
   SET
-    policy_fee_earned = sum_cover_purchased_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
+    policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
     duration = _get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date,
     end_balance       = get_tvl_till_date(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.end_date);
   
@@ -77,6 +77,8 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+ALTER FUNCTION get_historical_apr_by_cover_chart_data() OWNER TO writeuser;
 
 -- SELECT * FROM get_historical_apr_by_cover_chart_data() ORDER BY APR DESC;
 
