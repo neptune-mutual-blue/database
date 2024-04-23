@@ -101,7 +101,7 @@ SELECT
   10000000000000000000000                  AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('binance')             AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -111,7 +111,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('coinbase')            AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -121,7 +121,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   10                                       AS leverage,
   200                                      AS policy_floor,
@@ -131,7 +131,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('huobi')               AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -141,7 +141,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('okx')                 AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -151,7 +151,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   10                                       AS leverage,
   50                                       AS policy_floor,
@@ -159,3 +159,5 @@ SELECT
   300                                      AS reporting_period,
   60                                       AS coverage_lag,
   2000000000000000000000                   AS minimum_first_reporting_stake;
+
+ALTER VIEW config_cover_view OWNER TO writeuser;

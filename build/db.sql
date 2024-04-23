@@ -4038,9 +4038,7 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
-DROP VIEW IF EXISTS config_blockchain_network_view CASCADE;
-
-CREATE VIEW config_blockchain_network_view
+CREATE OR REPLACE VIEW config_blockchain_network_view
 AS
 SELECT
   1                                             AS chain_id,
@@ -4052,7 +4050,8 @@ SELECT
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
   '0x57f12FE6A4e5fe819eec699FAdf9Db2D06606bB4'  AS npm_address,
-  'https://etherscan.io/'                       AS explorer UNION ALL
+  'https://etherscan.io/'                       AS explorer 
+UNION ALL
 SELECT 42161                                    AS chain_id,
   'Arbitrum One'                                AS network_name,
   'Arbitrum'                                    AS nick_name,
@@ -4062,7 +4061,19 @@ SELECT 42161                                    AS chain_id,
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
   '0x57f12FE6A4e5fe819eec699FAdf9Db2D06606bB4'  AS npm_address,
-  'https://arbiscan.io/'                        AS explorer UNION ALL
+  'https://arbiscan.io/'                        AS explorer 
+UNION ALL
+SELECT 43113                                    AS chain_id,
+  'Avalanche Fuji Testnet'                      AS network_name,
+  'Fuji'                                        AS nick_name,
+  'AVAX'                                        AS currency,
+  'USDC'                                        AS stablecion,
+  6                                             AS stablecoin_decimals,
+  '0xf90727FB4e61d7B45DB9C024e87042Ec38Afb782'  AS protocol_address,
+  '0x3385A1896E6A76deDBf5498b1B1A65Bcf86eE58b'  AS store_address,
+  '0x73643a4f85ccbEdA5db6397BF044f4CBF16DC4Df'  AS npm_address,
+  'https://testnet.snowtrace.io/'               AS explorer 
+UNION ALL
 SELECT 84531                                    AS chain_id,
   'Base Goerli'                                 AS network_name,
   'Base Goerli'                                 AS nick_name,
@@ -4073,6 +4084,8 @@ SELECT 84531                                    AS chain_id,
   '0x52b124a19023edf0386a3d9e674fdd7e02b8a8a8'  AS store_address,
   '0x4bbdc138dd105c7dde874df7fcd087b064f7973d'  AS npm_address,
   'https://goerli.basescan.org/'                AS explorer;
+
+ALTER VIEW config_blockchain_network_view OWNER TO writeuser;
 
 CREATE OR REPLACE VIEW config_known_ipfs_hashes_view
 AS
@@ -4537,9 +4550,7 @@ LANGUAGE plpgsql;
 
 
 
-DROP VIEW IF EXISTS config_blockchain_network_view CASCADE;
-
-CREATE VIEW config_blockchain_network_view
+CREATE OR REPLACE VIEW config_blockchain_network_view
 AS
 SELECT
   1                                             AS chain_id,
@@ -4551,7 +4562,8 @@ SELECT
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
   '0x57f12fe6a4e5fe819eec699fadf9db2d06606bb4'  AS npm_address,
-  'https://etherscan.io/'                       AS explorer UNION ALL
+  'https://etherscan.io/'                       AS explorer 
+UNION ALL
 SELECT 42161                                    AS chain_id,
   'Arbitrum One'                                AS network_name,
   'Arbitrum'                                    AS nick_name,
@@ -4561,7 +4573,8 @@ SELECT 42161                                    AS chain_id,
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
   '0x57f12fe6a4e5fe819eec699fadf9db2d06606bb4'  AS npm_address,
-  'https://arbiscan.io/'                        AS explorer UNION ALL
+  'https://arbiscan.io/'                        AS explorer 
+UNION ALL
 SELECT 56                                       AS chain_id,
   'BNB Smart Chain'                             AS network_name,
   'BSC'                                         AS nick_name,
@@ -4571,17 +4584,19 @@ SELECT 56                                       AS chain_id,
   '0xb452ac021a1151aaf342c1b75aa914e03e6503b5'  AS protocol_address,
   '0x6579df8f986e4a982f200dafa0c1b955a438f620'  AS store_address,
   '0x57f12fe6a4e5fe819eec699fadf9db2d06606bb4'  AS npm_address,
-  'https://bscscan.com/'                        AS explorer UNION ALL
-SELECT 80001                                    AS chain_id,
-  'Polygon Mumbai'                              AS network_name,
-  'Mumbai'                                      AS nick_name,
-  'MATIC'                                       AS currency,
+  'https://bscscan.com/'                        AS explorer 
+UNION ALL
+SELECT 43113                                    AS chain_id,
+  'Avalanche Fuji Testnet'                      AS network_name,
+  'Fuji'                                        AS nick_name,
+  'AVAX'                                        AS currency,
   'USDC'                                        AS stablecion,
   6                                             AS stablecoin_decimals,
-  '0xf3393dD20B442DF5c4685fecd829656d9A49f9b6'  AS protocol_address,
-  '0xA483aF3eD0DF092EC4b9b93DA400f84922c92Be9'  AS store_address,
-  '0x88180bDc1Fa041d5Fce608B732D48373b2a12D62'  AS npm_address,
-  'https://mumbai.polygonscan.com/'             AS explorer UNION ALL
+  '0xf90727FB4e61d7B45DB9C024e87042Ec38Afb782'  AS protocol_address,
+  '0x3385A1896E6A76deDBf5498b1B1A65Bcf86eE58b'  AS store_address,
+  '0x73643a4f85ccbEdA5db6397BF044f4CBF16DC4Df'  AS npm_address,
+  'https://testnet.snowtrace.io/'               AS explorer 
+UNION ALL
 SELECT 84531                                    AS chain_id,
   'Base Goerli'                                 AS network_name,
   'Base Goerli'                                 AS nick_name,
@@ -4592,6 +4607,8 @@ SELECT 84531                                    AS chain_id,
   '0x52b124a19023edf0386a3d9e674fdd7e02b8a8a8'  AS store_address,
   '0x4bbdc138dd105c7dde874df7fcd087b064f7973d'  AS npm_address,
   'https://goerli.basescan.org/'                AS explorer;
+
+ALTER VIEW config_blockchain_network_view OWNER TO writeuser;
 
 DROP VIEW IF EXISTS config_contract_namespace_view CASCADE;
 
@@ -4717,7 +4734,7 @@ SELECT
   10000000000000000000000                  AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('binance')             AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -4727,7 +4744,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('coinbase')            AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -4737,7 +4754,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   10                                       AS leverage,
   200                                      AS policy_floor,
@@ -4747,7 +4764,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('huobi')               AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -4757,7 +4774,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('okx')                 AS cover_key,
   1                                        AS leverage,
   400                                      AS policy_floor,
@@ -4767,7 +4784,7 @@ SELECT
   2000000000000000000000                   AS minimum_first_reporting_stake
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   10                                       AS leverage,
   50                                       AS policy_floor,
@@ -4775,6 +4792,8 @@ SELECT
   300                                      AS reporting_period,
   60                                       AS coverage_lag,
   2000000000000000000000                   AS minimum_first_reporting_stake;
+
+ALTER VIEW config_cover_view OWNER TO writeuser;
 
 CREATE OR REPLACE VIEW config_known_ipfs_hashes_view
 AS
@@ -5118,100 +5137,102 @@ SELECT
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('1inch-v2')            AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('compound-v2')         AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('convex-v1')           AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('kyberswap-v1')        AS product_key,
   5000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('lido-v1')             AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('nexus-mutual-v1')     AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('rpl-v1')              AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('sushi-v2')            AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('uniswap-v3')          AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('aave-v2')             AS product_key,
   10000                                    AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('balancer-v2')         AS product_key,
   7500                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('curve-v2')            AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('gnosis-safe-v1')      AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('maker-v1')            AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('synthetix-v2')        AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('uniswap-v2')          AS product_key,
   9000                                     AS capital_efficiency;
+
+ALTER VIEW config_product_view OWNER TO writeuser;
 
 DROP MATERIALIZED VIEW IF EXISTS reassurance_transaction_view CASCADE;
 
