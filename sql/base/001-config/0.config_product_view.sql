@@ -265,97 +265,99 @@ SELECT
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('1inch-v2')            AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('compound-v2')         AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('convex-v1')           AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('kyberswap-v1')        AS product_key,
   5000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('lido-v1')             AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('nexus-mutual-v1')     AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('rpl-v1')              AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('sushi-v2')            AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('defi')                AS cover_key,
   string_to_bytes32('uniswap-v3')          AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('aave-v2')             AS product_key,
   10000                                    AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('balancer-v2')         AS product_key,
   7500                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('curve-v2')            AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('gnosis-safe-v1')      AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('maker-v1')            AS product_key,
   9000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('synthetix-v2')        AS product_key,
   7000                                     AS capital_efficiency
 UNION ALL
 SELECT
-  80001                                    AS chain_id,
+  43113                                    AS chain_id,
   string_to_bytes32('prime')               AS cover_key,
   string_to_bytes32('uniswap-v2')          AS product_key,
   9000                                     AS capital_efficiency;
+
+ALTER VIEW config_product_view OWNER TO writeuser;
