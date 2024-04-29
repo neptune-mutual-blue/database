@@ -6124,6 +6124,216 @@ LANGUAGE plpgsql;
 -- SELECT get_coverage_lag(42161, '0x62696e616e636500000000000000000000000000000000000000000000000000');
 
 
+CREATE OR REPLACE FUNCTION get_gauge_pool_latest_data(_chain_id uint256, _pool_address address)
+RETURNS TABLE
+(
+  chain_id                                          uint256,
+  key                                               bytes32,
+  staking_token                                     address,
+  ve_token                                          address,
+  reward_token                                      address,
+  registry                                          address,
+  name                                              text,
+  info                                              text,
+  epoch_duration                                    uint256,
+  ve_boost_ratio                                    uint256,
+  platform_fee                                      uint256,
+  treasury                                          address,
+  last_updated_at                                   integer
+)
+AS
+$$
+BEGIN
+  RETURN QUERY
+  WITH latest_pool_updated
+  AS
+  (
+    SELECT
+      ve.liquidity_gauge_pool_set.chain_id,
+      ve.liquidity_gauge_pool_set.name,
+      ve.liquidity_gauge_pool_set.info,
+      ve.liquidity_gauge_pool_set.epoch_duration,
+      ve.liquidity_gauge_pool_set.ve_boost_ratio,
+      ve.liquidity_gauge_pool_set.platform_fee,
+      ve.liquidity_gauge_pool_set.treasury,
+      ve.liquidity_gauge_pool_set.address,
+      ve.liquidity_gauge_pool_set.block_timestamp
+    FROM ve.liquidity_gauge_pool_set
+    WHERE 1 = 1
+    AND ve.liquidity_gauge_pool_set.address = _pool_address
+    AND ve.liquidity_gauge_pool_set.chain_id = _chain_id
+    ORDER BY ve.liquidity_gauge_pool_set.block_timestamp DESC
+    LIMIT 1
+  ),
+  latest_epoch_duration_updated
+  AS
+  (
+    SELECT
+      ve.epoch_duration_updated.chain_id,
+      ve.epoch_duration_updated.current AS epoch_duration,
+      ve.epoch_duration_updated.address,
+      ve.epoch_duration_updated.block_timestamp
+    FROM ve.epoch_duration_updated
+    WHERE 1 = 1
+    AND ve.epoch_duration_updated.address = _pool_address
+    AND ve.epoch_duration_updated.chain_id = _chain_id
+    ORDER BY ve.epoch_duration_updated.block_timestamp DESC
+    LIMIT 1
+  )
+  SELECT
+    ve.liquidity_gauge_pool_initialized.chain_id,
+    ve.liquidity_gauge_pool_initialized.key,
+    ve.liquidity_gauge_pool_initialized.staking_token,
+    ve.liquidity_gauge_pool_initialized.ve_token,
+    ve.liquidity_gauge_pool_initialized.reward_token,
+    ve.liquidity_gauge_pool_initialized.registry,
+    ve.liquidity_gauge_pool_initialized.name,
+    ve.liquidity_gauge_pool_initialized.info,
+    CASE
+      WHEN COALESCE(latest_pool_updated.block_timestamp, 0) > COALESCE(latest_epoch_duration_updated.block_timestamp, 0)
+      THEN latest_pool_updated.epoch_duration
+      ELSE latest_epoch_duration_updated.epoch_duration
+    END AS epoch_duration,
+    latest_pool_updated.ve_boost_ratio,
+    latest_pool_updated.platform_fee,
+    latest_pool_updated.treasury,
+    GREATEST(latest_pool_updated.block_timestamp, latest_epoch_duration_updated.block_timestamp) AS last_updated_at
+  FROM ve.liquidity_gauge_pool_initialized
+  LEFT JOIN latest_pool_updated
+  ON ve.liquidity_gauge_pool_initialized.address = latest_pool_updated.address
+  AND ve.liquidity_gauge_pool_initialized.chain_id = latest_pool_updated.chain_id  
+  LEFT JOIN latest_epoch_duration_updated
+  ON ve.liquidity_gauge_pool_initialized.address = latest_epoch_duration_updated.address
+  AND ve.liquidity_gauge_pool_initialized.chain_id = latest_epoch_duration_updated.chain_id
+  WHERE 1 = 1
+  AND ve.liquidity_gauge_pool_initialized.address = _pool_address
+  AND ve.liquidity_gauge_pool_initialized.chain_id = _chain_id;
+END
+$$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION get_gauge_pool_latest_data(_chain_id uint256, _pool_address address) OWNER TO writeuser;
+
+ALTER TABLE ve.liquidity_gauge_pool_set OWNER TO writeuser;
+ALTER TABLE ve.epoch_duration_updated OWNER TO writeuser;
+ALTER TABLE ve.liquidity_gauge_pool_initialized OWNER TO writeuser;
+
+CREATE OR REPLACE FUNCTION get_gauge_pool_status(_chain_id uint256, _pool_key bytes32)
+RETURNS TABLE
+(
+  pool_address                                      address,
+  active                                            boolean
+)
+AS
+$$
+BEGIN
+  RETURN QUERY
+  WITH latest_added
+  AS
+  (
+    SELECT
+      ve.liquidity_gauge_pool_added.key,
+      ve.liquidity_gauge_pool_added.pool AS address,
+      ve.liquidity_gauge_pool_added.block_timestamp
+    FROM ve.liquidity_gauge_pool_added
+    WHERE 1 = 1
+    AND ve.liquidity_gauge_pool_added.chain_id = _chain_id
+    AND ve.liquidity_gauge_pool_added.key = _pool_key
+    ORDER BY ve.liquidity_gauge_pool_added.block_timestamp DESC
+    LIMIT 1
+  ),
+  latest_activated
+  AS
+  (
+    SELECT
+      ve.gauge_controller_registry_pool_activated.key,
+      ve.gauge_controller_registry_pool_activated.block_timestamp
+    FROM ve.gauge_controller_registry_pool_activated
+    WHERE 1 = 1
+    AND ve.gauge_controller_registry_pool_activated.chain_id = _chain_id
+    AND ve.gauge_controller_registry_pool_activated.key = _pool_key
+    ORDER BY ve.gauge_controller_registry_pool_activated.block_timestamp DESC
+    LIMIT 1
+  ),
+  latest_deactivated
+  AS
+  (
+    SELECT
+      ve.gauge_controller_registry_pool_deactivated.key,
+      ve.gauge_controller_registry_pool_deactivated.block_timestamp
+    FROM ve.gauge_controller_registry_pool_deactivated
+    WHERE 1 = 1
+    AND ve.gauge_controller_registry_pool_deactivated.chain_id = _chain_id
+    AND ve.gauge_controller_registry_pool_deactivated.key = _pool_key
+    ORDER BY ve.gauge_controller_registry_pool_deactivated.block_timestamp DESC
+    LIMIT 1
+  ),
+  latest_deleted
+  AS
+  (
+    SELECT
+      ve.gauge_controller_registry_pool_deleted.key,
+      ve.gauge_controller_registry_pool_deleted.block_timestamp
+    FROM ve.gauge_controller_registry_pool_deleted
+    WHERE 1 = 1
+    AND ve.gauge_controller_registry_pool_deleted.chain_id = _chain_id
+    AND ve.gauge_controller_registry_pool_deleted.key = _pool_key
+    ORDER BY ve.gauge_controller_registry_pool_deleted.block_timestamp DESC
+    LIMIT 1
+  ),
+  latest_updated
+  AS
+  (
+    SELECT
+      ve.liquidity_gauge_pool_updated.key,
+      ve.liquidity_gauge_pool_updated.current AS address,
+      ve.liquidity_gauge_pool_updated.block_timestamp
+    FROM ve.liquidity_gauge_pool_updated
+    WHERE 1 = 1
+    AND ve.liquidity_gauge_pool_updated.chain_id = _chain_id
+    AND ve.liquidity_gauge_pool_updated.key = _pool_key
+    ORDER BY ve.liquidity_gauge_pool_updated.block_timestamp DESC
+    LIMIT 1
+  )
+  SELECT
+    CASE
+      WHEN COALESCE(latest_updated.block_timestamp, 0) > COALESCE(latest_added.block_timestamp, 0)
+      THEN latest_updated.address
+      ELSE latest_added.address
+    END AS pool_address,
+    COALESCE(latest_deactivated.block_timestamp, 0) < 
+    GREATEST
+    (
+      latest_added.block_timestamp,
+      COALESCE(latest_updated.block_timestamp, 0),
+      COALESCE(latest_activated.block_timestamp, 0)
+    ) AS active
+  FROM latest_added
+  FULL OUTER JOIN latest_updated
+  ON latest_added.key = latest_updated.key
+  LEFT JOIN latest_activated
+  ON latest_added.key = latest_activated.key
+  LEFT JOIN latest_deactivated
+  ON latest_added.key = latest_deactivated.key
+  LEFT JOIN latest_deleted
+  ON latest_added.key = latest_deleted.key
+  WHERE COALESCE(latest_deleted.block_timestamp, 0) <
+  GREATEST
+  (
+    latest_added.block_timestamp,
+    COALESCE(latest_updated.block_timestamp, 0)
+  );
+END
+$$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION get_gauge_pool_status(_chain_id uint256, _pool_key bytes32) OWNER TO writeuser;
+
+ALTER TABLE ve.gauge_controller_registry_pool_activated OWNER TO writeuser;
+ALTER TABLE ve.gauge_controller_registry_pool_deactivated OWNER TO writeuser;
+ALTER TABLE ve.gauge_controller_registry_pool_deleted OWNER TO writeuser;
+ALTER TABLE ve.liquidity_gauge_pool_updated OWNER TO writeuser;
+
 CREATE OR REPLACE FUNCTION get_gauge_pools()
 RETURNS TABLE
 (
@@ -6145,7 +6355,6 @@ RETURNS TABLE
 )
 AS
 $$
-  DECLARE _r                                        RECORD;
 BEGIN
   DROP TABLE IF EXISTS _get_gauge_pools_result;
   CREATE TEMPORARY TABLE _get_gauge_pools_result
@@ -6167,125 +6376,63 @@ BEGIN
     current_distribution                            uint256
   ) ON COMMIT DROP;
 
-  FOR _r IN
+  INSERT INTO _get_gauge_pools_result(chain_id, key)
+  SELECT DISTINCT ve.liquidity_gauge_pool_added.chain_id, ve.liquidity_gauge_pool_added.key
+  FROM ve.liquidity_gauge_pool_added;
+
+  UPDATE _get_gauge_pools_result
+  SET (pool_address, active) = (SELECT * FROM get_gauge_pool_status(_get_gauge_pools_result.chain_id, _get_gauge_pools_result.key));
+
+  UPDATE _get_gauge_pools_result
+  SET lockup_period_in_blocks = 100;
+
+  UPDATE _get_gauge_pools_result
+  SET (epoch_duration, staking_token, name, info, platform_fee, token, ratio) = 
   (
-    SELECT *
-    FROM gauge_pool_lifecycle_view
-    ORDER BY block_number::numeric
-  )
-  LOOP
-    IF(_r.action = 'add') THEN
-      INSERT INTO _get_gauge_pools_result
-      (
-        chain_id,
-        key,
-        epoch_duration,
-        pool_address,
-        staking_token,
-        name,
-        info,
-        platform_fee,
-        token,
-        lockup_period_in_blocks,
-        ratio
-      )
-      SELECT
-        liquidity_gauge_pool_initialized.chain_id,
-        liquidity_gauge_pool_initialized.key,
-        liquidity_gauge_pool_initialized.epoch_duration,
-        liquidity_gauge_pool_initialized.address,
-        liquidity_gauge_pool_initialized.staking_token,        
-        liquidity_gauge_pool_initialized.name,
-        liquidity_gauge_pool_initialized.info,
-        liquidity_gauge_pool_initialized.platform_fee,
-        liquidity_gauge_pool_initialized.staking_token,
-        100 AS lockup_period_in_blocks,
-        liquidity_gauge_pool_initialized.ve_boost_ratio
-      FROM ve.liquidity_gauge_pool_initialized
-      WHERE liquidity_gauge_pool_initialized.id = _r.id;
-    END IF;
-    
-    IF(_r.action = 'edit') THEN
-      UPDATE _get_gauge_pools_result
-      SET 
-        name = CASE WHEN COALESCE(liquidity_gauge_pool_set.name, '') = '' THEN _get_gauge_pools_result.name ELSE liquidity_gauge_pool_set.name END,
-        info = CASE WHEN COALESCE(liquidity_gauge_pool_set.info, '') = '' THEN _get_gauge_pools_result.info ELSE liquidity_gauge_pool_set.info END,
-        platform_fee = CASE WHEN COALESCE(liquidity_gauge_pool_set.platform_fee, 0) = 0 THEN _get_gauge_pools_result.platform_fee ELSE liquidity_gauge_pool_set.platform_fee END,
-        ratio = CASE WHEN COALESCE(liquidity_gauge_pool_set.ve_boost_ratio, 0) = 0 THEN _get_gauge_pools_result.ratio ELSE liquidity_gauge_pool_set.ve_boost_ratio END
-      FROM ve.liquidity_gauge_pool_set AS liquidity_gauge_pool_set
-      WHERE _get_gauge_pools_result.key = liquidity_gauge_pool_set.key
-      AND _get_gauge_pools_result.chain_id = liquidity_gauge_pool_set.chain_id
-      AND liquidity_gauge_pool_set.id = _r.id;
-    END IF;
-    
-    IF(_r.action = 'deactivate') THEN
-      UPDATE _get_gauge_pools_result
-      SET active = false
-      WHERE _get_gauge_pools_result.chain_id = _r.chain_id
-      AND _get_gauge_pools_result.key = _r.key;      
-    END IF;
-
-    IF(_r.action = 'activate') THEN
-      UPDATE _get_gauge_pools_result
-      SET active = true
-      WHERE _get_gauge_pools_result.chain_id = _r.chain_id
-      AND _get_gauge_pools_result.key = _r.key;      
-    END IF;
-
-    IF(_r.action = 'delete') THEN
-      DELETE FROM _get_gauge_pools_result
-      WHERE _get_gauge_pools_result.chain_id = _r.chain_id
-      AND _get_gauge_pools_result.key = _r.key;      
-    END IF;
-  END LOOP;
+    SELECT
+      result.epoch_duration,
+      result.staking_token,
+      result.name,
+      result.info,
+      result.platform_fee,
+      result.staking_token,
+      result.ve_boost_ratio
+    FROM get_gauge_pool_latest_data(_get_gauge_pools_result.chain_id, _get_gauge_pools_result.pool_address)
+    AS result
+  );
   
+  -- ipfs info details
   UPDATE _get_gauge_pools_result
   SET info_details = config_known_ipfs_hashes_view.ipfs_details
   FROM config_known_ipfs_hashes_view
   WHERE 1 = 1
   AND config_known_ipfs_hashes_view.ipfs_hash = _get_gauge_pools_result.info;
-
-  --@todo: drop this when address bug of the `ve.liquidity_gauge_pool_set` is fixed
-  UPDATE _get_gauge_pools_result
-  SET pool_address = ve.liquidity_gauge_pool_added.pool
-  FROM ve.liquidity_gauge_pool_added
-  WHERE ve.liquidity_gauge_pool_added.chain_id = _get_gauge_pools_result.chain_id
-  AND ve.liquidity_gauge_pool_added.key = _get_gauge_pools_result.key
-  AND _get_gauge_pools_result.pool_address = '0x0000000000000000000000000000000000000000';
   
+  -- epoch number & distribution
   UPDATE _get_gauge_pools_result
   SET
-    current_epoch = ve.gauge_set.epoch,
-    current_distribution = get_npm_value(ve.gauge_set.distribution)
+    current_epoch           = ve.gauge_set.epoch,
+    current_distribution    = get_npm_value(ve.gauge_set.distribution)
   FROM ve.gauge_set
-  WHERE ve.gauge_set.key = _get_gauge_pools_result.key
+  WHERE 1 = 1
+  AND ve.gauge_set.key      = _get_gauge_pools_result.key
   AND ve.gauge_set.chain_id = _get_gauge_pools_result.chain_id
-  AND ve.gauge_set.epoch = (SELECT MAX(epoch) FROM ve.gauge_set);
+  AND ve.gauge_set.epoch    = (SELECT MAX(epoch) FROM ve.gauge_set);
   
-  UPDATE _get_gauge_pools_result
-  SET epoch_duration =
-  COALESCE
-  (
-    (
-      SELECT current
-      FROM ve.epoch_duration_updated
-      WHERE ve.epoch_duration_updated.key = _get_gauge_pools_result.key
-      AND ve.epoch_duration_updated.chain_id = _get_gauge_pools_result.chain_id    
-      ORDER BY ve.epoch_duration_updated.block_timestamp DESC
-      LIMIT 1
-    )
-  , _get_gauge_pools_result.epoch_duration);
-
-
   RETURN QUERY
   SELECT * FROM _get_gauge_pools_result;
 END
 $$
 LANGUAGE plpgsql;
 
+ALTER FUNCTION get_gauge_pools() OWNER TO writeuser;
+
+ALTER TABLE ve.liquidity_gauge_pool_added OWNER TO writeuser;
+ALTER TABLE ve.gauge_set OWNER TO writeuser;
+
+ALTER VIEW config_known_ipfs_hashes_view OWNER TO writeuser;
 
 -- SELECT * FROM get_gauge_pools();
-
 
 CREATE OR REPLACE FUNCTION get_incident_date_by_expiry_date
 (
