@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION get_tvl_till_date
   _date                                     TIMESTAMP WITH TIME ZONE
 )
 RETURNS numeric
-IMMUTABLE
+STABLE
 AS
 $$
   DECLARE _result numeric;
@@ -82,3 +82,9 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+ALTER FUNCTION get_tvl_till_date( _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_tvl_till_date( _chain_id uint256, _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_tvl_till_date( _chain_id uint256, _cover_key bytes32, _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+
+-- SELECT * FROM get_tvl_till_date(NOW());

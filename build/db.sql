@@ -6753,7 +6753,7 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _date                                     TIMESTAMP WITH TIME ZONE
 )
 RETURNS numeric
-IMMUTABLE
+STABLE
 AS
 $$
   DECLARE _added numeric;
@@ -6780,7 +6780,7 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _date                                     TIMESTAMP WITH TIME ZONE
 )
 RETURNS numeric
-IMMUTABLE
+STABLE
 AS
 $$
   DECLARE _added numeric;
@@ -6810,7 +6810,7 @@ CREATE OR REPLACE FUNCTION get_reassurance_till_date
   _date                                     TIMESTAMP WITH TIME ZONE
 )
 RETURNS numeric
-IMMUTABLE
+STABLE
 AS
 $$
   DECLARE _added numeric;
@@ -6835,8 +6835,11 @@ END
 $$
 LANGUAGE plpgsql;
 
--- SELECT * FROM get_reassurance_till_date(NOW());
+ALTER FUNCTION get_reassurance_till_date(_date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_reassurance_till_date(_chain_id uint256, _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_reassurance_till_date(_chain_id uint256, _cover_key bytes32, _date TIMESTAMP WITH TIME ZONE ) OWNER TO writeuser;
 
+-- SELECT * FROM get_reassurance_till_date(NOW());
 
 CREATE OR REPLACE FUNCTION get_reporter_commission(_chain_id uint256)
 RETURNS numeric
@@ -7024,7 +7027,7 @@ CREATE OR REPLACE FUNCTION get_tvl_till_date
   _date                                     TIMESTAMP WITH TIME ZONE
 )
 RETURNS numeric
-IMMUTABLE
+STABLE
 AS
 $$
   DECLARE _result numeric;
@@ -7103,6 +7106,13 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+ALTER FUNCTION get_tvl_till_date( _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_tvl_till_date( _chain_id uint256, _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_tvl_till_date( _chain_id uint256, _cover_key bytes32, _date TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+
+-- SELECT * FROM get_tvl_till_date(NOW());
+
 CREATE OR REPLACE FUNCTION get_user_milestones
 (
   _account                        address
