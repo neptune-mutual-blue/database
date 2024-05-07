@@ -5,12 +5,13 @@ RETURNS TABLE
   key                                               bytes32,
   epoch_duration                                    uint256,
   pool_address                                      address,
-  staking_token                                     address,
   name                                              text,
   info                                              text,
   info_details                                      text,
   platform_fee                                      uint256,
+  reward_token                                      address,
   token                                             address,
+  balance                                           uint256,
   lockup_period_in_blocks                           uint256,
   ratio                                             uint256,
   active                                            boolean,
@@ -27,12 +28,13 @@ BEGIN
     key                                             bytes32,
     epoch_duration                                  uint256,
     pool_address                                    address,
-    staking_token                                   address,
     name                                            text,
     info                                            text,
     info_details                                    text,
     platform_fee                                    uint256,
+    reward_token                                    address,
     token                                           address,
+    balance                                         uint256,
     lockup_period_in_blocks                         uint256,
     ratio                                           uint256,    
     active                                          boolean DEFAULT(true),
@@ -51,11 +53,11 @@ BEGIN
   SET lockup_period_in_blocks = 100;
 
   UPDATE _get_gauge_pools_result
-  SET (epoch_duration, staking_token, name, info, platform_fee, token, ratio) = 
+  SET (epoch_duration, reward_token, name, info, platform_fee, token, ratio) = 
   (
     SELECT
       result.epoch_duration,
-      result.staking_token,
+      result.reward_token,
       result.name,
       result.info,
       result.platform_fee,
@@ -64,6 +66,9 @@ BEGIN
     FROM get_gauge_pool_latest_data(_get_gauge_pools_result.chain_id, _get_gauge_pools_result.pool_address)
     AS result
   );
+
+  UPDATE _get_gauge_pools_result
+  SET balance = get_gauge_pool_locked_balance(_get_gauge_pools_result.chain_id, _get_gauge_pools_result.pool_address);
   
   -- ipfs info details
   UPDATE _get_gauge_pools_result

@@ -6218,6 +6218,35 @@ ALTER TABLE ve.liquidity_gauge_pool_set OWNER TO writeuser;
 ALTER TABLE ve.epoch_duration_updated OWNER TO writeuser;
 ALTER TABLE ve.liquidity_gauge_pool_initialized OWNER TO writeuser;
 
+CREATE OR REPLACE FUNCTION get_gauge_pool_locked_balance(_chain_id uint256, _pool_address address)
+RETURNS numeric
+AS
+$$
+DECLARE
+  total_deposit     numeric;
+  total_withdrawal  numeric;
+BEGIN
+  SELECT COALESCE(SUM(ve.liquidity_gauge_deposited.amount), 0) INTO total_deposit
+  FROM ve.liquidity_gauge_deposited
+  WHERE 1 = 1
+  AND ve.liquidity_gauge_deposited.address  = _pool_address
+  AND ve.liquidity_gauge_deposited.chain_id = _chain_id;
+
+  SELECT COALESCE(SUM(ve.liquidity_gauge_withdrawn.amount), 0) INTO total_withdrawal
+  FROM ve.liquidity_gauge_withdrawn
+  WHERE 1 = 1
+  AND ve.liquidity_gauge_withdrawn.address  = _pool_address
+  AND ve.liquidity_gauge_withdrawn.chain_id = _chain_id;
+
+  RETURN total_deposit - total_withdrawal;
+END
+$$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION get_gauge_pool_locked_balance(_chain_id uint256, _pool_address address) OWNER TO writeuser;
+
+-- SELECT get_gauge_pool_locked_balance(42161, '0xe78b4f044ef559e79103e9d31d734c60932d0fe2');
+
 CREATE OR REPLACE FUNCTION get_gauge_pool_status(_chain_id uint256, _pool_key bytes32)
 RETURNS TABLE
 (
@@ -6341,12 +6370,13 @@ RETURNS TABLE
   key                                               bytes32,
   epoch_duration                                    uint256,
   pool_address                                      address,
-  staking_token                                     address,
   name                                              text,
   info                                              text,
   info_details                                      text,
   platform_fee                                      uint256,
+  reward_token                                      address,
   token                                             address,
+  balance                                           uint256,
   lockup_period_in_blocks                           uint256,
   ratio                                             uint256,
   active                                            boolean,
@@ -6363,12 +6393,13 @@ BEGIN
     key                                             bytes32,
     epoch_duration                                  uint256,
     pool_address                                    address,
-    staking_token                                   address,
     name                                            text,
     info                                            text,
     info_details                                    text,
     platform_fee                                    uint256,
+    reward_token                                    address,
     token                                           address,
+    balance                                         uint256,
     lockup_period_in_blocks                         uint256,
     ratio                                           uint256,    
     active                                          boolean DEFAULT(true),
@@ -6387,11 +6418,11 @@ BEGIN
   SET lockup_period_in_blocks = 100;
 
   UPDATE _get_gauge_pools_result
-  SET (epoch_duration, staking_token, name, info, platform_fee, token, ratio) = 
+  SET (epoch_duration, reward_token, name, info, platform_fee, token, ratio) = 
   (
     SELECT
       result.epoch_duration,
-      result.staking_token,
+      result.reward_token,
       result.name,
       result.info,
       result.platform_fee,
@@ -6400,6 +6431,9 @@ BEGIN
     FROM get_gauge_pool_latest_data(_get_gauge_pools_result.chain_id, _get_gauge_pools_result.pool_address)
     AS result
   );
+
+  UPDATE _get_gauge_pools_result
+  SET balance = get_gauge_pool_locked_balance(_get_gauge_pools_result.chain_id, _get_gauge_pools_result.pool_address);
   
   -- ipfs info details
   UPDATE _get_gauge_pools_result
