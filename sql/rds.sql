@@ -76,6 +76,7 @@ CREATE TABLE core.transactions
   id                                                uuid PRIMARY KEY DEFAULT(gen_random_uuid()),
   transaction_hash                                  text NOT NULL,
   address                                           address /* NOT NULL */,
+  contract                                          address /* NOT NULL */,
   block_timestamp                                   integer NOT NULL,
   block_number                                      text NOT NULL,
   transaction_sender                                address,
