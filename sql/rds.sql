@@ -65,11 +65,6 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE TABLE core.locks
-(
-  namespace                                         text NOT NULL PRIMARY KEY,
-  started_on                                        integer NOT NULL DEFAULT(extract(epoch FROM NOW() AT TIME ZONE 'UTC'))
-);
 
 CREATE TABLE core.transactions
 (
@@ -84,6 +79,8 @@ CREATE TABLE core.transactions
   transaction_stablecoin_amount                     uint256,
   transaction_npm_amount                            uint256,
   gas_price                                         uint256,
+  log_index                                         integer,
+  interface_name                                    text,
   event_name                                        text,
   coupon_code                                       text,
   ck                                                text,
