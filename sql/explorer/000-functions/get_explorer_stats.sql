@@ -117,4 +117,4 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_explorer_stats() OWNER TO writeuser;
+ALTER FUNCTION get_explorer_stats OWNER TO writeuser;

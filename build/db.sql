@@ -3638,7 +3638,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION wei_to_ether(uint256) OWNER TO writeuser;
+ALTER FUNCTION wei_to_ether OWNER TO writeuser;
 
 
 CREATE FUNCTION average(numeric, variadic numeric[])
@@ -3668,7 +3668,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_stablecoin_value(uint256, numeric(100, 32)) OWNER TO writeuser;
+ALTER FUNCTION get_stablecoin_value OWNER TO writeuser;
 DO
 $$
 BEGIN
@@ -7306,8 +7306,8 @@ AS
 WITH chains
 AS
 (
-	SELECT DISTINCT core.transactions.chain_id
-	FROM core.transactions
+  SELECT DISTINCT core.transactions.chain_id
+  FROM core.transactions
 ),
 unfiltered
 AS
@@ -9721,7 +9721,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_explorer_stats() OWNER TO writeuser;
+ALTER FUNCTION get_explorer_stats OWNER TO writeuser;
 
 CREATE OR REPLACE FUNCTION get_protocol_contracts()
 RETURNS TABLE

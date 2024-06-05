@@ -3,8 +3,8 @@ AS
 WITH chains
 AS
 (
-	SELECT DISTINCT core.transactions.chain_id
-	FROM core.transactions
+  SELECT DISTINCT core.transactions.chain_id
+  FROM core.transactions
 ),
 unfiltered
 AS

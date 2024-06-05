@@ -3638,7 +3638,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION wei_to_ether(uint256) OWNER TO writeuser;
+ALTER FUNCTION wei_to_ether OWNER TO writeuser;
 
 
 CREATE FUNCTION average(numeric, variadic numeric[])
@@ -3668,4 +3668,4 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_stablecoin_value(uint256, numeric(100, 32)) OWNER TO writeuser;
+ALTER FUNCTION get_stablecoin_value OWNER TO writeuser;
