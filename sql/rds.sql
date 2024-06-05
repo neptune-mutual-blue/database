@@ -3589,21 +3589,6 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION get_stablecoin_value(_chain_id uint256, _amount numeric(100, 32))
-RETURNS numeric(100, 32)
-IMMUTABLE
-AS
-$$
-BEGIN
-  IF(_chain_id IN (56)) THEN
-    RETURN _amount / POWER(10, 18)::numeric(100, 32);  
-  END IF;
-
-  RETURN _amount / POWER(10, 6)::numeric(100, 32);
-END
-$$
-LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION get_npm_value(_amount uint256)
 RETURNS numeric
 IMMUTABLE
@@ -3648,10 +3633,12 @@ IMMUTABLE
 AS
 $$
 BEGIN
-  RETURN COALESCE(amount, 0) / POWER(10, 18);
+  RETURN COALESCE(amount, 0) / POWER(10, 18)::numeric(100, 32);
 END
 $$
 LANGUAGE plpgsql;
+
+ALTER FUNCTION wei_to_ether OWNER TO writeuser;
 
 
 CREATE FUNCTION average(numeric, variadic numeric[])
@@ -3666,3 +3653,19 @@ $$
 LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION get_stablecoin_value(_chain_id uint256, _amount numeric(100, 32))
+RETURNS numeric(100, 32)
+IMMUTABLE
+AS
+$$
+BEGIN
+  IF(_chain_id IN (56)) THEN
+    RETURN wei_to_ether(_amount);
+  END IF;
+
+  RETURN _amount / POWER(10, 6)::numeric(100, 32);
+END
+$$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION get_stablecoin_value OWNER TO writeuser;

@@ -1,6 +1,4 @@
-DROP VIEW IF EXISTS my_policies_view;
-
-CREATE VIEW my_policies_view
+CREATE OR REPLACE VIEW my_policies_view
 AS
 WITH policy_txs
 AS
@@ -25,10 +23,10 @@ AS
     block_timestamp,
     cx_token,
     transaction_hash,
-    account                                     AS account,
-    wei_to_ether(amount)                        AS cxtoken_amount,
-    wei_to_ether(claimed)                       AS stablecoin_amount,
-    'claimed'                                   AS tx_type
+    account                                             AS account,
+    wei_to_ether(amount)                                AS cxtoken_amount,
+    wei_to_ether(claimed)                               AS stablecoin_amount,
+    'claimed'                                           AS tx_type
   FROM cxtoken.claimed
 )
 
@@ -53,3 +51,5 @@ ON factory.cx_token_deployed.chain_id           = policy_txs.chain_id
 AND factory.cx_token_deployed.cover_key         = policy_txs.cover_key
 AND factory.cx_token_deployed.product_key       = policy_txs.product_key
 AND factory.cx_token_deployed.cx_token          = policy_txs.cx_token;
+
+ALTER VIEW my_policies_view OWNER TO writeuser;
