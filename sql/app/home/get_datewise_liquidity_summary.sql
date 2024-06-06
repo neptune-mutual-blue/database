@@ -18,7 +18,7 @@ BEGIN
   CREATE UNLOGGED TABLE IF NOT EXISTS public.datewise_liquidity_summary
   (
     id                                                      BIGSERIAL,
-    chain_id                                                integer,
+    chain_id                                                uint256,
     date                                                    TIMESTAMP WITH TIME ZONE,
     total_liquidity                                         numeric,
     total_capacity                                          numeric,
@@ -45,7 +45,6 @@ BEGIN
   (
     SELECT * FROM stale_data
   );
-
 
   WITH date_ranges
   AS
@@ -102,19 +101,19 @@ BEGIN
   WHERE public.datewise_liquidity_summary.total_liquidity IS NULL;
 
   UPDATE public.datewise_liquidity_summary
-  SET total_capacity = get_total_capacity_by_date(public.datewise_liquidity_summary.date)
+  SET total_capacity = get_total_capacity_by_date(public.datewise_liquidity_summary.chain_id, public.datewise_liquidity_summary.date)
   WHERE public.datewise_liquidity_summary.total_capacity IS NULL;
 
   UPDATE public.datewise_liquidity_summary
-  SET total_covered = get_total_covered_till_date(public.datewise_liquidity_summary.date)
+  SET total_covered = get_total_covered_till_date(public.datewise_liquidity_summary.chain_id, public.datewise_liquidity_summary.date)
   WHERE public.datewise_liquidity_summary.total_covered IS NULL;
 
   UPDATE public.datewise_liquidity_summary
-  SET total_cover_fee = sum_cover_fee_earned_during('-infinity', public.datewise_liquidity_summary.date)
+  SET total_cover_fee = sum_cover_fee_earned_during(public.datewise_liquidity_summary.chain_id, '-infinity', public.datewise_liquidity_summary.date)
   WHERE public.datewise_liquidity_summary.total_cover_fee IS NULL;
 
   UPDATE public.datewise_liquidity_summary
-  SET total_purchase_count = count_cover_purchase_during('-infinity', public.datewise_liquidity_summary.date)
+  SET total_purchase_count = count_cover_purchase_during(public.datewise_liquidity_summary.chain_id, '-infinity', public.datewise_liquidity_summary.date)
   WHERE public.datewise_liquidity_summary.total_purchase_count IS NULL;
 
   RETURN QUERY

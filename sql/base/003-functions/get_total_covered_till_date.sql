@@ -1,48 +1,5 @@
 CREATE OR REPLACE FUNCTION get_total_covered_till_date
 (
-  _date                                     TIMESTAMP WITH TIME ZONE
-)
-RETURNS numeric
-STABLE
-AS
-$$
-  DECLARE _result numeric;
-BEGIN
-  SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover))
-  INTO _result
-  FROM policy.cover_purchased
-  WHERE to_timestamp(expires_on) <= _date;
-
-  RETURN COALESCE(_result, 0);
-END
-$$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION get_total_covered_till_date
-(
-  _chain_id                                 uint256,
-  _date                                     TIMESTAMP WITH TIME ZONE
-)
-RETURNS numeric
-STABLE
-AS
-$$
-  DECLARE _result numeric;
-BEGIN
-  SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover))
-  INTO _result
-  FROM policy.cover_purchased
-  WHERE chain_id = _chain_id
-  AND to_timestamp(expires_on) <= _date;
-
-  RETURN COALESCE(_result, 0);
-END
-$$
-LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION get_total_covered_till_date
-(
   _chain_id                                 uint256,
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
@@ -56,11 +13,42 @@ BEGIN
   SELECT SUM(get_stablecoin_value(chain_id, amount_to_cover))
   INTO _result
   FROM policy.cover_purchased
-  WHERE chain_id = _chain_id
-  AND cover_key = _cover_key
+  WHERE 1 = 1 
+  AND (_chain_id IS NULL OR chain_id = _chain_id)
+  AND (_cover_key IS NULL OR cover_key = _cover_key)
   AND to_timestamp(expires_on) <= _date;
 
   RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION get_total_covered_till_date
+(
+  _chain_id                                 uint256,
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+BEGIN
+  RETURN get_total_covered_till_date(_chain_id, NULL, _date);
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_total_covered_till_date
+(
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+BEGIN
+  RETURN get_total_covered_till_date(NULL, NULL, _date);
 END
 $$
 LANGUAGE plpgsql;
