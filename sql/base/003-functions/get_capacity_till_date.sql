@@ -1,6 +1,6 @@
-
 CREATE OR REPLACE FUNCTION get_total_capacity_by_date
 (
+  _chain_id                                 uint256,
   _date                                     TIMESTAMP WITH TIME ZONE
 )
 RETURNS numeric
@@ -14,6 +14,8 @@ BEGIN
   (
     SELECT DISTINCT core.transactions.chain_id
     FROM core.transactions
+    WHERE 1 = 1
+    AND (_chain_id IS NULL OR core.transactions.chain_id = _chain_id)
   ),
   unfiltered
   AS
@@ -63,6 +65,25 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_total_capacity_by_date(TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
 
---SELECT get_total_capacity_by_date('infinity')
+CREATE OR REPLACE FUNCTION get_total_capacity_by_date
+(
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _capacity                         uint256;
+BEGIN
+  RETURN get_total_capacity_by_date(NULL, _date);
+END
+$$
+LANGUAGE plpgsql;
+
+
+
+ALTER FUNCTION get_total_capacity_by_date(TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+ALTER FUNCTION get_total_capacity_by_date(uint256, TIMESTAMP WITH TIME ZONE) OWNER TO writeuser;
+
+
