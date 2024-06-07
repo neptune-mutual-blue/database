@@ -50,13 +50,20 @@ AS
     vaults.vault_address
 )
 SELECT
-  chain_id,
+  balances.chain_id,
   account,
-  balance,
-  vault_address,
-  cover_key,
-  bytes32_to_string(cover_key)                AS cover_key_string
-FROM balances;
+  wei_to_ether(balances.balance)              AS balance,
+  balances.vault_address,
+  balances.cover_key,
+  bytes32_to_string(balances.cover_key)       AS cover_key_string,
+  factory.vault_deployed.name                 AS token_name,
+  factory.vault_deployed.symbol               AS token_symbol
+FROM balances
+LEFT JOIN factory.vault_deployed
+ON 1=1
+AND factory.vault_deployed.chain_id            = balances.chain_id
+AND factory.vault_deployed.cover_key           = balances.cover_key
+AND factory.vault_deployed.vault               = balances.vault_address;
 
 ALTER VIEW active_liquidity_view OWNER TO writeuser;
 

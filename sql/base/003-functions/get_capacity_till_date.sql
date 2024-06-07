@@ -38,27 +38,16 @@ BEGIN
   (
     SELECT DISTINCT chain_id, cover_key, product_key
     FROM unfiltered
-    WHERE cover_key IS NOT NULL
-  ),
-  summary
-  AS
-  (
-    SELECT
-      chain_id,
-      cover_key,
-      bytes32_to_string(cover_key) AS cover,
-      is_diversified(chain_id, cover_key) AS diversified,
-      product_key,
-      bytes32_to_string(product_key) AS product,
-      get_cover_capacity_till(chain_id, cover_key, product_key, _date) AS capacity,
-      format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, _date)) AS formatted_capacity
-    FROM products
+    WHERE COALESCE(cover_key, string_to_bytes32('')) != string_to_bytes32('')
+    AND
+    (
+      COALESCE(product_key, string_to_bytes32('')) != string_to_bytes32('')
+      OR NOT is_diversified(chain_id, cover_key)
+    )
   )
-  SELECT SUM(capacity)
+  SELECT SUM(get_cover_capacity_till(chain_id, cover_key, product_key, _date))
   INTO _capacity
-  FROM summary
-  WHERE 1 = 1
-  AND NOT (diversified = true AND product_key != string_to_bytes32(''));
+  FROM products;
 
   RETURN COALESCE(_capacity, 0);
 END
