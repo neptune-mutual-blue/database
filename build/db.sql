@@ -3574,20 +3574,40 @@ FOR EACH ROW EXECUTE FUNCTION policy.cover_purchased_product_key_trigger();
 
 /********************************************/
 
+DROP FUNCTION IF EXISTS vault.update_cover_key_on_vault_event_trigger() CASCADE;
 
-CREATE OR REPLACE FUNCTION format_stablecoin
-(
-  _amount         numeric
-)
-RETURNS money
-IMMUTABLE
+CREATE FUNCTION vault.update_cover_key_on_vault_event_trigger()
+RETURNS TRIGGER
 AS
 $$
 BEGIN
-  RETURN _amount / POWER(10, 6);
+  UPDATE core.transactions
+  SET ck = get_cover_key_by_vault_address(core.transactions.chain_id, core.transactions.address)
+  WHERE core.transactions.event_name IN ('PodsIssued', 'PodsRedeemed')
+  AND core.transactions.ck IS NULL;
+
+  RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;
+
+CREATE TRIGGER update_cover_key_on_vault_event_trigger
+AFTER INSERT ON vault.pods_issued
+FOR EACH ROW 
+EXECUTE FUNCTION vault.update_cover_key_on_vault_event_trigger();
+
+CREATE TRIGGER update_cover_key_on_vault_event_trigger
+AFTER INSERT ON vault.pods_redeemed
+FOR EACH ROW 
+EXECUTE FUNCTION vault.update_cover_key_on_vault_event_trigger();
+
+CREATE TRIGGER update_cover_key_on_vault_event_trigger
+AFTER INSERT ON factory.vault_deployed
+FOR EACH ROW 
+EXECUTE FUNCTION vault.update_cover_key_on_vault_event_trigger();
+
+
+/********************************************/
 
 CREATE OR REPLACE FUNCTION get_npm_value(_amount uint256)
 RETURNS numeric
@@ -5945,27 +5965,16 @@ BEGIN
   (
     SELECT DISTINCT chain_id, cover_key, product_key
     FROM unfiltered
-    WHERE cover_key IS NOT NULL
-  ),
-  summary
-  AS
-  (
-    SELECT
-      chain_id,
-      cover_key,
-      bytes32_to_string(cover_key) AS cover,
-      is_diversified(chain_id, cover_key) AS diversified,
-      product_key,
-      bytes32_to_string(product_key) AS product,
-      get_cover_capacity_till(chain_id, cover_key, product_key, _date) AS capacity,
-      format_stablecoin(get_cover_capacity_till(chain_id, cover_key, product_key, _date)) AS formatted_capacity
-    FROM products
+    WHERE COALESCE(cover_key, string_to_bytes32('')) != string_to_bytes32('')
+    AND
+    (
+      COALESCE(product_key, string_to_bytes32('')) != string_to_bytes32('')
+      OR NOT is_diversified(chain_id, cover_key)
+    )
   )
-  SELECT SUM(capacity)
+  SELECT SUM(get_cover_capacity_till(chain_id, cover_key, product_key, _date))
   INTO _capacity
-  FROM summary
-  WHERE 1 = 1
-  AND NOT (diversified = true AND product_key != string_to_bytes32(''));
+  FROM products;
 
   RETURN COALESCE(_capacity, 0);
 END
@@ -7035,7 +7044,7 @@ BEGIN
   WHERE 1 = 1 
   AND (_chain_id IS NULL OR chain_id = _chain_id)
   AND (_cover_key IS NULL OR cover_key = _cover_key)
-  AND to_timestamp(expires_on) <= _date;
+  AND to_timestamp(block_timestamp) <= _date;
 
   RETURN COALESCE(_result, 0);
 END
@@ -7082,61 +7091,6 @@ ALTER FUNCTION get_total_covered_till_date(uint256, bytes32, TIMESTAMP WITH TIME
 
 CREATE OR REPLACE FUNCTION get_tvl_till_date
 (
-  _date                                     TIMESTAMP WITH TIME ZONE
-)
-RETURNS numeric
-STABLE
-AS
-$$
-  DECLARE _result numeric;
-BEGIN
-  SELECT SUM
-  (
-    get_stablecoin_value(core.transactions.chain_id, core.transactions.transaction_stablecoin_amount)
-    *
-    CASE WHEN core.transactions.event_name IN ('Claimed') THEN -1 ELSE 1 END
-  )
-  INTO _result
-  FROM core.transactions
-  WHERE core.transactions.event_name IN ('CoverPurchased', 'PodsIssued', 'PodsRedeemed', 'Claimed', 'PoolCapitalized')
-  AND to_timestamp(core.transactions.block_timestamp) <= _date;
-
-  RETURN COALESCE(_result, 0);
-END
-$$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION get_tvl_till_date
-(
-  _chain_id                                 uint256,
-  _date                                     TIMESTAMP WITH TIME ZONE
-)
-RETURNS numeric
-STABLE
-AS
-$$
-  DECLARE _result numeric;
-BEGIN
-  SELECT SUM
-  (
-    get_stablecoin_value(core.transactions.chain_id, core.transactions.transaction_stablecoin_amount)
-    *
-    CASE WHEN core.transactions.event_name IN ('Claimed') THEN -1 ELSE 1 END
-  )
-  INTO _result
-  FROM core.transactions
-  WHERE core.transactions.chain_id = _chain_id
-  AND core.transactions.event_name IN ('CoverPurchased', 'PodsIssued', 'PodsRedeemed', 'Claimed', 'PoolCapitalized')
-  AND to_timestamp(core.transactions.block_timestamp) <= _date;
-
-  RETURN COALESCE(_result, 0);
-END
-$$
-LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION get_tvl_till_date
-(
   _chain_id                                 uint256,
   _cover_key                                bytes32,
   _date                                     TIMESTAMP WITH TIME ZONE
@@ -7148,19 +7102,51 @@ $$
   DECLARE _result numeric;
 BEGIN
   SELECT SUM
-  (    
+  (
     get_stablecoin_value(core.transactions.chain_id, core.transactions.transaction_stablecoin_amount)
     *
     CASE WHEN core.transactions.event_name IN ('Claimed') THEN -1 ELSE 1 END
   )
   INTO _result
   FROM core.transactions
-  WHERE core.transactions.chain_id = _chain_id
-  AND core.transactions.ck = _cover_key
+  WHERE 1 = 1
+  AND (_chain_id IS NULL OR core.transactions.chain_id = _chain_id)
+  AND (_cover_key IS NULL OR core.transactions.ck = _cover_key)
   AND core.transactions.event_name IN ('CoverPurchased', 'PodsIssued', 'PodsRedeemed', 'Claimed', 'PoolCapitalized')
   AND to_timestamp(core.transactions.block_timestamp) <= _date;
 
   RETURN COALESCE(_result, 0);
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_tvl_till_date
+(
+  _chain_id                                 uint256,
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  RETURN get_tvl_till_date(_chain_id, NULL, _date);
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_tvl_till_date
+(
+  _date                                     TIMESTAMP WITH TIME ZONE
+)
+RETURNS numeric
+STABLE
+AS
+$$
+  DECLARE _result numeric;
+BEGIN
+  RETURN get_tvl_till_date(NULL, NULL, _date);
 END
 $$
 LANGUAGE plpgsql;
@@ -7322,7 +7308,8 @@ AS
     SELECT chain_id FROM chains
   )
   UNION ALL
-  SELECT  chain_id, cover_key, string_to_bytes32('') FROM config_cover_view
+  SELECT  chain_id, cover_key, string_to_bytes32('')
+  FROM config_cover_view
   WHERE config_cover_view.chain_id IN
   (
     SELECT chain_id FROM chains
@@ -7333,8 +7320,9 @@ AS
 (
   SELECT DISTINCT chain_id, cover_key, product_key
   FROM unfiltered
-  WHERE COALESCE(cover_key, string_to_bytes32('')) != string_to_bytes32('')
-  AND 
+  WHERE 1 = 1
+  AND COALESCE(cover_key, string_to_bytes32('')) != string_to_bytes32('')
+  AND
   (
     COALESCE(product_key, string_to_bytes32('')) != string_to_bytes32('')
     OR NOT is_diversified(chain_id, cover_key)
@@ -7343,10 +7331,10 @@ AS
 SELECT
   chain_id,
   cover_key,
-  bytes32_to_string(cover_key) AS cover,
-  is_diversified(chain_id, cover_key) AS diversified,
+  bytes32_to_string(cover_key)                                          AS cover,
+  is_diversified(chain_id, cover_key)                                   AS diversified,
   product_key,
-  bytes32_to_string(product_key) AS product,
+  bytes32_to_string(product_key)                                        AS product,
   get_cover_capacity_till(chain_id, cover_key, product_key, 'infinity') AS capacity
 FROM products;
 
@@ -8684,13 +8672,20 @@ AS
     vaults.vault_address
 )
 SELECT
-  chain_id,
+  balances.chain_id,
   account,
-  balance,
-  vault_address,
-  cover_key,
-  bytes32_to_string(cover_key)                AS cover_key_string
-FROM balances;
+  wei_to_ether(balances.balance)              AS balance,
+  balances.vault_address,
+  balances.cover_key,
+  bytes32_to_string(balances.cover_key)       AS cover_key_string,
+  factory.vault_deployed.name                 AS token_name,
+  factory.vault_deployed.symbol               AS token_symbol
+FROM balances
+LEFT JOIN factory.vault_deployed
+ON 1=1
+AND factory.vault_deployed.chain_id            = balances.chain_id
+AND factory.vault_deployed.cover_key           = balances.cover_key
+AND factory.vault_deployed.vault               = balances.vault_address;
 
 ALTER VIEW active_liquidity_view OWNER TO writeuser;
 
@@ -8706,50 +8701,50 @@ AS
 (
   SELECT
     vault.pods_redeemed.chain_id,
-    vault.pods_redeemed.address                                 AS vault_address,
+    vault.pods_redeemed.address                                     AS vault_address,
     vault.pods_redeemed.block_timestamp,
     vault.pods_redeemed.transaction_hash,
     vault.pods_redeemed.account,
-    vault.pods_redeemed.redeemed                                AS pod_amount,
-    0                                                           AS npm_amount,
-    vault.pods_redeemed.liquidity_released                      AS stablecoin_amount,
-    'PodsRedeemed'                                              AS tx_type
+    vault.pods_redeemed.redeemed                                    AS pod_amount,
+    0                                                               AS npm_amount,
+    vault.pods_redeemed.liquidity_released                          AS stablecoin_amount,
+    'PodsRedeemed'                                                  AS tx_type
   FROM vault.pods_redeemed
   UNION ALL
   SELECT
     vault.pods_issued.chain_id,
-    vault.pods_issued.address                                   AS vault_address,
+    vault.pods_issued.address                                       AS vault_address,
     vault.pods_issued.block_timestamp,
     vault.pods_issued.transaction_hash,
     vault.pods_issued.account,
-    vault.pods_issued.issued                                    AS pod_amount,
-    0                                                           AS npm_amount,
-    vault.pods_issued.liquidity_added                           AS stablecoin_amount,
-    'PodsIssued'                                                AS tx_type
+    vault.pods_issued.issued                                        AS pod_amount,
+    0                                                               AS npm_amount,
+    vault.pods_issued.liquidity_added                               AS stablecoin_amount,
+    'PodsIssued'                                                    AS tx_type
   FROM vault.pods_issued
   UNION ALL
   SELECT
     vault.npm_unstaken.chain_id,
-    vault.npm_unstaken.address                                  AS vault_address,
+    vault.npm_unstaken.address                                      AS vault_address,
     vault.npm_unstaken.block_timestamp,
     vault.npm_unstaken.transaction_hash,
     vault.npm_unstaken.account,
-    0                                                           AS pod_amount,
-    vault.npm_unstaken.amount                                   AS npm_amount,
-    0                                                           AS stablecoin_amount,
-    'NpmUnstaken'                                               AS tx_type
+    0                                                               AS pod_amount,
+    vault.npm_unstaken.amount                                       AS npm_amount,
+    0                                                               AS stablecoin_amount,
+    'NpmUnstaken'                                                   AS tx_type
   FROM vault.npm_unstaken
   UNION ALL
   SELECT
     vault.npm_staken.chain_id,
-    vault.npm_staken.address                                    AS vault_address,
+    vault.npm_staken.address                                        AS vault_address,
     vault.npm_staken.block_timestamp,
     vault.npm_staken.transaction_hash,
     vault.npm_staken.account,
-    0                                                           AS pod_amount,
-    vault.npm_staken.amount                                     AS npm_amount,
-    0                                                           AS stablecoin_amount,
-    'NpmStaken'                                                 AS tx_type
+    0                                                               AS pod_amount,
+    vault.npm_staken.amount                                         AS npm_amount,
+    0                                                               AS stablecoin_amount,
+    'NpmStaken'                                                     AS tx_type
   FROM vault.npm_staken
 ),
 stage2
@@ -8769,7 +8764,7 @@ AS
     (
       stage1.chain_id,
       stage1.vault_address
-    )                                                           AS cover_key
+    )                                                               AS cover_key
   FROM stage1
 )
 SELECT
@@ -8778,20 +8773,20 @@ SELECT
   stage2.block_timestamp,
   stage2.transaction_hash,
   stage2.account,
-  stage2.pod_amount,
-  stage2.npm_amount,
-  stage2.stablecoin_amount,
+  wei_to_ether(stage2.pod_amount)                                   AS pod_amount,
+  wei_to_ether(stage2.npm_amount)                                   AS npm_amount,
+  get_stablecoin_value(stage2.chain_id, stage2.stablecoin_amount)   AS stablecoin_amount,
   stage2.tx_type,
   stage2.cover_key,
-  get_products_of(stage2.chain_id, stage2.cover_key)            AS product_keys,
-  factory.vault_deployed.name                                   AS token_name,
-  factory.vault_deployed.symbol                                 AS token_symbol
+  get_products_of(stage2.chain_id, stage2.cover_key)                AS product_keys,
+  factory.vault_deployed.name                                       AS token_name,
+  factory.vault_deployed.symbol                                     AS token_symbol
 FROM stage2
 LEFT JOIN factory.vault_deployed
 ON 1=1
-AND factory.vault_deployed.chain_id                             = stage2.chain_id
-AND factory.vault_deployed.cover_key                            = stage2.cover_key
-AND factory.vault_deployed.vault                                = stage2.vault_address;
+AND factory.vault_deployed.chain_id                                 = stage2.chain_id
+AND factory.vault_deployed.cover_key                                = stage2.cover_key
+AND factory.vault_deployed.vault                                    = stage2.vault_address;
 
 ALTER VIEW my_liquidity_view OWNER TO writeuser;
 
@@ -8962,7 +8957,7 @@ AS
     on_behalf_of                                        AS account,
     get_stablecoin_value(chain_id, amount_to_cover)     AS cxtoken_amount,
     get_stablecoin_value(chain_id, fee)                 AS stablecoin_amount,
-    'cover_purchased'                                   AS tx_type
+    'CoverPurchased'                                    AS tx_type
   FROM policy.cover_purchased
   UNION ALL
   SELECT
@@ -8975,7 +8970,7 @@ AS
     account                                             AS account,
     wei_to_ether(amount)                                AS cxtoken_amount,
     wei_to_ether(claimed)                               AS stablecoin_amount,
-    'claimed'                                           AS tx_type
+    'Claimed'                                           AS tx_type
   FROM cxtoken.claimed
 )
 
@@ -9003,9 +8998,7 @@ AND factory.cx_token_deployed.cx_token          = policy_txs.cx_token;
 
 ALTER VIEW my_policies_view OWNER TO writeuser;
 
-DROP VIEW IF EXISTS votes_view;
-
-CREATE VIEW votes_view
+CREATE OR REPLACE VIEW votes_view
 AS
 WITH vote_txs
 AS
@@ -9019,7 +9012,7 @@ AS
     transaction_hash,
     witness,
     stake,
-    'attested'                                AS tx_type
+    'Attested'                                    AS tx_type
   FROM consensus.attested
   UNION ALL
   SELECT
@@ -9031,14 +9024,24 @@ AS
     transaction_hash,
     witness,
     stake,
-    'refuted'                                 AS tx_type
+    'Refuted'                                     AS tx_type
   FROM consensus.refuted
 )
 SELECT
-  *,
-  bytes32_to_string(cover_key)                AS cover_key_string,
-  bytes32_to_string(product_key)              AS product_key_string
+  vote_txs.chain_id,
+  vote_txs.cover_key,
+  vote_txs.product_key,
+  vote_txs.incident_date,
+  vote_txs.block_timestamp,
+  vote_txs.transaction_hash,
+  vote_txs.witness,
+  get_npm_value(vote_txs.stake)                   AS stake,
+  vote_txs.tx_type,
+  bytes32_to_string(vote_txs.cover_key)           AS cover_key_string,
+  bytes32_to_string(vote_txs.product_key)         AS product_key_string
 FROM vote_txs;
+
+ALTER VIEW votes_view OWNER TO writeuser;
 
 DROP FUNCTION IF EXISTS get_cover_stats
 (

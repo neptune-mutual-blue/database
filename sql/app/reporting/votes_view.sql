@@ -1,6 +1,4 @@
-DROP VIEW IF EXISTS votes_view;
-
-CREATE VIEW votes_view
+CREATE OR REPLACE VIEW votes_view
 AS
 WITH vote_txs
 AS
@@ -14,7 +12,7 @@ AS
     transaction_hash,
     witness,
     stake,
-    'attested'                                AS tx_type
+    'Attested'                                    AS tx_type
   FROM consensus.attested
   UNION ALL
   SELECT
@@ -26,11 +24,21 @@ AS
     transaction_hash,
     witness,
     stake,
-    'refuted'                                 AS tx_type
+    'Refuted'                                     AS tx_type
   FROM consensus.refuted
 )
 SELECT
-  *,
-  bytes32_to_string(cover_key)                AS cover_key_string,
-  bytes32_to_string(product_key)              AS product_key_string
+  vote_txs.chain_id,
+  vote_txs.cover_key,
+  vote_txs.product_key,
+  vote_txs.incident_date,
+  vote_txs.block_timestamp,
+  vote_txs.transaction_hash,
+  vote_txs.witness,
+  get_npm_value(vote_txs.stake)                   AS stake,
+  vote_txs.tx_type,
+  bytes32_to_string(vote_txs.cover_key)           AS cover_key_string,
+  bytes32_to_string(vote_txs.product_key)         AS product_key_string
 FROM vote_txs;
+
+ALTER VIEW votes_view OWNER TO writeuser;

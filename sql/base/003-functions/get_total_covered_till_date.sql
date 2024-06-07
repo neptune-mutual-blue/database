@@ -16,7 +16,7 @@ BEGIN
   WHERE 1 = 1 
   AND (_chain_id IS NULL OR chain_id = _chain_id)
   AND (_cover_key IS NULL OR cover_key = _cover_key)
-  AND to_timestamp(expires_on) <= _date;
+  AND to_timestamp(block_timestamp) <= _date;
 
   RETURN COALESCE(_result, 0);
 END

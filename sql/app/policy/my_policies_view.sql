@@ -13,7 +13,7 @@ AS
     on_behalf_of                                        AS account,
     get_stablecoin_value(chain_id, amount_to_cover)     AS cxtoken_amount,
     get_stablecoin_value(chain_id, fee)                 AS stablecoin_amount,
-    'cover_purchased'                                   AS tx_type
+    'CoverPurchased'                                    AS tx_type
   FROM policy.cover_purchased
   UNION ALL
   SELECT
@@ -26,7 +26,7 @@ AS
     account                                             AS account,
     wei_to_ether(amount)                                AS cxtoken_amount,
     wei_to_ether(claimed)                               AS stablecoin_amount,
-    'claimed'                                           AS tx_type
+    'Claimed'                                           AS tx_type
   FROM cxtoken.claimed
 )
 

@@ -3574,20 +3574,40 @@ FOR EACH ROW EXECUTE FUNCTION policy.cover_purchased_product_key_trigger();
 
 /********************************************/
 
+DROP FUNCTION IF EXISTS vault.update_cover_key_on_vault_event_trigger() CASCADE;
 
-CREATE OR REPLACE FUNCTION format_stablecoin
-(
-  _amount         numeric
-)
-RETURNS money
-IMMUTABLE
+CREATE FUNCTION vault.update_cover_key_on_vault_event_trigger()
+RETURNS TRIGGER
 AS
 $$
 BEGIN
-  RETURN _amount / POWER(10, 6);
+  UPDATE core.transactions
+  SET ck = get_cover_key_by_vault_address(core.transactions.chain_id, core.transactions.address)
+  WHERE core.transactions.event_name IN ('PodsIssued', 'PodsRedeemed')
+  AND core.transactions.ck IS NULL;
+
+  RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;
+
+CREATE TRIGGER update_cover_key_on_vault_event_trigger
+AFTER INSERT ON vault.pods_issued
+FOR EACH ROW 
+EXECUTE FUNCTION vault.update_cover_key_on_vault_event_trigger();
+
+CREATE TRIGGER update_cover_key_on_vault_event_trigger
+AFTER INSERT ON vault.pods_redeemed
+FOR EACH ROW 
+EXECUTE FUNCTION vault.update_cover_key_on_vault_event_trigger();
+
+CREATE TRIGGER update_cover_key_on_vault_event_trigger
+AFTER INSERT ON factory.vault_deployed
+FOR EACH ROW 
+EXECUTE FUNCTION vault.update_cover_key_on_vault_event_trigger();
+
+
+/********************************************/
 
 CREATE OR REPLACE FUNCTION get_npm_value(_amount uint256)
 RETURNS numeric
