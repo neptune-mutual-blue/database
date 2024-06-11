@@ -7540,54 +7540,54 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA claim GRANT INSERT, UPDATE ON TABLES TO write
 ALTER DEFAULT PRIVILEGES IN SCHEMA nft GRANT INSERT, UPDATE ON TABLES TO writeuser;
 CREATE OR REPLACE FUNCTION get_report_insight
 (
-  _chain_id                                       uint256,
-  _cover_key                                      bytes32,
-  _product_key                                    bytes32,
-  _incident_date                                  uint256
+  _chain_id                                         uint256,
+  _cover_key                                        bytes32,
+  _product_key                                      bytes32,
+  _incident_date                                    uint256
 )
 RETURNS TABLE
 (
-  chain_id                                        uint256,
-  cover_key                                       bytes32,
-  product_key                                     bytes32,
-  incident_date                                   uint256,
-  report_resolution_timestamp                     uint256,
-  report_transaction                              address,
-  report_timestamp                                uint256,
-  reporter                                        address,
-  report_info                                     text,
-  reporter_stake                                  uint256,
-  dispute_transaction                             address,
-  dispute_timestamp                               uint256,
-  disputer                                        address,
-  dispute_info                                    text,
-  disputer_stake                                  uint256,
-  total_attestation                               uint256,
-  attestation_count                               integer,
-  total_refutation                                uint256,
-  refutation_count                                integer,
-  resolved                                        boolean,
-  resolution_transaction                          text,
-  resolution_timestamp                            uint256,
-  resolution_decision                             boolean,
-  resolution_deadline                             uint256,
-  emergency_resolved                              boolean,
-  emergency_resolution_transaction                text,
-  emergency_resolution_timestamp                  uint256,
-  emergency_resolution_decision                   boolean,
-  emergency_resolution_deadline                   uint256,
-  finalized                                       boolean,
-  status_enum                                     product_status_type,
-  status                                          smallint,
-  claim_begins_from                               uint256,
-  claim_expires_at                                uint256
+  chain_id                                          uint256,
+  cover_key                                         bytes32,
+  product_key                                       bytes32,
+  incident_date                                     uint256,
+  report_resolution_timestamp                       uint256,
+  report_transaction                                address,
+  report_timestamp                                  uint256,
+  reporter                                          address,
+  report_info                                       text,
+  reporter_stake                                    uint256,
+  dispute_transaction                               address,
+  dispute_timestamp                                 uint256,
+  disputer                                          address,
+  dispute_info                                      text,
+  disputer_stake                                    uint256,
+  total_attestation                                 uint256,
+  attestation_count                                 integer,
+  total_refutation                                  uint256,
+  refutation_count                                  integer,
+  resolved                                          boolean,
+  resolution_transaction                            text,
+  resolution_timestamp                              uint256,
+  resolution_decision                               boolean,
+  resolution_deadline                               uint256,
+  emergency_resolved                                boolean,
+  emergency_resolution_transaction                  text,
+  emergency_resolution_timestamp                    uint256,
+  emergency_resolution_decision                     boolean,
+  emergency_resolution_deadline                     uint256,
+  finalized                                         boolean,
+  status_enum                                       product_status_type,
+  status                                            smallint,
+  claim_begins_from                                 uint256,
+  claim_expires_at                                  uint256
 )
 AS
 $$
-  DECLARE _total_attestation                      uint256;
-  DECLARE _attestation_count                      integer;
-  DECLARE _total_refutation                       uint256;
-  DECLARE _refutation_count                       integer;
+  DECLARE _total_attestation                        uint256;
+  DECLARE _attestation_count                        integer;
+  DECLARE _total_refutation                         uint256;
+  DECLARE _refutation_count                         integer;
 BEGIN
   DROP TABLE IF EXISTS _get_report_insight_result;
   
@@ -7612,17 +7612,17 @@ BEGIN
     attestation_count                               integer,
     total_refutation                                uint256,
     refutation_count                                integer,
-    resolved                                        boolean,
+    resolved                                        boolean DEFAULT(FALSE),
     resolution_transaction                          text,
     resolution_timestamp                            uint256,
     resolution_decision                             boolean,
     resolution_deadline                             uint256,
-    emergency_resolved                              boolean,
+    emergency_resolved                              boolean DEFAULT(FALSE),
     emergency_resolution_transaction                text,
     emergency_resolution_timestamp                  uint256,
     emergency_resolution_decision                   boolean,
     emergency_resolution_deadline                   uint256,
-    finalized                                       boolean,
+    finalized                                       boolean DEFAULT(FALSE),
     status_enum                                     product_status_type,
     status                                          smallint,
     claim_begins_from                               uint256,
@@ -7643,47 +7643,47 @@ BEGIN
     get_npm_value(consensus.reported.initial_stake),
     get_product_status(_chain_id, _cover_key, _product_key, _incident_date)
   FROM consensus.reported
-  WHERE consensus.reported.chain_id     = _chain_id
-  AND consensus.reported.cover_key      = _cover_key
-  AND consensus.reported.product_key    = _product_key
-  AND consensus.reported.incident_date  = _incident_date;
+  WHERE consensus.reported.chain_id                 = _chain_id
+  AND consensus.reported.cover_key                  = _cover_key
+  AND consensus.reported.product_key                = _product_key
+  AND consensus.reported.incident_date              = _incident_date;
 
   UPDATE _get_report_insight_result
   SET
-    dispute_transaction   = consensus.disputed.transaction_hash,
-    dispute_timestamp     = consensus.disputed.block_timestamp,
-    disputer              = consensus.disputed.reporter,
-    dispute_info          = consensus.disputed.info,
-    disputer_stake        = get_npm_value(consensus.disputed.initial_stake)
+    dispute_transaction                             = consensus.disputed.transaction_hash,
+    dispute_timestamp                               = consensus.disputed.block_timestamp,
+    disputer                                        = consensus.disputed.reporter,
+    dispute_info                                    = consensus.disputed.info,
+    disputer_stake                                  = get_npm_value(consensus.disputed.initial_stake)
   FROM consensus.disputed
-  WHERE consensus.disputed.chain_id     = _get_report_insight_result.chain_id
-  AND consensus.disputed.cover_key      = _get_report_insight_result.cover_key
-  AND consensus.disputed.product_key    = _get_report_insight_result.product_key
-  AND consensus.disputed.incident_date  = _get_report_insight_result.incident_date;
+  WHERE consensus.disputed.chain_id                 = _get_report_insight_result.chain_id
+  AND consensus.disputed.cover_key                  = _get_report_insight_result.cover_key
+  AND consensus.disputed.product_key                = _get_report_insight_result.product_key
+  AND consensus.disputed.incident_date              = _get_report_insight_result.incident_date;
   
   SELECT COUNT(*), SUM(get_npm_value(consensus.attested.stake))
   INTO _attestation_count, _total_attestation
   FROM consensus.attested
-  WHERE consensus.attested.chain_id     = _chain_id
-  AND consensus.attested.cover_key      = _cover_key
-  AND consensus.attested.product_key    = _product_key
-  AND consensus.attested.incident_date  = _incident_date;
+  WHERE consensus.attested.chain_id                 = _chain_id
+  AND consensus.attested.cover_key                  = _cover_key
+  AND consensus.attested.product_key                = _product_key
+  AND consensus.attested.incident_date              = _incident_date;
 
   SELECT COUNT(*), SUM(get_npm_value(consensus.refuted.stake))
   INTO _refutation_count, _total_refutation
   FROM consensus.refuted
-  WHERE consensus.refuted.chain_id      = _chain_id
-  AND consensus.refuted.cover_key       = _cover_key
-  AND consensus.refuted.product_key     = _product_key
-  AND consensus.refuted.incident_date   = _incident_date;
+  WHERE consensus.refuted.chain_id                  = _chain_id
+  AND consensus.refuted.cover_key                   = _cover_key
+  AND consensus.refuted.product_key                 = _product_key
+  AND consensus.refuted.incident_date               = _incident_date;
 
   UPDATE _get_report_insight_result
   SET
-    total_attestation   = _total_attestation,
-    attestation_count   = _attestation_count,
-    total_refutation    = _total_refutation,
-    refutation_count    = _refutation_count,
-    status              = array_length(enum_range(NULL, _get_report_insight_result.status_enum), 1) - 1;
+    total_attestation                               = _total_attestation,
+    attestation_count                               = _attestation_count,
+    total_refutation                                = _total_refutation,
+    refutation_count                                = _refutation_count,
+    status                                          = array_length(enum_range(NULL, _get_report_insight_result.status_enum), 1) - 1;
 
 
   WITH resolution
@@ -7694,33 +7694,33 @@ BEGIN
       consensus.resolved.cover_key,
       consensus.resolved.product_key,
       consensus.resolved.incident_date,
-      true                                    AS resolved,
-      consensus.resolved.transaction_hash     AS resolution_transaction,
-      consensus.resolved.block_timestamp      AS resolution_timestamp,
-      consensus.resolved.decision             AS resolution_decision, 
+      true                                          AS resolved,
+      consensus.resolved.transaction_hash           AS resolution_transaction,
+      consensus.resolved.block_timestamp            AS resolution_timestamp,
+      consensus.resolved.decision                   AS resolution_decision, 
       consensus.resolved.resolution_deadline,
       consensus.resolved.claim_begins_from,
       consensus.resolved.claim_expires_at
     FROM consensus.resolved
-    WHERE consensus.resolved.chain_id     = _chain_id
-    AND consensus.resolved.cover_key      = _cover_key
-    AND consensus.resolved.product_key    = _product_key
-    AND consensus.resolved.incident_date  = _incident_date
+    WHERE consensus.resolved.chain_id               = _chain_id
+    AND consensus.resolved.cover_key                = _cover_key
+    AND consensus.resolved.product_key              = _product_key
+    AND consensus.resolved.incident_date            = _incident_date
   )
   UPDATE _get_report_insight_result
   SET
-    resolved                              = resolution.resolved,
-    resolution_transaction                = resolution.resolution_transaction,
-    resolution_timestamp                  = resolution.resolution_timestamp,
-    resolution_decision                   = resolution.resolution_decision,
-    resolution_deadline                   = resolution.resolution_deadline,
-    claim_begins_from                     = resolution.claim_begins_from,
-    claim_expires_at                      = resolution.claim_expires_at
+    resolved                                        = resolution.resolved,
+    resolution_transaction                          = resolution.resolution_transaction,
+    resolution_timestamp                            = resolution.resolution_timestamp,
+    resolution_decision                             = resolution.resolution_decision,
+    resolution_deadline                             = resolution.resolution_deadline,
+    claim_begins_from                               = resolution.claim_begins_from,
+    claim_expires_at                                = resolution.claim_expires_at
   FROM resolution
-  WHERE resolution.chain_id               = _get_report_insight_result.chain_id
-  AND resolution.cover_key                = _get_report_insight_result.cover_key
-  AND resolution.product_key              = _get_report_insight_result.product_key
-  AND resolution.incident_date            = _get_report_insight_result.incident_date;
+  WHERE resolution.chain_id                         = _get_report_insight_result.chain_id
+  AND resolution.cover_key                          = _get_report_insight_result.cover_key
+  AND resolution.product_key                        = _get_report_insight_result.product_key
+  AND resolution.incident_date                      = _get_report_insight_result.incident_date;
 
   WITH emergency_resolution
   AS
@@ -7730,35 +7730,35 @@ BEGIN
       consensus.resolved.cover_key,
       consensus.resolved.product_key,
       consensus.resolved.incident_date,
-      true AS resolved,
-      consensus.resolved.transaction_hash     AS resolution_transaction,
-      consensus.resolved.block_timestamp      AS resolution_timestamp,
-      consensus.resolved.decision             AS resolution_decision, 
+      true                                          AS resolved,
+      consensus.resolved.transaction_hash           AS resolution_transaction,
+      consensus.resolved.block_timestamp            AS resolution_timestamp,
+      consensus.resolved.decision                   AS resolution_decision, 
       consensus.resolved.resolution_deadline,
       consensus.resolved.claim_begins_from,
       consensus.resolved.claim_expires_at
     FROM consensus.resolved
-    WHERE consensus.resolved.chain_id     = _chain_id
-    AND consensus.resolved.cover_key      = _cover_key
-    AND consensus.resolved.product_key    = _product_key
-    AND consensus.resolved.incident_date  = _incident_date
-    AND consensus.resolved.emergency      = true
+    WHERE consensus.resolved.chain_id               = _chain_id
+    AND consensus.resolved.cover_key                = _cover_key
+    AND consensus.resolved.product_key              = _product_key
+    AND consensus.resolved.incident_date            = _incident_date
+    AND consensus.resolved.emergency                = true
     ORDER BY consensus.resolved.block_timestamp DESC
   )
   UPDATE _get_report_insight_result
   SET
-    emergency_resolved                    = emergency_resolution.resolved,
-    emergency_resolution_transaction      = emergency_resolution.resolution_transaction,
-    emergency_resolution_timestamp        = emergency_resolution.resolution_timestamp,
-    emergency_resolution_decision         = emergency_resolution.resolution_decision,
-    emergency_resolution_deadline         = emergency_resolution.resolution_deadline,
-    claim_begins_from                     = emergency_resolution.claim_begins_from,
-    claim_expires_at                      = emergency_resolution.claim_expires_at
+    emergency_resolved                              = emergency_resolution.resolved,
+    emergency_resolution_transaction                = emergency_resolution.resolution_transaction,
+    emergency_resolution_timestamp                  = emergency_resolution.resolution_timestamp,
+    emergency_resolution_decision                   = emergency_resolution.resolution_decision,
+    emergency_resolution_deadline                   = emergency_resolution.resolution_deadline,
+    claim_begins_from                               = emergency_resolution.claim_begins_from,
+    claim_expires_at                                = emergency_resolution.claim_expires_at
   FROM emergency_resolution
-  WHERE emergency_resolution.chain_id     = _get_report_insight_result.chain_id
-  AND emergency_resolution.cover_key      = _get_report_insight_result.cover_key
-  AND emergency_resolution.product_key    = _get_report_insight_result.product_key
-  AND emergency_resolution.incident_date  = _get_report_insight_result.incident_date;
+  WHERE emergency_resolution.chain_id               = _get_report_insight_result.chain_id
+  AND emergency_resolution.cover_key                = _get_report_insight_result.cover_key
+  AND emergency_resolution.product_key              = _get_report_insight_result.product_key
+  AND emergency_resolution.incident_date            = _get_report_insight_result.incident_date;
 
   UPDATE _get_report_insight_result
   SET finalized = true
@@ -7766,10 +7766,10 @@ BEGIN
   (
     SELECT 1
     FROM consensus.finalized
-    WHERE consensus.finalized.chain_id    = _chain_id
-    AND consensus.finalized.cover_key     = _cover_key
-    AND consensus.finalized.product_key   = _product_key
-    AND consensus.finalized.incident_date = _incident_date
+    WHERE consensus.finalized.chain_id              = _chain_id
+    AND consensus.finalized.cover_key               = _cover_key
+    AND consensus.finalized.product_key             = _product_key
+    AND consensus.finalized.incident_date           = _incident_date
   );
 
 
@@ -7779,6 +7779,7 @@ END
 $$
 LANGUAGE plpgsql;
 
+ALTER FUNCTION get_report_insight OWNER TO writeuser;
 
 DROP VIEW IF EXISTS cover_expiring_this_month_view;
 
@@ -8033,30 +8034,30 @@ ALTER TABLE IF EXISTS public.datewise_liquidity_summary owner to writeuser;
 CREATE OR REPLACE FUNCTION get_historical_apr_by_cover_chart_data()
 RETURNS TABLE
 (
-  chain_id                                  uint256,
-  network_name                              text,
-  cover_key                                 bytes32,
-  cover_key_string                          text,
-  start_date                                date,
-  end_date                                  date,
-  duration                                  integer,
-  period_name                               text,
-  start_balance                             numeric,
-  end_balance                               numeric,
-  policy_fee_earned                         numeric,
-  apr                                       numeric
+  chain_id                                    uint256,
+  network_name                                text,
+  cover_key                                   bytes32,
+  cover_key_string                            text,
+  start_date                                  TIMESTAMP WITH TIME ZONE,
+  end_date                                    TIMESTAMP WITH TIME ZONE,
+  duration                                    integer,
+  period_name                                 text,
+  start_balance                               numeric,
+  end_balance                                 numeric,
+  policy_fee_earned                           numeric,
+  apr                                         numeric
 )
 AS
 $$
 BEGIN
-  CREATE TEMPORARY TABLE _get_historical_apr_chart_data_result
+  CREATE TEMPORARY TABLE _get_historical_apr_by_cover_chart_data_result
   (
     chain_id                                  uint256,
     network_name                              text,
     cover_key                                 bytes32,
     cover_key_string                          text,
-    start_date                                date,
-    end_date                                  date,
+    start_date                                TIMESTAMP WITH TIME ZONE,
+    end_date                                  TIMESTAMP WITH TIME ZONE,
     duration                                  integer,
     period_name                               text,
     start_balance                             numeric,
@@ -8064,74 +8065,75 @@ BEGIN
     policy_fee_earned                         numeric,
     apr                                       NUMERIC DEFAULT(0)
   ) ON COMMIT DROP;
-  
-  
-  INSERT INTO _get_historical_apr_chart_data_result(chain_id, cover_key, start_date)
+
+
+  INSERT INTO _get_historical_apr_by_cover_chart_data_result(chain_id, cover_key, start_date)
   WITH dates
   AS
   (
-    SELECT date_trunc('month',generate_series((SELECT to_timestamp(MIN(block_timestamp))::date FROM core.transactions), now(), '1 month'))
+    SELECT date_trunc
+    (
+      'month',
+      generate_series((SELECT to_timestamp(MIN(block_timestamp))::date FROM core.transactions), NOW() AT TIME ZONE 'UTC', '1 month')
+    )
   )
-  SELECT DISTINCT core.transactions.chain_id, core.transactions.ck, dates.*
+  SELECT DISTINCT
+    core.transactions.chain_id,
+    core.transactions.ck,
+    dates.*
   FROM core.transactions
   CROSS JOIN dates
-  WHERE core.transactions.ck IS NOT NULL;  
-  
-  UPDATE _get_historical_apr_chart_data_result
-  SET
-    cover_key_string  = bytes32_to_string(_get_historical_apr_chart_data_result.cover_key),
-    end_date          = (_get_historical_apr_chart_data_result.start_date + '1 month'::interval - '1 day'::interval),
-    period_name       = to_char(_get_historical_apr_chart_data_result.start_date, 'Mon-YY'),
-    start_balance     = get_tvl_till_date(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.start_date);
-  
-  UPDATE _get_historical_apr_chart_data_result
-  SET end_date = NOW()
-  WHERE _get_historical_apr_chart_data_result.end_date > NOW();
+  WHERE core.transactions.ck IS NOT NULL;
 
-  UPDATE _get_historical_apr_chart_data_result
+  UPDATE _get_historical_apr_by_cover_chart_data_result
   SET
-    policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
-    duration = _get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date,
-    end_balance       = get_tvl_till_date(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.cover_key, _get_historical_apr_chart_data_result.end_date);
-  
-  UPDATE _get_historical_apr_chart_data_result
-  SET apr = (_get_historical_apr_chart_data_result.policy_fee_earned * 365) / (average(_get_historical_apr_chart_data_result.start_balance, _get_historical_apr_chart_data_result.end_balance) * _get_historical_apr_chart_data_result.duration)
-  WHERE _get_historical_apr_chart_data_result.start_balance > 0;
-  
-  UPDATE _get_historical_apr_chart_data_result
-  SET network_name = config_blockchain_network_view.nick_name
+    cover_key_string  = bytes32_to_string(_get_historical_apr_by_cover_chart_data_result.cover_key),
+    end_date          = (_get_historical_apr_by_cover_chart_data_result.start_date + '1 month'::interval - '1 millisecond'::interval),
+    period_name       = to_char(_get_historical_apr_by_cover_chart_data_result.start_date, 'Mon-YY'),
+    start_balance     = get_tvl_till_date(_get_historical_apr_by_cover_chart_data_result.chain_id, _get_historical_apr_by_cover_chart_data_result.cover_key, _get_historical_apr_by_cover_chart_data_result.start_date);
+
+  UPDATE _get_historical_apr_by_cover_chart_data_result
+  SET end_date        = NOW()
+  WHERE _get_historical_apr_by_cover_chart_data_result.end_date > NOW();
+
+  UPDATE _get_historical_apr_by_cover_chart_data_result
+  SET
+    policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_by_cover_chart_data_result.chain_id, _get_historical_apr_by_cover_chart_data_result.cover_key, _get_historical_apr_by_cover_chart_data_result.start_date, _get_historical_apr_by_cover_chart_data_result.end_date),
+    duration          = EXTRACT(DAY FROM (_get_historical_apr_by_cover_chart_data_result.end_date - _get_historical_apr_by_cover_chart_data_result.start_date))::integer,
+    end_balance       = get_tvl_till_date(_get_historical_apr_by_cover_chart_data_result.chain_id, _get_historical_apr_by_cover_chart_data_result.cover_key, _get_historical_apr_by_cover_chart_data_result.end_date);
+
+  UPDATE _get_historical_apr_by_cover_chart_data_result
+  SET apr             = (_get_historical_apr_by_cover_chart_data_result.policy_fee_earned * 365) / (average(_get_historical_apr_by_cover_chart_data_result.start_balance, _get_historical_apr_by_cover_chart_data_result.end_balance) * _get_historical_apr_by_cover_chart_data_result.duration)
+  WHERE _get_historical_apr_by_cover_chart_data_result.start_balance > 0;
+
+  UPDATE _get_historical_apr_by_cover_chart_data_result
+  SET network_name    = config_blockchain_network_view.nick_name
   FROM config_blockchain_network_view
-  WHERE config_blockchain_network_view.chain_id = _get_historical_apr_chart_data_result.chain_id;
+  WHERE config_blockchain_network_view.chain_id = _get_historical_apr_by_cover_chart_data_result.chain_id;
 
   RETURN QUERY
-  SELECT * FROM _get_historical_apr_chart_data_result
+  SELECT * FROM _get_historical_apr_by_cover_chart_data_result
   ORDER BY 2, 1;
 END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_historical_apr_by_cover_chart_data() OWNER TO writeuser;
+ALTER FUNCTION get_historical_apr_by_cover_chart_data OWNER TO writeuser;
 
--- SELECT * FROM get_historical_apr_by_cover_chart_data() ORDER BY APR DESC;
+-- SELECT * FROM get_historical_apr_by_cover_chart_data() ORDER BY start_date DESC;
 
-
-
-
-
-DROP FUNCTION IF EXISTS get_historical_apr_chart_data() CASCADE;
-
-CREATE FUNCTION get_historical_apr_chart_data()
+CREATE OR REPLACE FUNCTION get_historical_apr_chart_data()
 RETURNS TABLE
 (
-  chain_id                                  uint256,
-  network_name                              text,
-  start_date                                date,
-  end_date                                  date,
-  duration                                  integer,
-  period_name                               text,
-  start_balance                             numeric,
-  policy_fee_earned                         numeric,
-  apr                                       numeric
+  chain_id                                    uint256,
+  network_name                                text,
+  start_date                                  TIMESTAMP WITH TIME ZONE,
+  end_date                                    TIMESTAMP WITH TIME ZONE,
+  duration                                    integer,
+  period_name                                 text,
+  start_balance                               numeric,
+  policy_fee_earned                           numeric,
+  apr                                         numeric
 )
 AS
 $$
@@ -8140,48 +8142,50 @@ BEGIN
   (
     chain_id                                  uint256,
     network_name                              text,
-    start_date                                date,
-    end_date                                  date,
+    start_date                                TIMESTAMP WITH TIME ZONE,
+    end_date                                  TIMESTAMP WITH TIME ZONE,
     duration                                  integer,
     period_name                               text,
     start_balance                             numeric,
     policy_fee_earned                         numeric,
     apr                                       NUMERIC DEFAULT(0)
   ) ON COMMIT DROP;
-  
-  
+
+
   INSERT INTO _get_historical_apr_chart_data_result(chain_id, start_date)
   WITH dates
   AS
   (
-    SELECT date_trunc('month',generate_series((SELECT to_timestamp(MIN(block_timestamp))::date FROM core.transactions), now(), '1 month'))
+    SELECT date_trunc('month', generate_series((SELECT to_timestamp(MIN(block_timestamp))::date FROM core.transactions), NOW() AT TIME ZONE 'UTC', '1 month'))
   )
-  SELECT DISTINCT core.transactions.chain_id, dates.*
+  SELECT DISTINCT
+    core.transactions.chain_id,
+    dates.*
   FROM core.transactions
   CROSS JOIN dates;
-  
-  
+
+
   UPDATE _get_historical_apr_chart_data_result
   SET
-    end_date = (_get_historical_apr_chart_data_result.start_date + '1 month'::interval - '1 day'::interval),
-    period_name = to_char(_get_historical_apr_chart_data_result.start_date, 'Mon-YY'),
-    start_balance = get_tvl_till_date(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date);
-  
+    end_date          = (_get_historical_apr_chart_data_result.start_date + '1 month'::interval - '1 millisecond'::interval),
+    period_name       = to_char(_get_historical_apr_chart_data_result.start_date, 'Mon-YY'),
+    start_balance     = get_tvl_till_date(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date);
+
   UPDATE _get_historical_apr_chart_data_result
-  SET end_date = NOW()
+  SET end_date        = NOW()
   WHERE _get_historical_apr_chart_data_result.end_date > NOW();
 
   UPDATE _get_historical_apr_chart_data_result
   SET
     policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
-    duration = _get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date;
-  
+    duration          = EXTRACT(DAY FROM (_get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date))::integer;
+
   UPDATE _get_historical_apr_chart_data_result
-  SET apr = (_get_historical_apr_chart_data_result.policy_fee_earned * 365) / (_get_historical_apr_chart_data_result.start_balance * _get_historical_apr_chart_data_result.duration)
+  SET apr             = (_get_historical_apr_chart_data_result.policy_fee_earned * 365) / (_get_historical_apr_chart_data_result.start_balance * _get_historical_apr_chart_data_result.duration)
   WHERE _get_historical_apr_chart_data_result.start_balance > 0;
-  
+
   UPDATE _get_historical_apr_chart_data_result
-  SET network_name = config_blockchain_network_view.nick_name
+  SET network_name    = config_blockchain_network_view.nick_name
   FROM config_blockchain_network_view
   WHERE config_blockchain_network_view.chain_id = _get_historical_apr_chart_data_result.chain_id;
 
@@ -8192,9 +8196,9 @@ END
 $$
 LANGUAGE plpgsql;
 
-ALTER FUNCTION get_historical_apr_chart_data() OWNER TO writeuser;
+ALTER FUNCTION get_historical_apr_chart_data OWNER TO writeuser;
 
---SELECT * FROM get_historical_apr_chart_data();
+-- SELECT * FROM get_historical_apr_chart_data();
 
 CREATE OR REPLACE FUNCTION get_magic_square_campaign_2_result
 (
@@ -8997,6 +9001,207 @@ AND factory.cx_token_deployed.product_key       = policy_txs.product_key
 AND factory.cx_token_deployed.cx_token          = policy_txs.cx_token;
 
 ALTER VIEW my_policies_view OWNER TO writeuser;
+
+CREATE OR REPLACE FUNCTION get_incidents()
+RETURNS TABLE
+(
+  chain_id                                                        uint256,
+  cover_key                                                       bytes32,
+  product_key                                                     bytes32,
+  incident_date                                                   uint256,
+  report_resolution_timestamp                                     uint256,
+  reporter                                                        address,
+  reporter_stake                                                  uint256,
+  report_info                                                     text,
+  report_timestamp                                                integer,
+  report_transaction_hash                                         text,
+  disputer                                                        address,
+  disputer_stake                                                  uint256,
+  dispute_info                                                    text,
+  dispute_timestamp                                               integer,
+  dispute_transaction_hash                                        text,
+  resolved                                                        boolean,
+  resolution_transaction_hash                                     text,
+  resolution_decision                                             boolean,
+  resolution_timestamp                                            integer,
+  resolution_deadline                                             uint256,
+  emergency_resolved                                              boolean,
+  finalized                                                       boolean,
+  finalize_transaction_hash                                       text,
+  claim_begins_from                                               uint256,
+  claim_expires_at                                                uint256,
+  attestation_count                                               integer,
+  refutation_count                                                integer,
+  total_attestation_stake                                         uint256,
+  total_refutation_stake                                          uint256
+)
+AS
+$$
+BEGIN
+  CREATE TEMPORARY TABLE _get_incidents_result
+  (
+    chain_id                                                      uint256,
+    cover_key                                                     bytes32,
+    product_key                                                   bytes32,
+    incident_date                                                 uint256,
+    report_resolution_timestamp                                   uint256,
+    reporter                                                      address,
+    reporter_stake                                                uint256 NOT NULL DEFAULT(0),
+    report_info                                                   text,
+    report_timestamp                                              integer,
+    report_transaction_hash                                       text,
+    disputer                                                      address,
+    disputer_stake                                                uint256 NOT NULL DEFAULT(0),
+    dispute_info                                                  text,
+    dispute_timestamp                                             integer,
+    dispute_transaction_hash                                      text,
+    resolved                                                      boolean NOT NULL DEFAULT(FALSE),
+    resolution_transaction_hash                                   text,
+    resolution_decision                                           boolean,
+    resolution_timestamp                                          integer,
+    resolution_deadline                                           uint256,
+    emergency_resolved                                            boolean NOT NULL DEFAULT(FALSE),
+    finalized                                                     boolean NOT NULL DEFAULT(FALSE),
+    finalize_transaction_hash                                     text,
+    claim_begins_from                                             uint256,
+    claim_expires_at                                              uint256,
+    attestation_count                                             integer,
+    refutation_count                                              integer,
+    total_attestation_stake                                       uint256 NOT NULL DEFAULT(0),
+    total_refutation_stake                                        uint256 NOT NULL DEFAULT(0)
+  ) ON COMMIT DROP;
+
+  INSERT INTO _get_incidents_result
+  (
+    chain_id,
+    cover_key,
+    product_key,
+    incident_date,
+    reporter,
+    reporter_stake,
+    report_info,
+    report_timestamp,
+    report_resolution_timestamp,
+    report_transaction_hash
+  )
+  SELECT
+    consensus.reported.chain_id,
+    consensus.reported.cover_key,
+    consensus.reported.product_key,
+    consensus.reported.incident_date,
+    consensus.reported.reporter,
+    get_npm_value(consensus.reported.initial_stake),
+    consensus.reported.info,
+    consensus.reported.block_timestamp,
+    consensus.reported.resolution_timestamp,
+    consensus.reported.transaction_hash
+  FROM consensus.reported;
+
+  UPDATE _get_incidents_result
+  SET
+    disputer                                                      = consensus.disputed.reporter,
+    disputer_stake                                                = get_npm_value(consensus.disputed.initial_stake),
+    dispute_info                                                  = consensus.disputed.info,
+    dispute_timestamp                                             = consensus.disputed.block_timestamp,
+    dispute_transaction_hash                                      = consensus.disputed.transaction_hash
+  FROM consensus.disputed
+  WHERE 1 = 1
+  AND consensus.disputed.chain_id                                 = _get_incidents_result.chain_id
+  AND consensus.disputed.cover_key                                = _get_incidents_result.cover_key
+  AND consensus.disputed.product_key                              = _get_incidents_result.product_key
+  AND consensus.disputed.incident_date                            = _get_incidents_result.incident_date;
+
+  UPDATE _get_incidents_result
+  SET
+    (total_attestation_stake, attestation_count)  = (
+      SELECT get_npm_value(COALESCE(SUM(stake), 0)), COUNT(*)
+      FROM consensus.attested
+      WHERE 1 = 1
+      AND consensus.attested.chain_id                             = _get_incidents_result.chain_id
+      AND consensus.attested.cover_key                            = _get_incidents_result.cover_key
+      AND consensus.attested.product_key                          = _get_incidents_result.product_key
+      AND consensus.attested.incident_date                        = _get_incidents_result.incident_date
+    ),
+    (total_refutation_stake, refutation_count)   = (
+      SELECT get_npm_value(COALESCE(SUM(stake), 0)), COUNT(*)
+      FROM consensus.refuted
+      WHERE 1 = 1
+      AND consensus.refuted.chain_id                              = _get_incidents_result.chain_id
+      AND consensus.refuted.cover_key                             = _get_incidents_result.cover_key
+      AND consensus.refuted.product_key                           = _get_incidents_result.product_key
+      AND consensus.refuted.incident_date                         = _get_incidents_result.incident_date
+    );
+
+  WITH finalization
+  AS
+  (
+    SELECT
+      consensus.finalized.chain_id,
+      consensus.finalized.cover_key,
+      consensus.finalized.product_key,
+      consensus.finalized.incident_date,
+      consensus.finalized.transaction_hash
+    FROM consensus.finalized
+    ORDER BY consensus.finalized.block_timestamp DESC
+    LIMIT 1
+  )
+  UPDATE _get_incidents_result
+  SET
+    finalized = TRUE,
+    finalize_transaction_hash = finalization.transaction_hash
+  FROM finalization
+  WHERE 1 = 1
+  AND finalization.chain_id                                       = _get_incidents_result.chain_id
+  AND finalization.cover_key                                      = _get_incidents_result.cover_key
+  AND finalization.product_key                                    = _get_incidents_result.product_key
+  AND finalization.incident_date                                  = _get_incidents_result.incident_date;
+
+  WITH latest_resolution
+  AS
+  (
+    SELECT
+      consensus.resolved.chain_id,
+      consensus.resolved.cover_key,
+      consensus.resolved.product_key,
+      consensus.resolved.incident_date,
+      consensus.resolved.emergency,
+      consensus.resolved.decision,
+      consensus.resolved.transaction_hash,
+      consensus.resolved.block_timestamp,
+      consensus.resolved.resolution_deadline,
+      consensus.resolved.claim_begins_from,
+      consensus.resolved.claim_expires_at
+    FROM consensus.resolved
+    ORDER BY consensus.resolved.block_timestamp DESC
+    LIMIT 1
+  )
+  UPDATE _get_incidents_result
+  SET
+    resolved                                                      = TRUE,
+    emergency_resolved                                            = latest_resolution.emergency,
+    resolution_decision                                           = latest_resolution.decision,
+    resolution_transaction_hash                                   = latest_resolution.transaction_hash,
+    resolution_timestamp                                          = latest_resolution.block_timestamp,
+    resolution_deadline                                           = latest_resolution.resolution_deadline,
+    claim_begins_from                                             = latest_resolution.claim_begins_from,
+    claim_expires_at                                              = latest_resolution.claim_expires_at
+  FROM latest_resolution
+  WHERE 1 = 1
+  AND latest_resolution.chain_id                                  = _get_incidents_result.chain_id
+  AND latest_resolution.cover_key                                 = _get_incidents_result.cover_key
+  AND latest_resolution.product_key                               = _get_incidents_result.product_key
+  AND latest_resolution.incident_date                             = _get_incidents_result.incident_date;
+
+  RETURN QUERY
+  SELECT * FROM _get_incidents_result
+  ORDER BY incident_date DESC;
+END
+$$
+LANGUAGE plpgsql;
+
+-- SELECT * FROM get_incidents();
+
+ALTER FUNCTION get_incidents OWNER TO writeuser;
 
 CREATE OR REPLACE VIEW votes_view
 AS
