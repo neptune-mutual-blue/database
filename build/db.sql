@@ -5258,9 +5258,7 @@ SELECT
 
 ALTER VIEW config_product_view OWNER TO writeuser;
 
-DROP MATERIALIZED VIEW IF EXISTS reassurance_transaction_view CASCADE;
-
-CREATE MATERIALIZED VIEW reassurance_transaction_view
+CREATE OR REPLACE VIEW reassurance_transaction_view
 AS
 SELECT
   'Reassurance Added' AS description,  
@@ -5282,34 +5280,9 @@ GROUP BY
   reassurance.pool_capitalized.chain_id,
   reassurance.pool_capitalized.cover_key;
 
-CREATE UNIQUE INDEX description_chain_id_cover_key_reassurance_transaction_view
-ON reassurance_transaction_view(description, chain_id, cover_key);
+ALTER VIEW reassurance_transaction_view OWNER TO writeuser;
 
-CREATE INDEX chain_id_cover_key_reassurance_transaction_view_inx
-ON reassurance_transaction_view(chain_id, cover_key);
-
-
-DROP FUNCTION IF EXISTS core.refresh_reassurance_transaction_view_trigger() CASCADE;
-
-CREATE FUNCTION core.refresh_reassurance_transaction_view_trigger()
-RETURNS trigger
-AS
-$$
-BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY public.reassurance_transaction_view;
-  RETURN NEW;
-END
-$$
-LANGUAGE plpgsql;
-
-
-CREATE TRIGGER refresh_reassurance_transaction_view_trigger
-BEFORE INSERT OR UPDATE ON core.transactions
-FOR EACH STATEMENT
-EXECUTE FUNCTION core.refresh_reassurance_transaction_view_trigger();
-DROP MATERIALIZED VIEW IF EXISTS stablecoin_transactions_view CASCADE;
-
-CREATE MATERIALIZED VIEW stablecoin_transactions_view
+CREATE OR REPLACE VIEW stablecoin_transactions_view
 AS
 WITH transactions
 AS
@@ -5351,33 +5324,7 @@ AS
 SELECT description, chain_id, cover_key, total
 FROM transactions;
 
-
-CREATE UNIQUE INDEX description_chain_id_cover_key_stablecoin_transactions_view
-ON stablecoin_transactions_view(description, chain_id, cover_key);
-
-CREATE INDEX chain_id_cover_key_stablecoin_transactions_view_inx
-ON stablecoin_transactions_view(chain_id, cover_key);
-
-
-DROP FUNCTION IF EXISTS core.refresh_stablecoin_transactions_view_trigger() CASCADE;
-
-CREATE FUNCTION core.refresh_stablecoin_transactions_view_trigger()
-RETURNS trigger
-AS
-$$
-BEGIN
-  REFRESH MATERIALIZED VIEW CONCURRENTLY public.stablecoin_transactions_view;
-  RETURN NEW;
-END
-$$
-LANGUAGE plpgsql;
-
-
-CREATE TRIGGER refresh_stablecoin_transactions_view_trigger
-BEFORE INSERT OR UPDATE ON core.transactions
-FOR EACH STATEMENT
-EXECUTE FUNCTION core.refresh_stablecoin_transactions_view_trigger();
-
+ALTER VIEW stablecoin_transactions_view OWNER TO writeuser;
 
 DROP VIEW IF EXISTS incident_stakes_view CASCADE;
 
@@ -5415,14 +5362,13 @@ WHERE expires_on > EXTRACT(epoch FROM NOW() AT TIME ZONE 'UTC')
 GROUP BY chain_id;
 
 
-DROP VIEW IF EXISTS cover_reassurance_view;
-
-CREATE VIEW cover_reassurance_view
+CREATE OR REPLACE VIEW cover_reassurance_view
 AS
 SELECT chain_id, cover_key, SUM(total) AS reassurance
 FROM reassurance_transaction_view
 GROUP BY chain_id, cover_key;
 
+ALTER VIEW cover_reassurance_view OWNER TO writeuser;
 
 DROP VIEW IF EXISTS cx_token_deployed_view;
  
@@ -5530,28 +5476,26 @@ FROM policy.cover_purchased
 GROUP BY chain_id;
 
 
-DROP VIEW IF EXISTS total_fee_earned_view;
-
-CREATE VIEW total_fee_earned_view
+CREATE OR REPLACE VIEW total_fee_earned_view
 AS
 SELECT * FROM stablecoin_transactions_view
 WHERE description = 'Fee Earned';
 
+ALTER VIEW total_fee_earned_view OWNER TO writeuser;
 
-DROP VIEW IF EXISTS total_liquidity_added_view;
-
-CREATE VIEW total_liquidity_added_view
+CREATE OR REPLACE VIEW total_liquidity_added_view
 AS
 SELECT * FROM stablecoin_transactions_view
 WHERE description = 'Liquidity Added';
 
-DROP VIEW IF EXISTS total_liquidity_removed_view;
+ALTER VIEW total_liquidity_added_view OWNER TO writeuser;
 
-CREATE VIEW total_liquidity_removed_view
+CREATE OR REPLACE VIEW total_liquidity_removed_view
 AS
 SELECT * FROM stablecoin_transactions_view
 WHERE description = 'Liquidity Removed';
 
+ALTER VIEW total_liquidity_removed_view OWNER TO writeuser;
 
 DROP VIEW IF EXISTS total_platform_fee_earned_view;
 
@@ -5565,21 +5509,20 @@ FROM policy.cover_purchased
 GROUP BY chain_id, cover_key;
 
 
-DROP VIEW IF EXISTS total_value_locked_by_chain_view;
-
-CREATE VIEW total_value_locked_by_chain_view
+CREATE OR REPLACE VIEW total_value_locked_by_chain_view
 AS
 SELECT chain_id, sum(total) as total
 FROM stablecoin_transactions_view
 GROUP by chain_id;
 
-DROP VIEW IF EXISTS total_value_locked_view;
+ALTER VIEW total_value_locked_by_chain_view OWNER TO writeuser;
 
-CREATE VIEW total_value_locked_view
+CREATE OR REPLACE VIEW total_value_locked_view
 AS
 SELECT sum(total) as total
 FROM stablecoin_transactions_view;
 
+ALTER VIEW total_value_locked_view OWNER TO writeuser;
 
 DROP VIEW IF EXISTS vault_deployed_view;
  
