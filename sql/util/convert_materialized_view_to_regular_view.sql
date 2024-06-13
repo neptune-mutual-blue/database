@@ -13,8 +13,9 @@ BEGIN
   (
     SELECT DISTINCT pg_describe_object(classid, objid, objsubid)    AS dependency
     FROM pg_depend
-    WHERE refobjid = materialized_view::regclass
-    AND deptype = 'n'
+    WHERE 1 = 1
+    AND refobjid  = materialized_view::regclass
+    AND deptype   = 'n'
   ),
   all_views
   AS
@@ -34,7 +35,8 @@ BEGIN
 
   FOREACH _r IN ARRAY _dependencies
   LOOP
-    _dependency_codes:= _dependency_codes|| pg_get_viewdef(_r, true);
+    _dependency_codes := _dependency_codes|| pg_get_viewdef(_r, true);
+
     _sql = CONCAT(E'\n', _sql, format('DROP VIEW %I;', _r));
   END LOOP;
 
