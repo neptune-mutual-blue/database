@@ -54,7 +54,11 @@ BEGIN
   UPDATE _get_historical_apr_chart_data_result
   SET
     policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
-    duration          = EXTRACT(DAY FROM (_get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date))::integer;
+    duration          = CEIL
+    (
+      EXTRACT(EPOCH FROM (_get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date)) /
+      EXTRACT(EPOCH FROM INTERVAL '1 day')
+    );
 
   UPDATE _get_historical_apr_chart_data_result
   SET apr             = (_get_historical_apr_chart_data_result.policy_fee_earned * 365) / (_get_historical_apr_chart_data_result.start_balance * _get_historical_apr_chart_data_result.duration)

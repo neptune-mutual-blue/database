@@ -7996,8 +7996,12 @@ BEGIN
   UPDATE _get_historical_apr_by_cover_chart_data_result
   SET
     policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_by_cover_chart_data_result.chain_id, _get_historical_apr_by_cover_chart_data_result.cover_key, _get_historical_apr_by_cover_chart_data_result.start_date, _get_historical_apr_by_cover_chart_data_result.end_date),
-    duration          = EXTRACT(DAY FROM (_get_historical_apr_by_cover_chart_data_result.end_date - _get_historical_apr_by_cover_chart_data_result.start_date))::integer,
-    end_balance       = get_tvl_till_date(_get_historical_apr_by_cover_chart_data_result.chain_id, _get_historical_apr_by_cover_chart_data_result.cover_key, _get_historical_apr_by_cover_chart_data_result.end_date);
+    end_balance       = get_tvl_till_date(_get_historical_apr_by_cover_chart_data_result.chain_id, _get_historical_apr_by_cover_chart_data_result.cover_key, _get_historical_apr_by_cover_chart_data_result.end_date),
+    duration          = CEIL
+    (
+      EXTRACT(EPOCH FROM (_get_historical_apr_by_cover_chart_data_result.end_date - _get_historical_apr_by_cover_chart_data_result.start_date)) /
+      EXTRACT(EPOCH FROM INTERVAL '1 day')
+    );
 
   UPDATE _get_historical_apr_by_cover_chart_data_result
   SET apr             = (_get_historical_apr_by_cover_chart_data_result.policy_fee_earned * 365) / (average(_get_historical_apr_by_cover_chart_data_result.start_balance, _get_historical_apr_by_cover_chart_data_result.end_balance) * _get_historical_apr_by_cover_chart_data_result.duration)
@@ -8075,7 +8079,11 @@ BEGIN
   UPDATE _get_historical_apr_chart_data_result
   SET
     policy_fee_earned = sum_cover_fee_earned_during(_get_historical_apr_chart_data_result.chain_id, _get_historical_apr_chart_data_result.start_date, _get_historical_apr_chart_data_result.end_date),
-    duration          = EXTRACT(DAY FROM (_get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date))::integer;
+    duration          = CEIL
+    (
+      EXTRACT(EPOCH FROM (_get_historical_apr_chart_data_result.end_date - _get_historical_apr_chart_data_result.start_date)) /
+      EXTRACT(EPOCH FROM INTERVAL '1 day')
+    );
 
   UPDATE _get_historical_apr_chart_data_result
   SET apr             = (_get_historical_apr_chart_data_result.policy_fee_earned * 365) / (_get_historical_apr_chart_data_result.start_balance * _get_historical_apr_chart_data_result.duration)
@@ -8870,7 +8878,7 @@ AS
     transaction_hash,
     account                                             AS account,
     wei_to_ether(amount)                                AS cxtoken_amount,
-    wei_to_ether(claimed)                               AS stablecoin_amount,
+    get_stablecoin_value(chain_id, claimed)             AS stablecoin_amount,
     'Claimed'                                           AS tx_type
   FROM cxtoken.claimed
 )
@@ -8886,16 +8894,16 @@ SELECT
   policy_txs.cxtoken_amount,
   policy_txs.stablecoin_amount,
   policy_txs.tx_type,
-  bytes32_to_string(policy_txs.cover_key)       AS cover_key_string,
-  bytes32_to_string(policy_txs.product_key)     AS product_key_string,
-  'cxUSD'                                       AS token_symbol,
+  bytes32_to_string(policy_txs.cover_key)               AS cover_key_string,
+  bytes32_to_string(policy_txs.product_key)             AS product_key_string,
+  'cxUSD'                                               AS token_symbol,
   factory.cx_token_deployed.token_name
 FROM policy_txs
 INNER JOIN factory.cx_token_deployed
-ON factory.cx_token_deployed.chain_id           = policy_txs.chain_id
-AND factory.cx_token_deployed.cover_key         = policy_txs.cover_key
-AND factory.cx_token_deployed.product_key       = policy_txs.product_key
-AND factory.cx_token_deployed.cx_token          = policy_txs.cx_token;
+ON factory.cx_token_deployed.chain_id                   = policy_txs.chain_id
+AND factory.cx_token_deployed.cover_key                 = policy_txs.cover_key
+AND factory.cx_token_deployed.product_key               = policy_txs.product_key
+AND factory.cx_token_deployed.cx_token                  = policy_txs.cx_token;
 
 ALTER VIEW my_policies_view OWNER TO writeuser;
 
