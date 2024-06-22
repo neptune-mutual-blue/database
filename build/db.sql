@@ -8965,7 +8965,7 @@ BEGIN
     resolution_decision                                           boolean,
     resolution_timestamp                                          integer,
     resolution_deadline                                           uint256,
-    emergency_resolved                                            boolean NOT NULL DEFAULT(FALSE),
+    emergency_resolved                                            boolean,
     finalized                                                     boolean NOT NULL DEFAULT(FALSE),
     finalize_transaction_hash                                     text,
     claim_begins_from                                             uint256,
@@ -9017,58 +9017,60 @@ BEGIN
   AND consensus.disputed.incident_date                            = _get_incidents_result.incident_date;
 
   UPDATE _get_incidents_result
-  SET
-    (total_attestation_stake, attestation_count)  = (
-      SELECT get_npm_value(COALESCE(SUM(stake), 0)), COUNT(*)
-      FROM consensus.attested
-      WHERE 1 = 1
-      AND consensus.attested.chain_id                             = _get_incidents_result.chain_id
-      AND consensus.attested.cover_key                            = _get_incidents_result.cover_key
-      AND consensus.attested.product_key                          = _get_incidents_result.product_key
-      AND consensus.attested.incident_date                        = _get_incidents_result.incident_date
-    ),
-    (total_refutation_stake, refutation_count)   = (
-      SELECT get_npm_value(COALESCE(SUM(stake), 0)), COUNT(*)
-      FROM consensus.refuted
-      WHERE 1 = 1
-      AND consensus.refuted.chain_id                              = _get_incidents_result.chain_id
-      AND consensus.refuted.cover_key                             = _get_incidents_result.cover_key
-      AND consensus.refuted.product_key                           = _get_incidents_result.product_key
-      AND consensus.refuted.incident_date                         = _get_incidents_result.incident_date
-    );
-
-  WITH finalization
-  AS
+  SET (total_attestation_stake, attestation_count) =
   (
-    SELECT
-      consensus.finalized.chain_id,
-      consensus.finalized.cover_key,
-      consensus.finalized.product_key,
-      consensus.finalized.incident_date,
-      consensus.finalized.transaction_hash
+    SELECT get_npm_value(COALESCE(SUM(stake), 0)), COUNT(*)
+    FROM consensus.attested
+    WHERE 1 = 1
+    AND consensus.attested.chain_id                               = _get_incidents_result.chain_id
+    AND consensus.attested.cover_key                              = _get_incidents_result.cover_key
+    AND consensus.attested.product_key                            = _get_incidents_result.product_key
+    AND consensus.attested.incident_date                          = _get_incidents_result.incident_date
+  );
+
+  UPDATE _get_incidents_result
+  SET (total_refutation_stake, refutation_count) =
+  (
+    SELECT get_npm_value(COALESCE(SUM(stake), 0)), COUNT(*)
+    FROM consensus.refuted
+    WHERE 1 = 1
+    AND consensus.refuted.chain_id                                = _get_incidents_result.chain_id
+    AND consensus.refuted.cover_key                               = _get_incidents_result.cover_key
+    AND consensus.refuted.product_key                             = _get_incidents_result.product_key
+    AND consensus.refuted.incident_date                           = _get_incidents_result.incident_date
+  );
+
+  UPDATE _get_incidents_result
+  SET (finalize_transaction_hash) =
+  (
+    SELECT consensus.finalized.transaction_hash
     FROM consensus.finalized
+    WHERE 1 = 1
+    AND consensus.finalized.chain_id                              = _get_incidents_result.chain_id
+    AND consensus.finalized.cover_key                             = _get_incidents_result.cover_key
+    AND consensus.finalized.product_key                           = _get_incidents_result.product_key
+    AND consensus.finalized.incident_date                         = _get_incidents_result.incident_date
     ORDER BY consensus.finalized.block_timestamp DESC
     LIMIT 1
-  )
+  );
+
+  UPDATE _get_incidents_result
+  SET finalized                                                   = TRUE
+  WHERE _get_incidents_result.finalize_transaction_hash           IS NOT NULL;
+
   UPDATE _get_incidents_result
   SET
-    finalized = TRUE,
-    finalize_transaction_hash = finalization.transaction_hash
-  FROM finalization
-  WHERE 1 = 1
-  AND finalization.chain_id                                       = _get_incidents_result.chain_id
-  AND finalization.cover_key                                      = _get_incidents_result.cover_key
-  AND finalization.product_key                                    = _get_incidents_result.product_key
-  AND finalization.incident_date                                  = _get_incidents_result.incident_date;
-
-  WITH latest_resolution
-  AS
+  (
+    emergency_resolved,
+    resolution_decision,
+    resolution_transaction_hash,
+    resolution_timestamp,
+    resolution_deadline,
+    claim_begins_from,
+    claim_expires_at
+  ) =
   (
     SELECT
-      consensus.resolved.chain_id,
-      consensus.resolved.cover_key,
-      consensus.resolved.product_key,
-      consensus.resolved.incident_date,
       consensus.resolved.emergency,
       consensus.resolved.decision,
       consensus.resolved.transaction_hash,
@@ -9077,25 +9079,22 @@ BEGIN
       consensus.resolved.claim_begins_from,
       consensus.resolved.claim_expires_at
     FROM consensus.resolved
+    WHERE 1 = 1
+    AND consensus.resolved.chain_id                               = _get_incidents_result.chain_id
+    AND consensus.resolved.cover_key                              = _get_incidents_result.cover_key
+    AND consensus.resolved.product_key                            = _get_incidents_result.product_key
+    AND consensus.resolved.incident_date                          = _get_incidents_result.incident_date
     ORDER BY consensus.resolved.block_timestamp DESC
     LIMIT 1
-  )
+  );
+
   UPDATE _get_incidents_result
-  SET
-    resolved                                                      = TRUE,
-    emergency_resolved                                            = latest_resolution.emergency,
-    resolution_decision                                           = latest_resolution.decision,
-    resolution_transaction_hash                                   = latest_resolution.transaction_hash,
-    resolution_timestamp                                          = latest_resolution.block_timestamp,
-    resolution_deadline                                           = latest_resolution.resolution_deadline,
-    claim_begins_from                                             = latest_resolution.claim_begins_from,
-    claim_expires_at                                              = latest_resolution.claim_expires_at
-  FROM latest_resolution
-  WHERE 1 = 1
-  AND latest_resolution.chain_id                                  = _get_incidents_result.chain_id
-  AND latest_resolution.cover_key                                 = _get_incidents_result.cover_key
-  AND latest_resolution.product_key                               = _get_incidents_result.product_key
-  AND latest_resolution.incident_date                             = _get_incidents_result.incident_date;
+  SET resolved                                                    = TRUE
+  WHERE _get_incidents_result.resolution_transaction_hash         IS NOT NULL;
+
+  UPDATE _get_incidents_result
+  SET emergency_resolved                                          = FALSE
+  WHERE _get_incidents_result.emergency_resolved                  IS NULL;
 
   RETURN QUERY
   SELECT * FROM _get_incidents_result
